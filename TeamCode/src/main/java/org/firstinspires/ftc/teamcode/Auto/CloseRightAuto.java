@@ -19,9 +19,7 @@ import java.util.Arrays;
 
 //TODO: TUNE PID, CENTRIPETAL, ALL CONSTANTS, AND EXPERIMENT WITH INTERPOLATION.
 //TODO: download ftcdashboard and tune constants with drive test
-//TODO: finish path implementation: fix preload path
-//TODO: make 4 other autos, make backup autos, and add intake steps to pathing.
-//TODO: add move to load zone for pathing
+//TODO: Change everything to radians
 public class CloseRightAuto extends LinearOpMode {
     public RobotSystem robot = new RobotSystem(hardwareMap, this);
     public PathChain detectionPathChain;
@@ -80,27 +78,26 @@ public class CloseRightAuto extends LinearOpMode {
                 .build();
         this.scorePreloadPathChainPtTwo = follower.pathBuilder()
                 .addPath(new BezierLine(alignGoal, apTag1))
-                .setLinearHeadingInterpolation(36,90)
+                .setLinearHeadingInterpolation(37,90)
                 .build();
         this.pickupPathChain1 = follower.pathBuilder()
                 .addPath(new BezierLine(apTag1, pickup1))
-                .setLinearHeadingInterpolation(robot.hardwareRobot.getHeading(), 180)
+                .setLinearHeadingInterpolation(90, 360)
                 .build();
         this.pickupPathChain2 = follower.pathBuilder()
                 .addPath(new BezierLine(apTag1, pickup2))
-                .setLinearHeadingInterpolation(robot.hardwareRobot.getHeading(), 180)
+                .setLinearHeadingInterpolation(90, 360)
                 .build();
         this.pickupPathChain3 = follower.pathBuilder()
                 .addPath(new BezierLine(apTag1,pickup3))
-                .setLinearHeadingInterpolation(robot.hardwareRobot.getHeading(), 180)
+                .setLinearHeadingInterpolation(90, 360)
                 .build();
         this.scorePathChain = follower.pathBuilder()
                 .addPath(new BezierCurve(Arrays.asList(follower.getPose(), new Pose(70,80, 0), alignGoal)))
                 .setLinearHeadingInterpolation(360,37)
                 .build();
-        //edit
         this.returnPathChain = follower.pathBuilder()
-                .addPath(new BezierCurve(alignGoal, new Pose(90,20,0), new Pose(10,10,0)))
+                .addPath(new BezierCurve(alignGoal, new Pose(60,20,0), new Pose(136,5,180)))
                 .setLinearHeadingInterpolation(37,180)
                 .build();
         this.intakePathChain = follower.pathBuilder()
@@ -161,6 +158,7 @@ public class CloseRightAuto extends LinearOpMode {
                     if (robot.decode(lastTagDetected).equals("PPG")) follower.followPath(pickupPathChain3);
                     else if (robot.decode(lastTagDetected).equals("PGP")) follower.followPath(pickupPathChain2);
                     else follower.followPath(pickupPathChain1);
+                    follower.followPath(intakePathChain);
                     //intake
                     follower.followPath(intakePathChain);
                     //intake

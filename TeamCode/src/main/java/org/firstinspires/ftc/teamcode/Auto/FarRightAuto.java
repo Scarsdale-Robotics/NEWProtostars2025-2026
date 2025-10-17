@@ -16,12 +16,13 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import java.util.ArrayList;
 import java.util.Arrays;
-
+// not finished
 //TODO: TUNE PID, CENTRIPETAL, ALL CONSTANTS, AND EXPERIMENT WITH INTERPOLATION.
 //TODO: download ftcdashboard and tune constants with drive test
 //TODO: finish path implementation: fix preload path
 //TODO: make 4 other autos, make backup autos, and add intake steps to pathing.
 //TODO: add move to load zone for pathing
+//TODO: Change everything to radians
 public class FarRightAuto extends LinearOpMode {
     public RobotSystem robot = new RobotSystem(hardwareMap, this);
     public PathChain detectionPathChain;

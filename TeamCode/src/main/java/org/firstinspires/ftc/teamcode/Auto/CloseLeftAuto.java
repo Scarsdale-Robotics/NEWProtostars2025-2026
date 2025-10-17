@@ -16,12 +16,14 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import java.util.ArrayList;
 import java.util.Arrays;
-
+// not finished
 //TODO: TUNE PID, CENTRIPETAL, ALL CONSTANTS, AND EXPERIMENT WITH INTERPOLATION.
 //TODO: download ftcdashboard and tune constants with drive test
 //TODO: finish path implementation: fix preload path
 //TODO: make 4 other autos, make backup autos, and add intake steps to pathing.
 //TODO: add move to load zone for pathing
+//TODO: Change everything to radians
+//TODO: edit poses so that they actually align and clean up code
 public class CloseLeftAuto extends LinearOpMode {
     public RobotSystem robot = new RobotSystem(hardwareMap, this);
     public PathChain detectionPathChain;
@@ -38,7 +40,7 @@ public class CloseLeftAuto extends LinearOpMode {
     public final Pose startPose = new Pose(60,10,90);
     public final Pose apTag1 = new Pose(70,80, startPose.getHeading());
     //quad bezier curve, rest linear w little to no interpolation
-    public Pose pickup = new Pose(40, 84, 180);
+    public Pose pickup = new Pose(40, 82, 180);
     // quadratic bezier curve for this step
     public Pose alignGoal = new Pose(40, 115, 143);
     public PathChain finishIntake;

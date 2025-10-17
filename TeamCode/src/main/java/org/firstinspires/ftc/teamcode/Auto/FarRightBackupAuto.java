@@ -9,7 +9,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.RobotSystem;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
-
+//TODO: Change everything to radians
 public class FarRightBackupAuto extends LinearOpMode {
     public Follower follower;
     public Timer pathTimer;
