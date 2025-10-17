@@ -16,13 +16,11 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import java.util.ArrayList;
 import java.util.Arrays;
-// not finished
+
 //TODO: TUNE PID, CENTRIPETAL, ALL CONSTANTS, AND EXPERIMENT WITH INTERPOLATION.
 //TODO: download ftcdashboard and tune constants with drive test
-//TODO: finish path implementation: fix preload path
-//TODO: make 4 other autos, make backup autos, and add intake steps to pathing.
-//TODO: add move to load zone for pathing
 //TODO: Change everything to radians
+//TODO: Check poses for accurate data on visualizer
 public class FarRightAuto extends LinearOpMode {
     public RobotSystem robot = new RobotSystem(hardwareMap, this);
     public PathChain detectionPathChain;
@@ -36,15 +34,12 @@ public class FarRightAuto extends LinearOpMode {
     public Follower follower;
     public Timer pathTimer, opmodeTimer;
     public int pathState;
-    public final Pose startPose = new Pose(60,10,90);
-    public final Pose apTag1 = new Pose(70,80, startPose.getHeading());
-    //quad bezier curve, rest linear w little to no interpolation
-    public Pose pickup = new Pose(40, 84, 180);
-    // quadratic bezier curve for this step
-    public Pose alignGoal = new Pose(30, 125, 143);
+    public final Pose startPose = new Pose(105,134,270);
+    public final Pose apTag1 = new Pose(80,80, 90);
+    public Pose pickup = new Pose(103, 84, 180);
+    public Pose alignGoal = new Pose(100, 115, 37);
     public PathChain finishIntake;
     public PathChain scorePreloadPathChainPtTwo;
-    public Pose alignGoal2 = new Pose(30, 120, 143);
     public AprilTagDetection lastTagDetected;
     @Override
     public void runOpMode() throws InterruptedException {
@@ -71,43 +66,43 @@ public class FarRightAuto extends LinearOpMode {
     }
     public void buildPaths() {
         this.scorePreloadPathChain = follower.pathBuilder()
-                .addPath(new BezierLine(apTag1, alignGoal2))
-                .setLinearHeadingInterpolation(90,143)
+                .addPath(new BezierLine(apTag1, alignGoal))
+                .setLinearHeadingInterpolation(90,37)
                 .build();
         this.scorePreloadPathChainPtTwo = follower.pathBuilder()
-                .addPath(new BezierLine(alignGoal2, apTag1))
-                .setLinearHeadingInterpolation(143,90)
+                .addPath(new BezierLine(alignGoal, apTag1))
+                .setLinearHeadingInterpolation(37,90)
                 .build();
         this.detectionPathChain = follower.pathBuilder()
-                .addPath(new BezierCurve(Arrays.asList(startPose, new Pose(50,10,robot.hardwareRobot.getHeading()), apTag1)))
-                .setConstantHeadingInterpolation(90)
+                .addPath(new BezierLine(startPose, apTag1))
+                .setLinearHeadingInterpolation(270,90)
                 .build();
         this.pickupPathChain1 = follower.pathBuilder()
-                .addPath(new BezierCurve(Arrays.asList(apTag1, new Pose(70,100,90), pickup)))
-                .setLinearHeadingInterpolation(robot.hardwareRobot.getHeading(), 180)
+                .addPath(new BezierLine(apTag1,pickup))
+                .setLinearHeadingInterpolation(90, 0)
                 .build();
         this.pickupPathChain2 = follower.pathBuilder()
-                .addPath(new BezierLine(apTag1, new Pose(40, 61,0)))
-                .setLinearHeadingInterpolation(robot.hardwareRobot.getHeading(), 180)
+                .addPath(new BezierLine(apTag1, new Pose(103, 60,0)))
+                .setLinearHeadingInterpolation(90, 0)
                 .build();
         this.pickupPathChain3 = follower.pathBuilder()
-                .addPath(new BezierLine(apTag1, new Pose(40, 35, 0)))
-                .setLinearHeadingInterpolation(robot.hardwareRobot.getHeading(), 180)
+                .addPath(new BezierLine(apTag1, new Pose(103, 36, 0)))
+                .setLinearHeadingInterpolation(90, 0)
                 .build();
         this.scorePathChain = follower.pathBuilder()
-                .addPath(new BezierCurve(Arrays.asList(new Pose(robot.hardwareRobot.pinpoint.getPosX(DistanceUnit.INCH), robot.hardwareRobot.pinpoint.getPosY(DistanceUnit.INCH), robot.hardwareRobot.getHeading()), new Pose(70,80, 0), alignGoal)))
-                .setLinearHeadingInterpolation(robot.hardwareRobot.getHeading(), 143)
+                .addPath(new BezierCurve(Arrays.asList(follower.getPose(), new Pose(70,80, 0), alignGoal)))
+                .setLinearHeadingInterpolation(0, 37)
                 .build();
         this.returnPathChain = follower.pathBuilder()
-                .addPath(new BezierCurve(alignGoal, new Pose(90,20,0), new Pose(10,10,0)))
-                .setLinearHeadingInterpolation(143,0)
+                .addPath(new BezierLine(alignGoal,startPose))
+                .setLinearHeadingInterpolation(37,270)
                 .build();
         this.intakePathChain = follower.pathBuilder()
-                .addPath(new BezierLine(follower.getPose(), new Pose(follower.getPose().getX() - 4, follower.getPose().getY(), follower.getHeading())))
+                .addPath(new BezierLine(follower.getPose(), new Pose(follower.getPose().getX() + 6, follower.getPose().getY(), follower.getHeading())))
                 .setConstantHeadingInterpolation(180)
                 .build();
         this.finishIntake = follower.pathBuilder()
-                .addPath(new BezierLine(follower.getPose(), new Pose(follower.getPose().getX() + 12, follower.getPose().getY(), follower.getHeading())))
+                .addPath(new BezierLine(follower.getPose(), new Pose(follower.getPose().getX() - 18, follower.getPose().getY(), follower.getHeading())))
                 .setConstantHeadingInterpolation(180)
                 .build();
     }
@@ -160,6 +155,7 @@ public class FarRightAuto extends LinearOpMode {
                     if (robot.decode(lastTagDetected).equals("PPG")) follower.followPath(pickupPathChain3);
                     else if (robot.decode(lastTagDetected).equals("PGP")) follower.followPath(pickupPathChain2);
                     else follower.followPath(pickupPathChain1);
+                    follower.followPath(intakePathChain);
                     //intake
                     follower.followPath(intakePathChain);
                     //intake

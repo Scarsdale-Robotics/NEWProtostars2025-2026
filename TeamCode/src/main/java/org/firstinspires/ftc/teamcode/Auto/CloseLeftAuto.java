@@ -23,7 +23,7 @@ import java.util.Arrays;
 //TODO: make 4 other autos, make backup autos, and add intake steps to pathing.
 //TODO: add move to load zone for pathing
 //TODO: Change everything to radians
-//TODO: edit poses so that they actually align and clean up code
+//TODO: Check poses for accurate data on visualizer
 public class CloseLeftAuto extends LinearOpMode {
     public RobotSystem robot = new RobotSystem(hardwareMap, this);
     public PathChain detectionPathChain;

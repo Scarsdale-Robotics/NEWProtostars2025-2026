@@ -20,6 +20,7 @@ import java.util.Arrays;
 //TODO: TUNE PID, CENTRIPETAL, ALL CONSTANTS, AND EXPERIMENT WITH INTERPOLATION.
 //TODO: download ftcdashboard and tune constants with drive test
 //TODO: Change everything to radians
+//TODO: Check poses for accurate data on visualizer
 public class FarLeftAuto extends LinearOpMode {
     public RobotSystem robot = new RobotSystem(hardwareMap, this);
     public PathChain detectionPathChain;
