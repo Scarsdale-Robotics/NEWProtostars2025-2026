@@ -16,8 +16,8 @@ public class FarRightBackupAuto extends LinearOpMode {
     public Timer opModeTimer;
     public RobotSystem robot;
     public int pathState = 0;
-    public Pose startPose = new Pose(105,134,270);
-    public Pose outside = new Pose(90,70,270);
+    public Pose startPose = new Pose(105,134,Math.toRadians(270));
+    public Pose outside = new Pose(90,70,Math.toRadians(270));
     public PathChain parkAndReturn;
     @Override
     public void runOpMode() throws InterruptedException {
@@ -39,7 +39,7 @@ public class FarRightBackupAuto extends LinearOpMode {
     }
     public void buildPaths() {
         this.parkAndReturn = follower.pathBuilder()
-                .setGlobalConstantHeadingInterpolation(270)
+                .setGlobalConstantHeadingInterpolation(Math.toRadians(270))
                 .addPath(new BezierLine(startPose, outside))
                 .addPath(new BezierLine(outside, startPose))
                 .build();
