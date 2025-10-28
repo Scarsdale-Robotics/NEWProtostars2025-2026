@@ -17,6 +17,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 //TODO: TUNE PID, CENTRIPETAL, ALL CONSTANTS, AND EXPERIMENT WITH INTERPOLATION.
 //TODO: download ftcdashboard and tune constants with drive test
@@ -51,6 +52,7 @@ public class FarRightAuto extends LinearOpMode {
         follower = Constants.createFollower(hardwareMap);
         setPathState(-1);
         follower.setStartingPose(startPose);
+        robot.hardwareRobot.initOdom();
         buildPaths();
         while (opModeIsActive()) {
             detectTags();
@@ -147,15 +149,15 @@ public class FarRightAuto extends LinearOpMode {
                 /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
                 if(!follower.isBusy()) {
                     Pose current = follower.getPose();
-                    Pose vision = getRobotPoseFromCamera(lastTagDetected);
+                    Pose vision = getRobotPoseFromCamera(getTargetTag(24,24,24));
                     Pose blended = new Pose(
                             (current.getX() * 0.8 + vision.getX() * 0.2),
                             (current.getY() * 0.8 + vision.getY() * 0.2),
                             vision.getHeading()
                     );
                     follower.setPose(blended);
-                    if (robot.decode(lastTagDetected).equals("PPG")) follower.followPath(pickupPathChain3);
-                    else if (robot.decode(lastTagDetected).equals("PGP")) follower.followPath(pickupPathChain2);
+                    if (robot.decode(getTargetTag(21,22,23)).equals("PPG")) follower.followPath(pickupPathChain3);
+                    else if (robot.decode(getTargetTag(21,22,23)).equals("PGP")) follower.followPath(pickupPathChain2);
                     else follower.followPath(pickupPathChain1);
                     follower.followPath(intakePathChain);
                     //intake
@@ -189,5 +191,16 @@ public class FarRightAuto extends LinearOpMode {
     }
     private Pose getRobotPoseFromCamera(AprilTagDetection tag) {
         return new Pose(tag.robotPose.getPosition().x, tag.robotPose.getPosition().y, follower.getHeading(), FTCCoordinates.INSTANCE).getAsCoordinateSystem(PedroCoordinates.INSTANCE);
+    }
+    public AprilTagDetection getTargetTag(int targetId1, int targetId2, int targetId3) {
+        List<AprilTagDetection> detections = robot.cv.aprilTagProcessor.getDetections();
+        AprilTagDetection sol = null;
+        for (AprilTagDetection tag : detections) {
+            if (tag.id == targetId1 || tag.id == targetId2 || tag.id == targetId3) {
+                sol = tag;
+                break;
+            }
+        }
+        return sol;
     }
 }

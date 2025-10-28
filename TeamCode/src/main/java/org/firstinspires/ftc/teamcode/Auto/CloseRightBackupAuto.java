@@ -22,6 +22,7 @@ public class CloseRightBackupAuto extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         this.robot = new RobotSystem(hardwareMap, this);
+        robot.hardwareRobot.initOdom();
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(startPose);
         this.pathTimer = new Timer();

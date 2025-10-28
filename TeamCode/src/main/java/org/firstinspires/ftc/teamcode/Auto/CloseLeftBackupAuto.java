@@ -23,6 +23,7 @@ public class CloseLeftBackupAuto extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         this.robot = new RobotSystem(hardwareMap, this);
         follower = Constants.createFollower(hardwareMap);
+        robot.hardwareRobot.initOdom();
         follower.setStartingPose(startPose);
         this.pathTimer = new Timer();
         this.opModeTimer = new Timer();

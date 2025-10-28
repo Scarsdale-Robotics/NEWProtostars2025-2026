@@ -75,20 +75,17 @@ public class HardwareRobot {
         RevHubOrientationOnRobot orientationOnRobot =
                 new RevHubOrientationOnRobot(
                         RevHubOrientationOnRobot.LogoFacingDirection.UP,
-                        RevHubOrientationOnRobot.UsbFacingDirection.FORWARD
+                        RevHubOrientationOnRobot.UsbFacingDirection.RIGHT
                 );
 
-        // Create parameters with orientation + angle unit
         IMU.Parameters parameters = new IMU.Parameters(orientationOnRobot);
 
         imu.initialize(parameters);
         imu.resetYaw();
     }
     public void initOdom() {
-        //TODO: change parameters to get right orientation on robot for synchronizing w robot
         pinpoint.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
-        //TODO: tune (dist from center of robot)
-        pinpoint.setOffsets(100,100, DistanceUnit.INCH);
+        pinpoint.setOffsets(6,6, DistanceUnit.INCH);
         pinpoint.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.FORWARD, GoBildaPinpointDriver.EncoderDirection.FORWARD);
         pinpoint.resetPosAndIMU();
     }

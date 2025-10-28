@@ -31,6 +31,7 @@ public class FINALTELEOP extends LinearOpMode {
         this.pathTimer = new Timer();
         this.opModeTimer = new Timer();
         pathTimer.resetTimer();
+        robot.hardwareRobot.initOdom();
         opModeTimer.resetTimer();
         this.robot = new RobotSystem(hardwareMap, this);
         this.speed = 0.5;
@@ -58,7 +59,7 @@ public class FINALTELEOP extends LinearOpMode {
                 telemetry.addData("Z", tag.ftcPose.z);
                 telemetry.addData("Bearing", tag.ftcPose.bearing);
                 telemetry.addData("Yaw", tag.ftcPose.yaw);
-                telemetry.addData("Range: ", tag.ftcPose.range);
+                telemetry.addData("Range", tag.ftcPose.range);
                 lastTagDetected = tag;
                 break;
             }
