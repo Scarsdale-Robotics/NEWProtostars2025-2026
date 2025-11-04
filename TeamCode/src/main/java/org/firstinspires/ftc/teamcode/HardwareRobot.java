@@ -26,7 +26,6 @@ public class HardwareRobot {
     public final Motor leftBack;
     public final Motor rightBack;
     public final WebcamName cameraName;
-    public final IMU imu;
     public final GoBildaPinpointDriver pinpoint;
 
     public HardwareRobot(HardwareMap hardwareMap) {
@@ -65,32 +64,14 @@ public class HardwareRobot {
         leftBack.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
         rightBack.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
 
-        imu = hardwareMap.get(IMU.class, "IMU");
         cameraName = hardwareMap.get(WebcamName.class,  "Webcam 1");
 
         pinpoint = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
-    }
-    public void setImu() {
-        //TODO: change parameters to get right orientation on robot for synchronizing w robot
-        RevHubOrientationOnRobot orientationOnRobot =
-                new RevHubOrientationOnRobot(
-                        RevHubOrientationOnRobot.LogoFacingDirection.UP,
-                        RevHubOrientationOnRobot.UsbFacingDirection.RIGHT
-                );
-
-        IMU.Parameters parameters = new IMU.Parameters(orientationOnRobot);
-
-        imu.initialize(parameters);
-        imu.resetYaw();
     }
     public void initOdom() {
         pinpoint.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
         pinpoint.setOffsets(6,6, DistanceUnit.INCH);
         pinpoint.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.FORWARD, GoBildaPinpointDriver.EncoderDirection.FORWARD);
         pinpoint.resetPosAndIMU();
-    }
-    public double getHeading() {
-        YawPitchRollAngles orientation = imu.getRobotYawPitchRollAngles();
-        return orientation.getYaw(AngleUnit.DEGREES);
     }
 }
