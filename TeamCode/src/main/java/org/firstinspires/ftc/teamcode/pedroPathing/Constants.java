@@ -21,7 +21,7 @@ public class Constants {
 
             .forwardZeroPowerAcceleration(100)
             .lateralZeroPowerAcceleration(-67.342491844080064)
-            .mass(4)
+            .mass(5.715)
             .translationalPIDFCoefficients(new PIDFCoefficients(
                     0.03,
                     0,
@@ -79,16 +79,17 @@ public class Constants {
             .rightRearMotorName("rightBack")
             .leftRearMotorName("leftBack")
             .leftFrontMotorName("leftFront")
+            //check these
             .leftFrontMotorDirection(DcMotorEx.Direction.REVERSE)
-            .leftRearMotorDirection(DcMotorEx.Direction.REVERSE)
+            .leftRearMotorDirection(DcMotorEx.Direction.FORWARD)
             .rightFrontMotorDirection(DcMotorEx.Direction.FORWARD)
-            .rightRearMotorDirection(DcMotorEx.Direction.FORWARD)
+            .rightRearMotorDirection(DcMotorEx.Direction.REVERSE)
             .xVelocity(100)
             .yVelocity(100);
     //TODO: Tune
     public static PinpointConstants localizerConstants = new PinpointConstants()
-            .forwardPodY(-5)
-            .strafePodX(0.5)
+            .forwardPodY(0.5)
+            .strafePodX(-5.5)
             .distanceUnit(DistanceUnit.INCH)
             .hardwareMapName("pinpoint")
             .encoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD)

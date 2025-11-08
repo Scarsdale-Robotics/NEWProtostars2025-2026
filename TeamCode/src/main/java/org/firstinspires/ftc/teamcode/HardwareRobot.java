@@ -70,7 +70,7 @@ public class HardwareRobot {
     }
     public void initOdom() {
         pinpoint.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
-        pinpoint.setOffsets(6,6, DistanceUnit.INCH);
+        pinpoint.setOffsets(-5.5,-5, DistanceUnit.INCH);
         pinpoint.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.FORWARD, GoBildaPinpointDriver.EncoderDirection.FORWARD);
         pinpoint.resetPosAndIMU();
     }
