@@ -13,6 +13,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
+import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -27,6 +28,11 @@ public class HardwareRobot {
     public final Motor rightBack;
     public final WebcamName cameraName;
     public final GoBildaPinpointDriver pinpoint;
+    public final Servo intakeControl;
+    public final Motor shooterOne;
+    public final Motor shooterTwo;
+    public final Motor intakeOne;
+    public final Motor intakeTwo;
 
     public HardwareRobot(HardwareMap hardwareMap) {
         leftFront = new Motor(hardwareMap, "leftFront", Motor.GoBILDA.RPM_312);
@@ -63,6 +69,33 @@ public class HardwareRobot {
         rightFront.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
         leftBack.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
         rightBack.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
+
+        intakeOne = new Motor(hardwareMap, "intakeOne", Motor.GoBILDA.RPM_312);
+        intakeTwo = new Motor(hardwareMap, "intakeTwo", Motor.GoBILDA.RPM_312);
+        shooterOne = new Motor(hardwareMap, "shooterOne", Motor.GoBILDA.RPM_1620);
+        shooterTwo = new Motor(hardwareMap, "shooterTwo", Motor.GoBILDA.RPM_1620);
+
+        intakeOne.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        intakeTwo.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        shooterOne.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        shooterTwo.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        intakeOne.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        intakeTwo.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        shooterOne.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        shooterTwo.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        intakeTwo.setRunMode(Motor.RunMode.RawPower);
+        intakeOne.setRunMode(Motor.RunMode.RawPower);
+        shooterOne.setRunMode(Motor.RunMode.RawPower);
+        shooterTwo.setRunMode(Motor.RunMode.RawPower);
+
+        intakeOne.motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        intakeTwo.motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        shooterOne.motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        shooterTwo.motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        intakeControl = hardwareMap.get(Servo.class, "intakeControl");
 
         cameraName = hardwareMap.get(WebcamName.class,  "Webcam 1");
 
