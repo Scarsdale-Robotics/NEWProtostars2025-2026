@@ -24,25 +24,23 @@ import java.util.List;
 @Autonomous(name = "2MagFLeft")
 public class TwoMagFarLeft extends LinearOpMode {
     public RobotSystem robot = new RobotSystem(hardwareMap, this);
-    public PathChain detectionPathChain;
-    public PathChain returnPathChain;
-    public PathChain pickupPathChain1;
-    public PathChain pickupPathChain2;
-    public PathChain intakePathChain;
-    public PathChain pickupPathChain3;
-    public PathChain scorePathChain;
-    public PathChain scorePreloadPathChain;
+    public PathChain scorePreloadPath;
+    public PathChain pickupOnePath;
+    public PathChain finishPickupOnePath;
+    public PathChain scorePickupOnePath;
+    public PathChain pickupTwoPath;
+    public PathChain finishPickupTwoPath;
+    public PathChain scorePickupTwoPath;
+    public PathChain returnPath;
     public Follower follower;
     public Timer pathTimer, opmodeTimer;
     public int pathState;
-    public final Pose startPose = new Pose(40,134,Math.toRadians(270));
-    public final Pose apTag1 = new Pose(70,80, Math.toRadians(90));
-    //quad bezier curve, rest linear w little to no interpolation
-    public Pose pickup = new Pose(43, 81, Math.toRadians(180));
-    // quadratic bezier curve for this step
-    public Pose alignGoal = new Pose(40, 115, Math.toRadians(143));
-    public PathChain finishIntake;
-    public PathChain scorePreloadPathChainPtTwo;
+    public Pose startPose = new Pose(40,134,Math.toRadians(270));
+    public Pose pickupOne = new Pose(41, 84, Math.toRadians(180));
+    public Pose pickupOneFinish = new Pose(29, 81, Math.toRadians(180));
+    public Pose alignGoal = new Pose(67, 90, Math.toRadians(143));
+    public Pose pickupTwo = new Pose(41,60,Math.toRadians(180));
+    public Pose finishPickupTwo = new Pose(29,60,Math.toRadians(180));
     public AprilTagDetection lastTagDetected;
     @Override
     public void runOpMode() throws InterruptedException {
@@ -69,45 +67,37 @@ public class TwoMagFarLeft extends LinearOpMode {
         return target.ftcPose.range <= radius;
     }
     public void buildPaths() {
-        this.scorePreloadPathChain = follower.pathBuilder()
-                .addPath(new BezierLine(apTag1, alignGoal))
-                .setLinearHeadingInterpolation(Math.toRadians(90),Math.toRadians(143))
+        this.scorePreloadPath = follower.pathBuilder()
+                .addPath(new BezierLine(startPose, alignGoal))
+                .setLinearHeadingInterpolation(startPose.getHeading(), alignGoal.getHeading())
                 .build();
-        this.scorePreloadPathChainPtTwo = follower.pathBuilder()
-                .addPath(new BezierLine(alignGoal, apTag1))
-                .setLinearHeadingInterpolation(Math.toRadians(143),Math.toRadians(90))
+        this.pickupOnePath = follower.pathBuilder()
+                .addPath(new BezierLine(alignGoal, pickupOne))
+                .setLinearHeadingInterpolation(alignGoal.getHeading(), pickupOne.getHeading())
                 .build();
-        this.detectionPathChain = follower.pathBuilder()
-                .addPath(new BezierLine(startPose, apTag1))
-                .setLinearHeadingInterpolation(Math.toRadians(270),Math.toRadians(90))
+        this.finishPickupOnePath = follower.pathBuilder()
+                .addPath(new BezierLine(pickupOne, pickupOneFinish))
+                .setConstantHeadingInterpolation(pickupOne.getHeading())
                 .build();
-        this.pickupPathChain1 = follower.pathBuilder()
-                .addPath(new BezierLine(apTag1,pickup))
-                .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(180))
+        this.scorePickupOnePath = follower.pathBuilder()
+                .addPath(new BezierLine(pickupOneFinish, alignGoal))
+                .setLinearHeadingInterpolation(pickupOneFinish.getHeading(), alignGoal.getHeading())
                 .build();
-        this.pickupPathChain2 = follower.pathBuilder()
-                .addPath(new BezierLine(apTag1, new Pose(43, 56,0)))
-                .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(180))
+        this.pickupTwoPath = follower.pathBuilder()
+                .addPath(new BezierLine(alignGoal, pickupTwo))
+                .setLinearHeadingInterpolation(alignGoal.getHeading(), pickupTwo.getHeading())
                 .build();
-        this.pickupPathChain3 = follower.pathBuilder()
-                .addPath(new BezierLine(apTag1, new Pose(43, 30, Math.toRadians(0))))
-                .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(180))
+        this.finishPickupTwoPath = follower.pathBuilder()
+                .addPath(new BezierLine(pickupTwo, finishPickupTwo))
+                .setConstantHeadingInterpolation(pickupTwo.getHeading())
                 .build();
-        this.scorePathChain = follower.pathBuilder()
-                .addPath(new BezierCurve(Arrays.asList(follower.getPose(), new Pose(70,80, Math.toRadians(0)), alignGoal)))
-                .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(143))
+        this.scorePickupTwoPath = follower.pathBuilder()
+                .addPath(new BezierLine(finishPickupTwo, alignGoal))
+                .setLinearHeadingInterpolation(finishPickupTwo.getHeading(), alignGoal.getHeading())
                 .build();
-        this.returnPathChain = follower.pathBuilder()
-                .addPath(new BezierLine(alignGoal,startPose))
-                .setLinearHeadingInterpolation(Math.toRadians(143),Math.toRadians(270))
-                .build();
-        this.intakePathChain = follower.pathBuilder()
-                .addPath(new BezierLine(follower.getPose(), new Pose(follower.getPose().getX() - 6, follower.getPose().getY(), follower.getHeading())))
-                .setConstantHeadingInterpolation(Math.toRadians(180))
-                .build();
-        this.finishIntake = follower.pathBuilder()
-                .addPath(new BezierLine(follower.getPose(), new Pose(follower.getPose().getX() + 18, follower.getPose().getY(), follower.getHeading())))
-                .setConstantHeadingInterpolation(Math.toRadians(180))
+        this.returnPath = follower.pathBuilder()
+                .addPath(new BezierLine(alignGoal, startPose))
+                .setLinearHeadingInterpolation(alignGoal.getHeading(), startPose.getHeading())
                 .build();
     }
     public void detectTags() {
@@ -132,56 +122,56 @@ public class TwoMagFarLeft extends LinearOpMode {
     public void autonomousPathUpdate() {
         switch (pathState) {
             case 0:
-                if (!follower.isBusy()) follower.followPath(scorePreloadPathChain);
-                //shoot
-                if (!follower.isBusy()) {
-                    follower.followPath(scorePreloadPathChainPtTwo);
-                    setPathState(1);
-                }
-                break;
-            case -1:
-                if (!follower.isBusy())  {
-                    follower.followPath(detectionPathChain);
-                    setPathState(0);
-                }
-                break;
+                if (!follower.isBusy()) follower.followPath(scorePreloadPath);
+                robot.inDep.unloadMag();
             case 1:
-                /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
                 if(!follower.isBusy()) {
-                    Pose current = follower.getPose();
-                    Pose vision = getRobotPoseFromCamera(getTargetTag(24,24,24));
-                    Pose blended = new Pose(
-                            (current.getX() * 0.8 + vision.getX() * 0.2),
-                            (current.getY() * 0.8 + vision.getY() * 0.2),
-                            vision.getHeading()
-                    );
-                    follower.setPose(blended);
-                    if (robot.decode(getTargetTag(21,22,23)).equals("PPG")) follower.followPath(pickupPathChain3);
-                    else if (robot.decode(getTargetTag(21,22,23)).equals("PGP")) follower.followPath(pickupPathChain2);
-                    else follower.followPath(pickupPathChain1);
-                    follower.followPath(intakePathChain);
-                    //intake
-                    follower.followPath(intakePathChain);
-                    //intake
-                    follower.followPath(intakePathChain);
-                    //intake
-                    follower.followPath(finishIntake);
-                    setPathState(2);
+                    follower.followPath(pickupOnePath);
+                    robot.inDep.setIntake(0.6);
                 }
+                setPathState(2);
                 break;
             case 2:
-                if(!follower.isBusy()) {
-                    follower.followPath(scorePathChain);
-                }
-                if (!follower.isBusy()) {
-                    follower.followPath(returnPathChain);
-                    setPathState(3);
-                }
+                if (!follower.isBusy()) follower.followPath(finishPickupOnePath);
+                robot.inDep.setIntake(0);
+                setPathState(3);
                 break;
             case 3:
                 if(!follower.isBusy()) {
-                    setPathState(-2);
+                    follower.followPath(scorePickupOnePath);
                 }
+                robot.inDep.unloadMag();
+                setPathState(4);
+                break;
+            case 4:
+                if (!follower.isBusy()) {
+                    follower.followPath(pickupTwoPath);
+                }
+                robot.inDep.setIntake(0.6);
+                setPathState(5);
+                break;
+            case 5:
+                if (!follower.isBusy()) {
+                    follower.followPath(finishPickupTwoPath);
+                }
+                robot.inDep.setIntake(0);
+                setPathState(6);
+                break;
+            case 6:
+                if (!follower.isBusy()) {
+                    follower.followPath(scorePickupTwoPath);
+                }
+                robot.inDep.unloadMag();
+                setPathState(7);
+                break;
+            case 7:
+                if (!follower.isBusy()) {
+                    follower.followPath(returnPath);
+                }
+                setPathState(8);
+                break;
+            case 8:
+                if (!follower.isBusy()) setPathState(-1);
                 break;
         }
     }
