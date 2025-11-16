@@ -21,44 +21,45 @@ import java.util.List;
 
 //TODO: TUNE PID, CENTRIPETAL, ALL CONSTANTS, AND EXPERIMENT WITH INTERPOLATION.
 //TODO: download ftcdashboard and tune constants with drive test
-//TODO: Check poses for accurate data on visualizer
-//TODO: fix pickup sequence for one big sweep
+
 @Autonomous (name = "2MagCRight")
 public class TwoMagCloseRight extends LinearOpMode {
     public RobotSystem robot = new RobotSystem(hardwareMap, this);
-    public PathChain detectionPathChain;
+    public PathChain shootPreload;
+    public PathChain pickupPathOne;
+    public PathChain finishPickupOne;
+    public PathChain scorePickupOne;
+    public PathChain pickupPathTwo;
+    public PathChain finishPickupPathTwo;
+    public PathChain scorePickupTwo;
     public PathChain returnPathChain;
-    public PathChain pickupPathChain1;
-    public PathChain pickupPathChain2;
-    public PathChain intakePathChain;
-    public PathChain pickupPathChain3;
-    public PathChain scorePathChain;
-    public PathChain scorePreloadPathChain;
     public Follower follower;
     public Timer pathTimer, opmodeTimer;
     public int pathState;
-    public final Pose startPose = new Pose(80,10,Math.toRadians(90));
-    public final Pose apTag1 = new Pose(72,80,Math.toRadians(90));
-    //quad bezier curve, rest linear w little to no interpolation
-    public Pose pickup1 = new Pose(103, 84, Math.toRadians(360));
-    public Pose pickup2 = new Pose(103,60,Math.toRadians(360));
-    public Pose pickup3 = new Pose(103,35,Math.toRadians(360));
-    // quadratic bezier curve for this step
-    public Pose alignGoal = new Pose(100, 115, Math.toRadians(37));
-    public PathChain finishIntake;
-    public PathChain scorePreloadPathChainPtTwo;
+    public final Pose startPose = new Pose(88,6,Math.toRadians(90));
+    public final Pose preloadShoot = new Pose(88,6,Math.toRadians(70));
+    public Pose pickupOne = new Pose(110, 29, Math.toRadians(0));
+    public Pose pickupOneFinish = new Pose(122,29, Math.toRadians(0));
+    public Pose alignGoal = new Pose(90, 95, Math.toRadians(36));
+    public Pose controlPointOuttakeOne = new Pose(70,50,Math.toRadians(0));
+    public final Pose pickupTwo = new Pose(110,55, Math.toRadians(0));
+    public final Pose pickupTwoFinish = new Pose(122,55,Math.toRadians(0));
+    public final Pose scorePickupTwoControl = new Pose(100,50,Math.toRadians(0));
+    public final Pose finish = new Pose(137,5, Math.toRadians(180));
+    public final Pose finishControlPoint = new Pose(80,30,Math.toRadians(0));
     public AprilTagDetection lastTagDetected;
     @Override
     public void runOpMode() throws InterruptedException {
         pathTimer = new Timer();
         opmodeTimer = new Timer();
-        robot.hardwareRobot.initOdom();
         opmodeTimer.resetTimer();
+        robot.hardwareRobot.initOdom();
         follower = Constants.createFollower(hardwareMap);
-        setPathState(-1);
+        setPathState(0);
         follower.setStartingPose(startPose);
         buildPaths();
         while (opModeIsActive()) {
+            robot.hardwareRobot.pinpoint.update();
             detectTags();
             follower.update();
             autonomousPathUpdate();
@@ -73,45 +74,49 @@ public class TwoMagCloseRight extends LinearOpMode {
         return target.ftcPose.range <= radius;
     }
     public void buildPaths() {
-        this.detectionPathChain = follower.pathBuilder()
-                .addPath(new BezierLine(startPose, apTag1))
-                .setConstantHeadingInterpolation(Math.toRadians(90))
+        this.shootPreload = follower.pathBuilder()
+                .addPath(new BezierLine(startPose, preloadShoot))
+                .setLinearHeadingInterpolation(startPose.getHeading(),preloadShoot.getHeading())
                 .build();
-        this.scorePreloadPathChain = follower.pathBuilder()
-                .addPath(new BezierLine(apTag1, alignGoal))
-                .setLinearHeadingInterpolation(Math.toRadians(90),Math.toRadians(37))
+        this.pickupPathOne = follower.pathBuilder()
+                .addPath(new BezierLine(preloadShoot, pickupOne))
+                .setLinearHeadingInterpolation(preloadShoot.getHeading(),pickupOne.getHeading())
                 .build();
-        this.scorePreloadPathChainPtTwo = follower.pathBuilder()
-                .addPath(new BezierLine(alignGoal, apTag1))
-                .setLinearHeadingInterpolation(Math.toRadians(37),Math.toRadians(90))
+        this.finishPickupOne = follower.pathBuilder()
+                .addPath(new BezierLine(pickupOne, pickupOneFinish))
+                .setConstantHeadingInterpolation(Math.toRadians(0))
                 .build();
-        this.pickupPathChain1 = follower.pathBuilder()
-                .addPath(new BezierLine(apTag1, pickup1))
-                .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(360))
+        this.scorePickupOne = follower.pathBuilder()
+                .addPath(new BezierCurve(
+                        pickupOneFinish,
+                        controlPointOuttakeOne,
+                        alignGoal
+                ))
+                .setLinearHeadingInterpolation(pickupOneFinish.getHeading(), alignGoal.getHeading())
                 .build();
-        this.pickupPathChain2 = follower.pathBuilder()
-                .addPath(new BezierLine(apTag1, pickup2))
-                .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(360))
+        this.pickupPathTwo = follower.pathBuilder()
+                .addPath(new BezierLine(alignGoal, pickupTwo))
+                .setLinearHeadingInterpolation(alignGoal.getHeading(), pickupTwo.getHeading())
                 .build();
-        this.pickupPathChain3 = follower.pathBuilder()
-                .addPath(new BezierLine(apTag1,pickup3))
-                .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(360))
+        this.finishPickupPathTwo = follower.pathBuilder()
+                .addPath(new BezierLine(pickupTwo, pickupTwoFinish))
+                .setConstantHeadingInterpolation(pickupTwo.getHeading())
                 .build();
-        this.scorePathChain = follower.pathBuilder()
-                .addPath(new BezierCurve(Arrays.asList(follower.getPose(), new Pose(70,80, Math.toRadians(0)), alignGoal)))
-                .setLinearHeadingInterpolation(Math.toRadians(360),Math.toRadians(37))
+        this.scorePickupTwo = follower.pathBuilder()
+                .addPath(new BezierCurve(
+                        pickupTwoFinish,
+                        scorePickupTwoControl,
+                        alignGoal
+                ))
+                .setLinearHeadingInterpolation(pickupTwoFinish.getHeading(), alignGoal.getHeading())
                 .build();
         this.returnPathChain = follower.pathBuilder()
-                .addPath(new BezierCurve(alignGoal, new Pose(60,20,Math.toRadians(0)), new Pose(136,5,Math.toRadians(180))))
-                .setLinearHeadingInterpolation(Math.toRadians(37),Math.toRadians(180))
-                .build();
-        this.intakePathChain = follower.pathBuilder()
-                .addPath(new BezierLine(follower.getPose(), new Pose(follower.getPose().getX() + 6, follower.getPose().getY(), Math.toRadians(360))))
-                .setConstantHeadingInterpolation(Math.toRadians(360))
-                .build();
-        this.finishIntake = follower.pathBuilder()
-                .addPath(new BezierLine(follower.getPose(), new Pose(follower.getPose().getX() - 18, follower.getPose().getY(), Math.toRadians(360))))
-                .setConstantHeadingInterpolation(Math.toRadians(360))
+                .addPath(new BezierCurve(
+                        alignGoal,
+                        finishControlPoint,
+                        finish
+                ))
+                .setLinearHeadingInterpolation(alignGoal.getHeading(), finish.getHeading())
                 .build();
     }
     public void detectTags() {
@@ -127,7 +132,6 @@ public class TwoMagCloseRight extends LinearOpMode {
                 telemetry.addData("Yaw", tag.ftcPose.yaw);
                 telemetry.addData("Range: ", tag.ftcPose.range);
                 lastTagDetected = tag;
-                break;
             }
         } else {
             lastTagDetected = null; // clear old tag when none detected
@@ -136,65 +140,62 @@ public class TwoMagCloseRight extends LinearOpMode {
     public void autonomousPathUpdate() {
         switch (pathState) {
             case 0:
-                if (!follower.isBusy()) follower.followPath(scorePreloadPathChain);
-                //shoot
-                if (!follower.isBusy()) {
-                    follower.followPath(scorePreloadPathChainPtTwo);
-                    setPathState(1);
-                }
-                break;
-            case -1:
-                if (!follower.isBusy())  {
-                    follower.followPath(detectionPathChain);
-                    setPathState(0);
-                }
-                break;
+                if (!follower.isBusy()) follower.followPath(shootPreload);
+                robot.inDep.unloadMag();
             case 1:
-                /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
                 if(!follower.isBusy()) {
-                    Pose current = follower.getPose();
-                    Pose vision = getRobotPoseFromCamera(getTargetTag(24,24,24));
-                    Pose blended = new Pose(
-                            (current.getX() * 0.8 + vision.getX() * 0.2),
-                            (current.getY() * 0.8 + vision.getY() * 0.2),
-                            vision.getHeading()
-                    );
-                    follower.setPose(blended);
-                    if (robot.decode(getTargetTag(21,22,23)).equals("PPG")) follower.followPath(pickupPathChain3);
-                    else if (robot.decode(getTargetTag(21,22,23)).equals("PGP")) follower.followPath(pickupPathChain2);
-                    else follower.followPath(pickupPathChain1);
-                    follower.followPath(intakePathChain);
-                    //intake
-                    follower.followPath(intakePathChain);
-                    //intake
-                    follower.followPath(intakePathChain);
-                    //intake
-                    follower.followPath(finishIntake);
-                    setPathState(2);
+                    follower.followPath(pickupPathOne);
+                    robot.inDep.setIntake(0.6);
                 }
+                setPathState(2);
                 break;
             case 2:
-                if(!follower.isBusy()) {
-                    follower.followPath(scorePathChain);
-                }
-                if (!follower.isBusy()) {
-                    follower.followPath(returnPathChain);
-                    setPathState(3);
-                }
+                if (!follower.isBusy()) follower.followPath(finishPickupOne);
+                robot.inDep.setIntake(0);
+                setPathState(3);
                 break;
             case 3:
                 if(!follower.isBusy()) {
-                    setPathState(-2);
+                    follower.followPath(scorePickupOne);
                 }
+                robot.inDep.unloadMag();
+                setPathState(4);
+                break;
+            case 4:
+                if (!follower.isBusy()) {
+                    follower.followPath(pickupPathTwo);
+                }
+                robot.inDep.setIntake(0.6);
+                setPathState(5);
+                break;
+            case 5:
+                if (!follower.isBusy()) {
+                    follower.followPath(finishPickupPathTwo);
+                }
+                robot.inDep.setIntake(0);
+                setPathState(6);
+                break;
+            case 6:
+                if (!follower.isBusy()) {
+                    follower.followPath(scorePickupTwo);
+                }
+                robot.inDep.unloadMag();
+                setPathState(7);
+                break;
+            case 7:
+                if (!follower.isBusy()) {
+                    follower.followPath(returnPathChain);
+                }
+                setPathState(8);
+                break;
+            case 8:
+                if (!follower.isBusy()) setPathState(-1);
                 break;
         }
     }
     public void setPathState(int pState) {
         pathState = pState;
         pathTimer.resetTimer();
-    }
-    private Pose getRobotPoseFromCamera(AprilTagDetection tag) {
-        return new Pose(tag.robotPose.getPosition().x, tag.robotPose.getPosition().y, follower.getHeading(), FTCCoordinates.INSTANCE).getAsCoordinateSystem(PedroCoordinates.INSTANCE);
     }
     public AprilTagDetection getTargetTag(int targetId1, int targetId2, int targetId3) {
         List<AprilTagDetection> detections = robot.cv.aprilTagProcessor.getDetections();
@@ -206,5 +207,8 @@ public class TwoMagCloseRight extends LinearOpMode {
             }
         }
         return sol;
+    }
+    private Pose getRobotPoseFromCamera(AprilTagDetection tag) {
+        return new Pose(tag.robotPose.getPosition().x, tag.robotPose.getPosition().y, follower.getHeading(), FTCCoordinates.INSTANCE).getAsCoordinateSystem(PedroCoordinates.INSTANCE);
     }
 }

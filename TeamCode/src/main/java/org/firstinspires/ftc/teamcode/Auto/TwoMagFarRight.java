@@ -21,8 +21,6 @@ import java.util.List;
 
 //TODO: TUNE PID, CENTRIPETAL, ALL CONSTANTS, AND EXPERIMENT WITH INTERPOLATION.
 //TODO: download ftcdashboard and tune constants with drive test
-//TODO: Check poses for accurate data on visualizer
-//TODO: fix pickup sequence for one big sweep
 @Autonomous (name = "2MagFRight")
 public class TwoMagFarRight extends LinearOpMode {
     public RobotSystem robot = new RobotSystem(hardwareMap, this);
