@@ -3,6 +3,7 @@ import com.arcrobotics.ftclib.controller.PIDController;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.ftc.FTCCoordinates;
 import com.pedropathing.geometry.BezierCurve;
+import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.PedroCoordinates;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
@@ -17,21 +18,31 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
 import java.util.ArrayList;
 @TeleOp (name = "TeleOp")
-/* Using the fieldDrive method, you can follow a bezier line between your position and other points on the field.
- * This is primarily for macros and easier scoring.
- */
+//TODO: add toggle logic for control servo, make shooting macro
+//TODO: add shooting controls, intake controls.
+
 public class FINALTELEOP extends LinearOpMode {
+    public PathChain path;
     public RobotSystem robot;
-    public AprilTagDetection lastTagDetected;
+    public Follower follower;
     public Timer pathTimer, opModeTimer;
+    public AprilTagDetection lastTagDetected;
     public double speed;
+    public Pose startPose;
     public boolean lastSqPressed = false;
+    public Pose alignGoal;
     @Override
     public void runOpMode() throws InterruptedException {
+        this.startPose = new Pose(0,0,Math.toRadians(0));
+        this.alignGoal = new Pose(0,0,Math.toRadians(0));
+        //for the above, make it so square = closeLeft, circle = closeRight, triangle = farLeft, cross = farRight
+        //same for alignGoal. except square = blue goal, circle = red goal
         this.pathTimer = new Timer();
         this.opModeTimer = new Timer();
         pathTimer.resetTimer();
         robot.hardwareRobot.initOdom();
+        follower = Constants.createFollower(hardwareMap);
+        follower.setStartingPose(startPose);
         opModeTimer.resetTimer();
         this.robot = new RobotSystem(hardwareMap, this);
         this.speed = 0.5;
@@ -43,7 +54,7 @@ public class FINALTELEOP extends LinearOpMode {
             robot.drive.driveRobotCentricPowers(strafe, forward, turn);
             boolean square = gamepad1.square;
             if (!lastSqPressed && square) {
-                fieldDrive(lastTagDetected, 100,100,30);
+               bezierLine(follower.getPose(), alignGoal);
             }
             lastSqPressed = square;
         }
@@ -70,14 +81,12 @@ public class FINALTELEOP extends LinearOpMode {
     public boolean xInchRadius(AprilTagDetection target, int radius) {
         return target.ftcPose.range <= radius;
     }
-    public void fieldDrive(AprilTagDetection target, int xCoordinate, int yCoordinate, double targetHeading) {
-        PIDController tagController = new PIDController(0.02,0,0.001);
-        tagController.setTolerance(0.1);
-        while (opModeIsActive() && !tagController.atSetPoint()) {
-            double powerTurn = tagController.calculate(robot.hardwareRobot.pinpoint.getHeading(AngleUnit.DEGREES), targetHeading);
-            double powerX = tagController.calculate(target.robotPose.getPosition().x, xCoordinate);
-            double powerY = tagController.calculate(target.robotPose.getPosition().y, yCoordinate);
-            robot.drive.driveRobotCentricPowers(powerX, powerY, powerTurn);
-        }
+    public void bezierLine(Pose current, Pose target) {
+        this.path = follower.pathBuilder()
+                .addPath(new BezierLine(current, target))
+                .setLinearHeadingInterpolation(current.getHeading(), target.getHeading())
+                .build();
+        follower.followPath(path);
+        robot.inDep.unloadMag();
     }
 }

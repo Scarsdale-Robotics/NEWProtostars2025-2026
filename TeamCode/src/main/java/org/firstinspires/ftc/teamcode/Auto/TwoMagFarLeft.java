@@ -53,6 +53,7 @@ public class TwoMagFarLeft extends LinearOpMode {
         robot.hardwareRobot.initOdom();
         buildPaths();
         while (opModeIsActive()) {
+            robot.hardwareRobot.pinpoint.update();
             detectTags();
             follower.update();
             autonomousPathUpdate();
