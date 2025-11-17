@@ -17,50 +17,45 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
 import java.util.ArrayList;
-@TeleOp (name = "TeleOp")
-//TODO: add toggle logic for control servo, make shooting macro
-//TODO: add shooting controls, intake controls.
+
+@TeleOp(name = "TeleOp")
 
 public class FINALTELEOP extends LinearOpMode {
-    public PathChain path;
     public RobotSystem robot;
-    public Follower follower;
-    public Timer pathTimer, opModeTimer;
     public AprilTagDetection lastTagDetected;
     public double speed;
     public Pose startPose;
-    public boolean lastSqPressed = false;
-    public Pose alignGoal;
+    public boolean intakePressed = false;
+    public boolean lastToggleServoPressed = false;
+
     @Override
     public void runOpMode() throws InterruptedException {
-        this.startPose = new Pose(0,0,Math.toRadians(0));
-        this.alignGoal = new Pose(0,0,Math.toRadians(0));
-        //for the above, make it so square = closeLeft, circle = closeRight, triangle = farLeft, cross = farRight
-        //same for alignGoal. except square = blue goal, circle = red goal
-        this.pathTimer = new Timer();
-        this.opModeTimer = new Timer();
-        pathTimer.resetTimer();
         robot.hardwareRobot.initOdom();
-        follower = Constants.createFollower(hardwareMap);
-        follower.setStartingPose(startPose);
-        opModeTimer.resetTimer();
+        robot.inDep.setShooterPower(1);
         this.robot = new RobotSystem(hardwareMap, this);
-        this.speed = 0.5;
+        this.speed = 0.7;
+        waitForStart();
         while (opModeIsActive()) {
             detectTags();
+
             double strafe = gamepad1.left_stick_x;
             double forward = -gamepad1.left_stick_y;
             double turn = gamepad1.right_stick_x;
+
             robot.drive.driveRobotCentricPowers(strafe, forward, turn);
-            boolean square = gamepad1.square;
-            if (!lastSqPressed && square) {
-               bezierLine(follower.getPose(), alignGoal);
+            if (intakePressed) robot.inDep.setIntake(0.7);
+            else robot.inDep.setIntake(0);
+            boolean toggleServo = gamepad1.triangle;
+            if (!lastToggleServoPressed && toggleServo) {
+                robot.inDep.toggleControlServo(0,1);
             }
-            lastSqPressed = square;
+            lastToggleServoPressed = toggleServo;
         }
     }
+
     public void detectTags() {
         ArrayList<AprilTagDetection> detections = robot.cv.aprilTagProcessor.getDetections();
+
         if (detections != null && !detections.isEmpty()) {
             for (AprilTagDetection tag : detections) {
                 telemetry.addLine("AprilTag Detected.");
@@ -78,15 +73,8 @@ public class FINALTELEOP extends LinearOpMode {
             lastTagDetected = null; // clear old tag when none detected
         }
     }
+
     public boolean xInchRadius(AprilTagDetection target, int radius) {
         return target.ftcPose.range <= radius;
-    }
-    public void bezierLine(Pose current, Pose target) {
-        this.path = follower.pathBuilder()
-                .addPath(new BezierLine(current, target))
-                .setLinearHeadingInterpolation(current.getHeading(), target.getHeading())
-                .build();
-        follower.followPath(path);
-        robot.inDep.unloadMag();
     }
 }

@@ -52,6 +52,8 @@ public class TwoMagFarRight extends LinearOpMode {
         follower.setStartingPose(startPose);
         robot.hardwareRobot.initOdom();
         buildPaths();
+        robot.inDep.setShooterPower(1);
+        waitForStart();
         while (opModeIsActive()) {
             robot.hardwareRobot.pinpoint.update();
             detectTags();

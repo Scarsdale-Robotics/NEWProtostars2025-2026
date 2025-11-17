@@ -39,15 +39,12 @@ public class InDepSubsystem extends SubsystemBase {
         else hardwareRobot.intakeControl.setPosition(invertedPosition);
     }
     public void unloadMag() {
-        setShooterPower(1);
+        toggleControlServo(0,1);
         opMode.sleep(1000);
         toggleControlServo(0,1);
-        opMode.sleep(1500);
+        opMode.sleep(1000);
         toggleControlServo(0,1);
-        opMode.sleep(1500);
+        opMode.sleep(1000);
         toggleControlServo(0,1);
-        opMode.sleep(1500);
-        toggleControlServo(0,1);
-        setShooterPower(0);
     }
 }
