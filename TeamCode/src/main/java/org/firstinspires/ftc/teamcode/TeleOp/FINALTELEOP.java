@@ -29,6 +29,7 @@ public class FINALTELEOP extends LinearOpMode {
     public double speed;
     public boolean intakePressed = false;
     public boolean lastToggleServoPressed = false;
+    public boolean shooterPressed = false;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -48,16 +49,17 @@ public class FINALTELEOP extends LinearOpMode {
             telemetry.addData("X", robot.hardwareRobot.pinpoint.getPosX(DistanceUnit.INCH));
             telemetry.addData("Y", robot.hardwareRobot.pinpoint.getPosY(DistanceUnit.INCH));
             telemetry.update();
-            if (turn > 0) robot.hardwareRobot.turnInversions();
-            if (strafe > 0) robot.hardwareRobot.strafeInversions();
             robot.drive.driveRobotCentricPowers(strafe, forward, turn);
             intakePressed = gamepad1.triangle;
-            if (intakePressed) robot.inDep.setIntake(0.7);
+            if (intakePressed) robot.inDep.setIntake(1);
             else robot.inDep.setIntake(0);
             boolean toggleServo = gamepad1.square;
             if (!lastToggleServoPressed && toggleServo) {
-                robot.inDep.toggleControlServo(0,0.18);
+                robot.inDep.toggleControlServo(0,0.31);
             }
+            shooterPressed = gamepad1.circle;
+            if (shooterPressed) robot.inDep.setShooterPower(1);
+            else robot.inDep.setShooterPower(0.2);
             lastToggleServoPressed = toggleServo;
         }
     }

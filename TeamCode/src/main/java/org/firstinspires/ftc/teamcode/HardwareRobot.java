@@ -54,8 +54,8 @@ public class HardwareRobot {
         leftBack.setRunMode(Motor.RunMode.RawPower);
         rightBack.setRunMode(Motor.RunMode.RawPower);
 
-        leftFront.setInverted(false);
-        rightFront.setInverted(false);
+        leftFront.setInverted(true);
+        rightFront.setInverted(true);
         leftBack.setInverted(true);
         rightBack.setInverted(false);
 
@@ -100,17 +100,5 @@ public class HardwareRobot {
         pinpoint.setOffsets(-5.5,-5, DistanceUnit.INCH);
         pinpoint.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.FORWARD, GoBildaPinpointDriver.EncoderDirection.FORWARD);
         pinpoint.resetPosAndIMU();
-    }
-    public void turnInversions() {
-        leftFront.setInverted(false);
-        rightFront.setInverted(false);
-        leftBack.setInverted(false);
-        rightBack.setInverted(true);
-    }
-    public void strafeInversions() {
-        leftFront.setInverted(false);
-        rightFront.setInverted(true);
-        leftBack.setInverted(true);
-        rightBack.setInverted(true);
     }
 }
