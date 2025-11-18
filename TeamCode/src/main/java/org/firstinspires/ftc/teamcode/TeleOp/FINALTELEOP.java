@@ -1,4 +1,5 @@
 package org.firstinspires.ftc.teamcode.TeleOp;
+import com.acmerobotics.roadrunner.util.Angle;
 import com.arcrobotics.ftclib.controller.PIDController;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.ftc.FTCCoordinates;
@@ -12,42 +13,50 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.RobotSystem;
+import org.firstinspires.ftc.teamcode.Subsystems.CVSubsystem;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
 import java.util.ArrayList;
 
-@TeleOp(name = "TeleOp")
+@TeleOp(name = "TeleOpFinal")
 
 public class FINALTELEOP extends LinearOpMode {
     public RobotSystem robot;
     public AprilTagDetection lastTagDetected;
     public double speed;
-    public Pose startPose;
     public boolean intakePressed = false;
     public boolean lastToggleServoPressed = false;
 
     @Override
     public void runOpMode() throws InterruptedException {
-        robot.hardwareRobot.initOdom();
-        robot.inDep.setShooterPower(1);
         this.robot = new RobotSystem(hardwareMap, this);
-        this.speed = 0.7;
+        robot.inDep.setShooterPower(0);
+        robot.hardwareRobot.initOdom();
+        this.speed = 0.4;
         waitForStart();
         while (opModeIsActive()) {
+            robot.hardwareRobot.pinpoint.update();
             detectTags();
 
             double strafe = gamepad1.left_stick_x;
             double forward = -gamepad1.left_stick_y;
             double turn = gamepad1.right_stick_x;
-
+            telemetry.addData("heading", robot.hardwareRobot.pinpoint.getHeading(AngleUnit.DEGREES));
+            telemetry.addData("X", robot.hardwareRobot.pinpoint.getPosX(DistanceUnit.INCH));
+            telemetry.addData("Y", robot.hardwareRobot.pinpoint.getPosY(DistanceUnit.INCH));
+            telemetry.update();
+            if (turn > 0) robot.hardwareRobot.turnInversions();
+            if (strafe > 0) robot.hardwareRobot.strafeInversions();
             robot.drive.driveRobotCentricPowers(strafe, forward, turn);
+            intakePressed = gamepad1.triangle;
             if (intakePressed) robot.inDep.setIntake(0.7);
             else robot.inDep.setIntake(0);
-            boolean toggleServo = gamepad1.triangle;
+            boolean toggleServo = gamepad1.square;
             if (!lastToggleServoPressed && toggleServo) {
-                robot.inDep.toggleControlServo(0,1);
+                robot.inDep.toggleControlServo(0,0.18);
             }
             lastToggleServoPressed = toggleServo;
         }

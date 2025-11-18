@@ -32,7 +32,6 @@ public class HardwareRobot {
     public final Motor shooterOne;
     public final Motor shooterTwo;
     public final Motor intakeOne;
-    public final Motor intakeTwo;
 
     public HardwareRobot(HardwareMap hardwareMap) {
         leftFront = new Motor(hardwareMap, "leftFront", Motor.GoBILDA.RPM_312);
@@ -55,10 +54,10 @@ public class HardwareRobot {
         leftBack.setRunMode(Motor.RunMode.RawPower);
         rightBack.setRunMode(Motor.RunMode.RawPower);
 
-        leftFront.setInverted(true);
-        rightFront.setInverted(true);
+        leftFront.setInverted(false);
+        rightFront.setInverted(false);
         leftBack.setInverted(true);
-        rightBack.setInverted(true);
+        rightBack.setInverted(false);
 
         leftFront.motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightFront.motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -71,27 +70,22 @@ public class HardwareRobot {
         rightBack.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
 
         intakeOne = new Motor(hardwareMap, "intakeOne", Motor.GoBILDA.RPM_312);
-        intakeTwo = new Motor(hardwareMap, "intakeTwo", Motor.GoBILDA.RPM_312);
         shooterOne = new Motor(hardwareMap, "shooterOne", Motor.GoBILDA.RPM_1620);
         shooterTwo = new Motor(hardwareMap, "shooterTwo", Motor.GoBILDA.RPM_1620);
 
         intakeOne.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        intakeTwo.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         shooterOne.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         shooterTwo.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         intakeOne.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        intakeTwo.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         shooterOne.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         shooterTwo.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        intakeTwo.setRunMode(Motor.RunMode.RawPower);
         intakeOne.setRunMode(Motor.RunMode.RawPower);
         shooterOne.setRunMode(Motor.RunMode.RawPower);
         shooterTwo.setRunMode(Motor.RunMode.RawPower);
 
         intakeOne.motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        intakeTwo.motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         shooterOne.motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         shooterTwo.motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
@@ -106,5 +100,17 @@ public class HardwareRobot {
         pinpoint.setOffsets(-5.5,-5, DistanceUnit.INCH);
         pinpoint.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.FORWARD, GoBildaPinpointDriver.EncoderDirection.FORWARD);
         pinpoint.resetPosAndIMU();
+    }
+    public void turnInversions() {
+        leftFront.setInverted(false);
+        rightFront.setInverted(false);
+        leftBack.setInverted(false);
+        rightBack.setInverted(true);
+    }
+    public void strafeInversions() {
+        leftFront.setInverted(false);
+        rightFront.setInverted(true);
+        leftBack.setInverted(true);
+        rightBack.setInverted(true);
     }
 }

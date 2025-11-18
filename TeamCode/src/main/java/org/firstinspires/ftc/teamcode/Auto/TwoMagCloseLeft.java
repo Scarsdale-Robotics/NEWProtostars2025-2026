@@ -24,7 +24,7 @@ import java.util.List;
 
 @Autonomous (name = "2MagCLeft")
 public class TwoMagCloseLeft extends LinearOpMode {
-    public RobotSystem robot = new RobotSystem(hardwareMap, this);
+    public RobotSystem robot;
     public PathChain shootPreload;
     public PathChain pickupPathOne;
     public PathChain finishPickupOne;
@@ -49,10 +49,10 @@ public class TwoMagCloseLeft extends LinearOpMode {
     public AprilTagDetection lastTagDetected;
     @Override
     public void runOpMode() throws InterruptedException {
+        this.robot = new RobotSystem(hardwareMap, this);
         pathTimer = new Timer();
         opmodeTimer = new Timer();
         opmodeTimer.resetTimer();
-        robot.hardwareRobot.initOdom();
         follower = Constants.createFollower(hardwareMap);
         setPathState(0);
         follower.setStartingPose(startPose);
@@ -60,7 +60,6 @@ public class TwoMagCloseLeft extends LinearOpMode {
         robot.inDep.setShooterPower(1);
         waitForStart();
         while (opModeIsActive()) {
-            robot.hardwareRobot.pinpoint.update();
             detectTags();
             follower.update();
             autonomousPathUpdate();

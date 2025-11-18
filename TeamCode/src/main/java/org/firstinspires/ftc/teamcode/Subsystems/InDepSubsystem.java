@@ -11,13 +11,10 @@ import org.firstinspires.ftc.teamcode.HardwareRobot;
 
 public class InDepSubsystem extends SubsystemBase {
     public HardwareRobot hardwareRobot;
-    public CVSubsystem cv;
     public DriveSubsystem drive;
     public LinearOpMode opMode;
     public InDepSubsystem(LinearOpMode opMode, HardwareMap hardwareMap) {
         this.hardwareRobot = new HardwareRobot(hardwareMap);
-        this.cv = new CVSubsystem(hardwareRobot.cameraName, opMode, hardwareMap.appContext.getResources().getIdentifier(
-                "cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName()));
         this.drive = new DriveSubsystem(
           hardwareRobot.leftFront,
           hardwareRobot.rightFront,
@@ -32,7 +29,6 @@ public class InDepSubsystem extends SubsystemBase {
     }
     public void setIntake(double p) {
         hardwareRobot.intakeOne.set(p);
-        hardwareRobot.intakeTwo.set(p);
     }
     public void toggleControlServo(double invertedPosition, double startingPosition) {
         if (hardwareRobot.intakeControl.getPosition() == invertedPosition) hardwareRobot.intakeControl.setPosition(startingPosition);

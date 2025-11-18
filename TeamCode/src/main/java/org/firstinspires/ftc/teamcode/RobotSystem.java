@@ -19,14 +19,13 @@ public class RobotSystem {
     public final InDepSubsystem inDep;
     public RobotSystem(HardwareMap hardwareMap, LinearOpMode opMode) {
         this.hardwareRobot = new HardwareRobot(hardwareMap);
-        this.cv = new CVSubsystem(hardwareRobot.cameraName, opMode, hardwareMap.appContext.getResources().getIdentifier(
-                "cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName()));
         this.drive = new DriveSubsystem(
           hardwareRobot.leftFront,
           hardwareRobot.rightFront,
           hardwareRobot.leftBack,
-          hardwareRobot.leftFront
+          hardwareRobot.rightBack
         );
+        this.cv = new CVSubsystem(hardwareRobot.cameraName, opMode, hardwareMap);
         this.opMode = opMode;
         this.inDep = new InDepSubsystem(opMode, hardwareMap);
     }

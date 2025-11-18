@@ -53,7 +53,6 @@ public class TwoMagCloseRight extends LinearOpMode {
         pathTimer = new Timer();
         opmodeTimer = new Timer();
         opmodeTimer.resetTimer();
-        robot.hardwareRobot.initOdom();
         follower = Constants.createFollower(hardwareMap);
         setPathState(0);
         follower.setStartingPose(startPose);
@@ -61,7 +60,6 @@ public class TwoMagCloseRight extends LinearOpMode {
         robot.inDep.setShooterPower(1);
         waitForStart();
         while (opModeIsActive()) {
-            robot.hardwareRobot.pinpoint.update();
             detectTags();
             follower.update();
             autonomousPathUpdate();
