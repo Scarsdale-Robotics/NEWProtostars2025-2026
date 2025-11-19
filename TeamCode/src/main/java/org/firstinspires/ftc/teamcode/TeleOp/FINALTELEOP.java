@@ -58,8 +58,10 @@ public class FINALTELEOP extends LinearOpMode {
                 robot.inDep.toggleControlServo(0,0.31);
             }
             shooterPressed = gamepad1.circle;
-            if (shooterPressed) robot.inDep.setShooterPower(1);
-            else robot.inDep.setShooterPower(0.2);
+            if (shooterPressed) robot.inDep.setShooterPower(0.6);
+            else if (gamepad1.left_bumper) robot.inDep.setShooterPower(0.55);
+            else if (gamepad1.right_bumper) robot.inDep.setShooterPower(0.5);
+            else robot.inDep.setShooterPower(0.3);
             lastToggleServoPressed = toggleServo;
         }
     }

@@ -29,14 +29,17 @@ public class InDepSubsystem extends SubsystemBase {
     }
     public void setIntake(double p) {
         hardwareRobot.intakeOne.set(p);
+        hardwareRobot.intakeTwo.set(p);
     }
     public void toggleControlServo(double invertedPosition, double startingPosition) {
         if (hardwareRobot.intakeControl.getPosition() == invertedPosition) hardwareRobot.intakeControl.setPosition(startingPosition);
         else hardwareRobot.intakeControl.setPosition(invertedPosition);
     }
+    //TODO: optimize
     public void unloadMag() {
-        toggleControlServo(0,1);
-        opMode.sleep(1000);
+        toggleControlServo(0,0.31);
+        opMode.sleep(500);
+        setIntake(0.2);
         toggleControlServo(0,1);
         opMode.sleep(1000);
         toggleControlServo(0,1);
