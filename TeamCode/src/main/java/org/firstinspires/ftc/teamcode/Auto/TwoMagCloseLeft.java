@@ -137,7 +137,7 @@ public class TwoMagCloseLeft extends LinearOpMode {
         switch (pathState) {
             case 0:
                 if (!follower.isBusy()) follower.followPath(shootPreload);
-                robot.inDep.unloadMag();
+                robot.inDep.unloadMag(opmodeTimer);
             case 1:
                 if(!follower.isBusy()) {
                     follower.followPath(pickupPathOne);
@@ -154,7 +154,7 @@ public class TwoMagCloseLeft extends LinearOpMode {
                 if(!follower.isBusy()) {
                     follower.followPath(scorePickupOne);
                 }
-                robot.inDep.unloadMag();
+                robot.inDep.unloadMag(opmodeTimer);
                 setPathState(4);
                 break;
             case 4:
@@ -175,7 +175,7 @@ public class TwoMagCloseLeft extends LinearOpMode {
                 if (!follower.isBusy()) {
                     follower.followPath(scorePickupTwo);
                 }
-                robot.inDep.unloadMag();
+                robot.inDep.unloadMag(opmodeTimer);
                 setPathState(7);
                 break;
             case 7:

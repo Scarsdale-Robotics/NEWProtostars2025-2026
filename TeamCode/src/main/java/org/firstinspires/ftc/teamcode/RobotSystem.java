@@ -25,8 +25,8 @@ public class RobotSystem {
           hardwareRobot.leftBack,
           hardwareRobot.rightBack
         );
-        this.cv = new CVSubsystem(hardwareRobot.cameraName, opMode, hardwareMap);
         this.opMode = opMode;
+        this.cv = new CVSubsystem(hardwareRobot.cameraName, opMode, hardwareMap);
         this.inDep = new InDepSubsystem(opMode, hardwareMap);
     }
     public String decode(AprilTagDetection target) {

@@ -55,8 +55,8 @@ public class HardwareRobot {
         leftBack.setRunMode(Motor.RunMode.RawPower);
         rightBack.setRunMode(Motor.RunMode.RawPower);
 
-        leftFront.setInverted(true);
-        rightFront.setInverted(true);
+        leftFront.setInverted(false);
+        rightFront.setInverted(false);
         leftBack.setInverted(true);
         rightBack.setInverted(false);
 
@@ -71,7 +71,7 @@ public class HardwareRobot {
         rightBack.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
 
         intakeOne = new Motor(hardwareMap, "intakeOne", Motor.GoBILDA.RPM_312);
-        intakeTwo = new Motor(hardwareMap, "intakeOne", Motor.GoBILDA.RPM_312);
+        intakeTwo = new Motor(hardwareMap, "intakeTwo", Motor.GoBILDA.RPM_312);
         shooterOne = new Motor(hardwareMap, "shooterOne", Motor.GoBILDA.RPM_1620);
         shooterTwo = new Motor(hardwareMap, "shooterTwo", Motor.GoBILDA.RPM_1620);
 

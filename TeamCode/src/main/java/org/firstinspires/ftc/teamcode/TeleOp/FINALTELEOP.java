@@ -21,7 +21,7 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
 import java.util.ArrayList;
 
-@TeleOp(name = "TeleOpFinal")
+@TeleOp(name = "changedtle")
 
 public class FINALTELEOP extends LinearOpMode {
     public RobotSystem robot;
@@ -30,18 +30,20 @@ public class FINALTELEOP extends LinearOpMode {
     public boolean intakePressed = false;
     public boolean lastToggleServoPressed = false;
     public boolean shooterPressed = false;
+    public Timer opModeTimer;
 
     @Override
     public void runOpMode() throws InterruptedException {
+        this.opModeTimer = new Timer();
         this.robot = new RobotSystem(hardwareMap, this);
         robot.inDep.setShooterPower(0);
         robot.hardwareRobot.initOdom();
         this.speed = 0.4;
+        opModeTimer.resetTimer();
         waitForStart();
         while (opModeIsActive()) {
             robot.hardwareRobot.pinpoint.update();
             detectTags();
-
             double strafe = gamepad1.left_stick_x;
             double forward = -gamepad1.left_stick_y;
             double turn = gamepad1.right_stick_x;
@@ -51,17 +53,17 @@ public class FINALTELEOP extends LinearOpMode {
             telemetry.update();
             robot.drive.driveRobotCentricPowers(strafe, forward, turn);
             intakePressed = gamepad1.triangle;
-            if (intakePressed) robot.inDep.setIntake(1);
+            if (intakePressed) robot.inDep.setIntake(0.5);
             else robot.inDep.setIntake(0);
             boolean toggleServo = gamepad1.square;
             if (!lastToggleServoPressed && toggleServo) {
                 robot.inDep.toggleControlServo(0,0.31);
             }
             shooterPressed = gamepad1.circle;
-            if (shooterPressed) robot.inDep.setShooterPower(0.6);
-            else if (gamepad1.left_bumper) robot.inDep.setShooterPower(0.55);
-            else if (gamepad1.right_bumper) robot.inDep.setShooterPower(0.5);
-            else robot.inDep.setShooterPower(0.3);
+            if (shooterPressed) robot.inDep.setShooterPower(0.9);
+            else if (gamepad1.left_bumper) robot.inDep.setShooterPower(0.8);
+            else if (gamepad1.right_bumper) robot.inDep.setShooterPower(0.85);
+            else robot.inDep.setShooterPower(0);
             lastToggleServoPressed = toggleServo;
         }
     }
@@ -69,16 +71,18 @@ public class FINALTELEOP extends LinearOpMode {
     public void detectTags() {
         ArrayList<AprilTagDetection> detections = robot.cv.aprilTagProcessor.getDetections();
 
-        if (detections != null && !detections.isEmpty()) {
+        if (detections != null) {
             for (AprilTagDetection tag : detections) {
-                telemetry.addLine("AprilTag Detected.");
-                telemetry.addData("ID", tag.id);
-                telemetry.addData("X (Sideways offset)", tag.ftcPose.x);
-                telemetry.addData("Y (Forward/Back Offset)", tag.ftcPose.y);
-                telemetry.addData("Z", tag.ftcPose.z);
-                telemetry.addData("Bearing", tag.ftcPose.bearing);
-                telemetry.addData("Yaw", tag.ftcPose.yaw);
-                telemetry.addData("Range", tag.ftcPose.range);
+                if (tag.rawPose != null) {
+                    telemetry.addLine("AprilTag Detected.");
+                    telemetry.addData("ID", tag.id);
+                    telemetry.addData("X (Sideways offset)", tag.ftcPose.x);
+                    telemetry.addData("Y (Forward/Back Offset)", tag.ftcPose.y);
+                    telemetry.addData("Z", tag.ftcPose.z);
+                    telemetry.addData("Bearing", tag.ftcPose.bearing);
+                    telemetry.addData("Yaw", tag.ftcPose.yaw);
+                    telemetry.addData("Range", tag.ftcPose.range);
+                }
                 lastTagDetected = tag;
                 break;
             }

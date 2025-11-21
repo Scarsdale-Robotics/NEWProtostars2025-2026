@@ -74,14 +74,14 @@ public class Constants {
                 .build();
     }
     public static MecanumConstants driveConstants = new MecanumConstants()
-            .maxPower(0.7)
+            .maxPower(0.65)
             .rightFrontMotorName("rightFront")
             .rightRearMotorName("rightBack")
             .leftRearMotorName("leftBack")
             .leftFrontMotorName("leftFront")
             //check these
             .leftFrontMotorDirection(DcMotorEx.Direction.REVERSE)
-            .leftRearMotorDirection(DcMotorEx.Direction.REVERSE)   // ← CHANGED
+            .leftRearMotorDirection(DcMotorEx.Direction.REVERSE)
             .rightFrontMotorDirection(DcMotorEx.Direction.REVERSE)
             .rightRearMotorDirection(DcMotorEx.Direction.FORWARD)
             .xVelocity(40.944)
