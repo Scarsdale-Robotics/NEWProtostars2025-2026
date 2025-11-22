@@ -21,16 +21,19 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
 import java.util.ArrayList;
 
-@TeleOp(name = "changedtle")
+@TeleOp(name = "TeleOp - JJ Scrim")
 
 public class FINALTELEOP extends LinearOpMode {
     public RobotSystem robot;
     public AprilTagDetection lastTagDetected;
     public double speed;
-    public boolean intakePressed = false;
+    public boolean intakeOnePressed = false;
+    public boolean intakeTwoPressed = false;
+
     public boolean lastToggleServoPressed = false;
     public boolean shooterPressed = false;
     public Timer opModeTimer;
+    public boolean lastToggleShootMacro = false;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -45,26 +48,41 @@ public class FINALTELEOP extends LinearOpMode {
             robot.hardwareRobot.pinpoint.update();
             detectTags();
             double strafe = gamepad1.left_stick_x;
-            double forward = -gamepad1.left_stick_y;
+            double forward = gamepad1.left_stick_y;
             double turn = gamepad1.right_stick_x;
             telemetry.addData("heading", robot.hardwareRobot.pinpoint.getHeading(AngleUnit.DEGREES));
             telemetry.addData("X", robot.hardwareRobot.pinpoint.getPosX(DistanceUnit.INCH));
             telemetry.addData("Y", robot.hardwareRobot.pinpoint.getPosY(DistanceUnit.INCH));
             telemetry.update();
             robot.drive.driveRobotCentricPowers(strafe, forward, turn);
-            intakePressed = gamepad1.triangle;
-            if (intakePressed) robot.inDep.setIntake(0.5);
-            else robot.inDep.setIntake(0);
+            intakeOnePressed = gamepad1.left_bumper;
+            if (intakeOnePressed) robot.inDep.setFrontIn(0.65);
+            else if (gamepad1.right_bumper) robot.inDep.setFrontIn(-0.65);
+            else robot.inDep.setFrontIn(0);
+            intakeTwoPressed = gamepad1.triangle;
+            if (intakeTwoPressed) robot.inDep.setSecondIn(0.65);
+            else if (gamepad1.cross) robot.inDep.setSecondIn(-0.65);
+            else robot.inDep.setSecondIn(0);
             boolean toggleServo = gamepad1.square;
             if (!lastToggleServoPressed && toggleServo) {
                 robot.inDep.toggleControlServo(0,0.31);
+                if (robot.hardwareRobot.intakeControl.getPosition() == 0) gamepad1.setLedColor(255,0,0,-1);
+                else gamepad1.setLedColor(0,255,0,-1);
             }
             shooterPressed = gamepad1.circle;
-            if (shooterPressed) robot.inDep.setShooterPower(0.9);
-            else if (gamepad1.left_bumper) robot.inDep.setShooterPower(0.8);
-            else if (gamepad1.right_bumper) robot.inDep.setShooterPower(0.85);
-            else robot.inDep.setShooterPower(0);
+            if (shooterPressed) robot.inDep.setShooterPower(0.85);
+            else if (gamepad1.dpad_up) robot.inDep.setShooterPower(0.8);
+            else if (gamepad1.dpad_right) robot.inDep.setShooterPower(0.75);
+            else if (gamepad1.dpad_down) robot.inDep.setShooterPower(0.7);
+            else if (gamepad1.dpad_left) robot.inDep.setShooterPower(0.65);
+            else {
+                if (gamepad2.cross) robot.inDep.setShooterPower(0);
+                robot.inDep.setShooterPower(0.3);
+            }
+            //boolean toggleShooter = gamepad1.options;
+            //if (!lastToggleShootMacro && toggleShooter) robot.inDep.unloadMag(opModeTimer);
             lastToggleServoPressed = toggleServo;
+            //lastToggleShootMacro = toggleShooter;
         }
     }
 
