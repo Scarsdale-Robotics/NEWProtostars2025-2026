@@ -67,28 +67,22 @@ public class InDepSubsystem extends SubsystemBase {
     }
     //TODO: optimize
     public void unloadMag(Timer opTimer) {
-        int pathState = 0;
+        int pathState = 1;
         opTimer.resetTimer();
         while (opMode.opModeIsActive()) {
             setIntake(0);
-            if (opTimer.getElapsedTimeSeconds() >= 5 && pathState == 0) {
-                toggleControlServo(0,0.31);
-                setIntake(0.7);
+            setShooterPower(0.8);
+            if (opTimer.getElapsedTimeSeconds() >= 2 && pathState == 1) {
+                toggleControlServo(0, 0.31);
                 pathState++;
             }
-            if (opTimer.getElapsedTimeSeconds() >= 6 && pathState == 1) {
-                setIntake(0);
-                toggleControlServo(0,0.31);
+            if (opTimer.getElapsedTimeSeconds() >= 3 && pathState == 2) {
+                setSecondIn(0.7);
                 pathState++;
             }
-            if (opTimer.getElapsedTimeSeconds() >= 10 && pathState == 2) {
-                toggleControlServo(0,0.31);
-                setIntake(0.7);
-                pathState++;
-            }
-            if (opTimer.getElapsedTimeSeconds() >= 11 && pathState == 3) {
-                setIntake(0);
-                toggleControlServo(0,0.31);
+            if (opTimer.getElapsedTimeSeconds() >= 7 && pathState == 3) {
+                setSecondIn(0);
+                toggleControlServo(0, 0.31);
                 pathState++;
             }
             if (pathState == 4) break;
