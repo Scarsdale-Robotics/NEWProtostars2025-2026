@@ -8,7 +8,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.RobotSystem;
-
+//TODO: finish tuning and transfer coefficients to teleop
 @Autonomous (name = "TurnAuton")
 public class TurnAutoTest extends LinearOpMode {
     public RobotSystem robot;

@@ -23,7 +23,7 @@ import java.util.List;
 //TODO: download ftcdashboard and tune constants with drive test
 @Autonomous(name = "2MagFRight")
 public class TwoMagFarRight extends LinearOpMode {
-    public RobotSystem robot = new RobotSystem(hardwareMap, this);
+    public RobotSystem robot;
     public PathChain scorePreloadPath;
     public PathChain pickupOnePath;
     public PathChain finishPickupOnePath;
@@ -44,6 +44,7 @@ public class TwoMagFarRight extends LinearOpMode {
     public AprilTagDetection lastTagDetected;
     @Override
     public void runOpMode() throws InterruptedException {
+        this.robot = new RobotSystem(hardwareMap, this);
         pathTimer = new Timer();
         opmodeTimer = new Timer();
         opmodeTimer.resetTimer();

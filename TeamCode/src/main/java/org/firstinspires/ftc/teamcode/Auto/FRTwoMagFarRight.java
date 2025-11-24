@@ -21,8 +21,8 @@ import java.util.List;
 
 //TODO: TUNE PID, CENTRIPETAL, ALL CONSTANTS, AND EXPERIMENT WITH INTERPOLATION.
 //TODO: download ftcdashboard and tune constants with drive test
-@Autonomous(name = "2MagFLeft")
-public class TwoMagFarLeft extends LinearOpMode {
+@Autonomous(name = "FR2MagFRight")
+public class FRTwoMagFarRight extends LinearOpMode {
     public RobotSystem robot;
     public PathChain scorePreloadPath;
     public PathChain pickupOnePath;
@@ -35,12 +35,12 @@ public class TwoMagFarLeft extends LinearOpMode {
     public Follower follower;
     public Timer pathTimer, opmodeTimer;
     public int pathState;
-    public Pose startPose = new Pose(40,134,Math.toRadians(270));
-    public Pose pickupOne = new Pose(41, 84, Math.toRadians(180));
-    public Pose pickupOneFinish = new Pose(29, 81, Math.toRadians(180));
-    public Pose alignGoal = new Pose(67, 90, Math.toRadians(143));
-    public Pose pickupTwo = new Pose(41,60,Math.toRadians(180));
-    public Pose finishPickupTwo = new Pose(29,60,Math.toRadians(180));
+    public Pose startPose = new Pose(105,134,Math.toRadians(270));
+    public Pose pickupOne = new Pose(110, 80, Math.toRadians(0));
+    public Pose pickupOneFinish = new Pose(122, 80, Math.toRadians(0));
+    public Pose alignGoal = new Pose(85, 90, Math.toRadians(43));
+    public Pose pickupTwo = new Pose(110,55,Math.toRadians(0));
+    public Pose finishPickupTwo = new Pose(122,55,Math.toRadians(0));
     public AprilTagDetection lastTagDetected;
     @Override
     public void runOpMode() throws InterruptedException {
