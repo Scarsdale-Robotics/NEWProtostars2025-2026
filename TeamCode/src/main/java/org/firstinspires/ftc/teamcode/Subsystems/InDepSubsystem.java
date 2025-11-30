@@ -4,18 +4,25 @@ import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.arcrobotics.ftclib.controller.PDController;
 import com.arcrobotics.ftclib.controller.PIDController;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
+import com.bylazar.configurables.annotations.Configurable;
 import com.pedropathing.util.Timer;
+import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.HardwareRobot;
 
+import java.util.concurrent.TimeUnit;
+
+@Configurable
 public class InDepSubsystem extends SubsystemBase {
     public HardwareRobot hardwareRobot;
     public DriveSubsystem drive;
     public LinearOpMode opMode;
+    public static PIDController pid1 = new PIDController(0.0008,0,0);
     public InDepSubsystem(LinearOpMode opMode, HardwareMap hardwareMap) {
         this.hardwareRobot = new HardwareRobot(hardwareMap);
         this.drive = new DriveSubsystem(
@@ -27,27 +34,53 @@ public class InDepSubsystem extends SubsystemBase {
         this.opMode = opMode;
     }
     public void setShooterPower(double power){
-        hardwareRobot.shooterTwo.set(-1 * power);
-        hardwareRobot.shooterOne.set(power);
+        hardwareRobot.shooterOne.set(-power);
+        hardwareRobot.shooterTwo.set(power);
     }
-    //TODO: implement PID
-    public void setShooterPowerVel(double p) {
-        PDController pd = new PDController(0.1, 0);
-        PDController pd2 = new PDController(0.1,0);
-        pd.setTolerance(5);
-        pd2.setTolerance(5);
-        pd.setSetPoint(0);
-        pd2.setSetPoint(0);
-        while (!pd.atSetPoint() && !pd2.atSetPoint()) {
-            double error1 = hardwareRobot.shooterOne.getCorrectedVelocity() - rpmToTicksPerSecond(convertToRPM(p));
-            double error2 = hardwareRobot.shooterTwo.getCorrectedVelocity() - rpmToTicksPerSecond(convertToRPM(p));
-            if (Math.abs(error1) < 7 && Math.abs(error2) < 7) break;
-            double power1 = pd.calculate(error1, 6);
-            double power2 = pd2.calculate(error2,6);
-            double CP1 = clamp(power1);
-            double CP2 = clamp(power2);
-            hardwareRobot.shooterOne.set(CP1);
-            hardwareRobot.shooterTwo.set(CP2);
+    public void setShooterVel(double ticksPerSecond) {
+        double error = hardwareRobot.shooterOne.getCorrectedVelocity() - ticksPerSecond;
+        double power = pid1.calculate(hardwareRobot.shooterOne.getCorrectedVelocity(), ticksPerSecond);
+        double clamped = clamp(power);
+        opMode.telemetry.addData("Power", power);
+        opMode.telemetry.addData("Error", error);
+        opMode.telemetry.addData("velocity", hardwareRobot.shooterOne.getCorrectedVelocity());
+        hardwareRobot.shooterOne.set(-clamped);
+        hardwareRobot.shooterTwo.set(clamped);
+    }
+    ElapsedTime time = null;
+    double lastTicks = 0.0;
+    double lastV = 0.0;
+    public static double kP = 0.0008, kD = 0.0, kS = 0.0;
+    public void setShooterVelocity(double tps){
+        if (!opMode.opModeIsActive()) return;
+        if (time != null) {
+            double dt = time.seconds();
+            time.reset();
+            opMode.telemetry.addData("shooter dt (secs)", dt);
+
+//            double ticks = hardwareRobot.shooterOne.getCurrentPosition();
+//            opMode.telemetry.addData("shooter ticks (ticks)", ticks);
+//            double dr = ticks - lastTicks;
+//            lastTicks = ticks;
+//            opMode.telemetry.addData("shooter dr (ticks)", dr);
+//
+//            double v = dr/dt;
+            double v = hardwareRobot.shooterOne.getCorrectedVelocity();
+            double dv = v - lastV;
+            lastV = v;
+            opMode.telemetry.addData("shooter v (tps)", v);
+            double a = dv/dt;
+            opMode.telemetry.addData("shooter a (tpss)", a);
+
+            double power = kP * (tps - v + kS) - kD * a;
+            opMode.telemetry.addData("shooter power", power);
+
+            double clamped = clamp(power);
+            hardwareRobot.shooterOne.set(-clamped);
+            hardwareRobot.shooterTwo.set(clamped);
+        } else {
+            time = new ElapsedTime();
+            lastTicks = hardwareRobot.shooterOne.getCurrentPosition();
         }
     }
     public void setIntake(double p) {
@@ -62,8 +95,8 @@ public class InDepSubsystem extends SubsystemBase {
     }
 
     public void toggleControlServo(double invertedPosition, double startingPosition) {
-        if (hardwareRobot.intakeControl.getPosition() == invertedPosition) hardwareRobot.intakeControl.setPosition(startingPosition);
-        else hardwareRobot.intakeControl.setPosition(invertedPosition);
+        if (hardwareRobot.intakeControl.getPosition() == 0) hardwareRobot.intakeControl.setPosition(0.31);
+        else if (hardwareRobot.intakeControl.getPosition() == 0.31) hardwareRobot.intakeControl.setPosition(0);
     }
     //TODO: optimize
     public void unloadMag(Timer opTimer) {
@@ -71,7 +104,7 @@ public class InDepSubsystem extends SubsystemBase {
         opTimer.resetTimer();
         while (opMode.opModeIsActive()) {
             setIntake(0);
-            setShooterPower(0.8);
+            setShooterPower(0.6);
             if (opTimer.getElapsedTimeSeconds() >= 2 && pathState == 1) {
                 toggleControlServo(0, 0.31);
                 pathState++;
@@ -88,14 +121,7 @@ public class InDepSubsystem extends SubsystemBase {
             if (pathState == 4) break;
         }
     }
-    public double rpmToTicksPerSecond(double rpm) {
-        final double TPR = 112.0;
-        return (rpm / 60.0) * TPR;
-    }
-    public double convertToRPM(double p) {
-        return 6000 * p;
-    }
     public double clamp(double value) {
-        return Math.max(-1.0, Math.min(1.0, value));
+        return Math.max(-0.65, Math.min(0.65, value));
     }
 }

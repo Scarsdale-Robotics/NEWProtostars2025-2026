@@ -9,7 +9,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.RobotSystem;
 //TODO: finish tuning and transfer coefficients to teleop
-@Autonomous (name = "TurnAuton")
+@Autonomous (name = "TurnAuton11/29")
 public class TurnAutoTest extends LinearOpMode {
     public RobotSystem robot;
 
@@ -24,42 +24,41 @@ public class TurnAutoTest extends LinearOpMode {
     }
 
     public void turn(double targetHeading) {
-        PIDController pid = new PIDController(0.02, 0.03, 0.002);
+        PIDController pid = new PIDController(0.06, 0.05, 0.002);
         pid.setSetPoint(targetHeading);
         pid.setTolerance(1); // 1-degree tolerance
 
-        while (opModeIsActive()) {
+        while (opModeIsActive() && !pid.atSetPoint()) {
             robot.hardwareRobot.pinpoint.update();
 
             double currentHeading = robot.hardwareRobot.pinpoint.getHeading(AngleUnit.DEGREES);
 
-            // Normalize so PID doesn't jump from +179 to -181
-            currentHeading = normalizeAngle(currentHeading);
+            double corrected = normalizeAngle(currentHeading);
+            double error = corrected - targetHeading;
 
-            // PID computes: error = normalize(target - current)
-            double power = pid.calculate(currentHeading);
+            double power = pid.calculate(corrected, targetHeading);
 
-            // Stop when close enough
-            if (pid.atSetPoint()) break;
+            if (Math.abs(error) <= 2) break;
 
             double clamped = clamp(power);
 
             robot.drive.driveRobotCentricPowers(0, 0, clamped);
 
             telemetry.addData("Power", power);
-            telemetry.addData("Error", pid.getPositionError());
-            telemetry.addData("Heading", currentHeading);
+            telemetry.addData("Error", error);
+            telemetry.addData("Corrected H", corrected);
+            telemetry.addData("Raw H", currentHeading);
+            telemetry.addData("PPX", robot.hardwareRobot.pinpoint.getPosX(DistanceUnit.INCH));
+            telemetry.addData("PPY", robot.hardwareRobot.pinpoint.getPosY(DistanceUnit.INCH));
             telemetry.addData("TargetHeading", targetHeading);
             telemetry.update();
-            robot.hardwareRobot.pinpoint.update();
         }
     }
 
     public double normalizeAngle(double angle) {
-        angle = angle % 360;
-        if (angle <= -180) angle += 360;
-        if (angle > 180) angle -= 360;
-        return angle;
+        if (angle <= 0) return Math.abs(angle);
+        else if (angle > 0) return (180 - angle) + 180;
+        return 0;
     }
 
     public double clamp(double value) {

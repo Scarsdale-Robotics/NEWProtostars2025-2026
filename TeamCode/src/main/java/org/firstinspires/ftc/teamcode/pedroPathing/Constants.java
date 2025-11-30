@@ -21,7 +21,7 @@ public class Constants {
 
             .forwardZeroPowerAcceleration(100)
             .lateralZeroPowerAcceleration(-67.342491844080064)
-            .mass(9.07)
+            .mass(10.56)
             .translationalPIDFCoefficients(new PIDFCoefficients(
                     0.03,
                     0,
@@ -76,16 +76,16 @@ public class Constants {
     public static MecanumConstants driveConstants = new MecanumConstants()
             .maxPower(0.65)
             .rightFrontMotorName("rightFront")
-            .rightRearMotorName("rightBack")
+            .rightRearMotorName("leftFront")
             .leftRearMotorName("leftBack")
-            .leftFrontMotorName("leftFront")
+            .leftFrontMotorName("rightBack")
             //check these
             .leftFrontMotorDirection(DcMotorEx.Direction.REVERSE)
             .leftRearMotorDirection(DcMotorEx.Direction.REVERSE)
             .rightFrontMotorDirection(DcMotorEx.Direction.REVERSE)
             .rightRearMotorDirection(DcMotorEx.Direction.FORWARD)
-            .xVelocity(40.944)
-            .yVelocity(100);
+            .xVelocity(42.87)
+            .yVelocity(36.117);
     //TODO: Tune
     public static PinpointConstants localizerConstants = new PinpointConstants()
             .forwardPodY(-5)

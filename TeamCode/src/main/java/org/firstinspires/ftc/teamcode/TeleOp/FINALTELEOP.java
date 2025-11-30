@@ -21,7 +21,7 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
 import java.util.ArrayList;
 
-@TeleOp(name = "TeleOp - JJ Scrim")
+@TeleOp(name = "Tee lop")
 
 public class FINALTELEOP extends LinearOpMode {
     public RobotSystem robot;
@@ -31,10 +31,8 @@ public class FINALTELEOP extends LinearOpMode {
     public boolean intakeTwoPressed = false;
 
     public boolean lastToggleServoPressed = false;
-    public boolean shooterPressed = false;
     public Timer opModeTimer;
     public boolean lastToggleShootMacro = false;
-    public boolean lastToggleAlignMacro = false;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -42,7 +40,7 @@ public class FINALTELEOP extends LinearOpMode {
         this.robot = new RobotSystem(hardwareMap, this);
         robot.inDep.setShooterPower(0);
         robot.hardwareRobot.initOdom();
-        this.speed = 0.6;
+        this.speed = 0.35;
         opModeTimer.resetTimer();
         waitForStart();
         while (opModeIsActive()) {
@@ -54,7 +52,7 @@ public class FINALTELEOP extends LinearOpMode {
             telemetry.addData("heading", robot.hardwareRobot.pinpoint.getHeading(AngleUnit.DEGREES));
             telemetry.addData("X", robot.hardwareRobot.pinpoint.getPosX(DistanceUnit.INCH));
             telemetry.addData("Y", robot.hardwareRobot.pinpoint.getPosY(DistanceUnit.INCH));
-            telemetry.update();
+//            telemetry.update();
             robot.drive.driveRobotCentricPowers(strafe * speed, forward * speed, turn * speed);
             intakeOnePressed = gamepad1.left_bumper;
             if (intakeOnePressed) robot.inDep.setFrontIn(0.75);
@@ -64,29 +62,27 @@ public class FINALTELEOP extends LinearOpMode {
             if (intakeTwoPressed) robot.inDep.setSecondIn(0.75);
             else if (gamepad1.cross) robot.inDep.setSecondIn(-0.75);
             else robot.inDep.setSecondIn(0);
-            //boolean toggleAlign = gamepad2.triangle;
-            //if (toggleAlign && !lastToggleAlignMacro) {
-              //  alignToTag(getTargetTag(20, 24));
-            //}
+            boolean toggleAlign = gamepad2.triangle;
             boolean toggleServo = gamepad1.square;
             if (!lastToggleServoPressed && toggleServo) {
                 robot.inDep.toggleControlServo(0,0.31);
                 if (robot.hardwareRobot.intakeControl.getPosition() == 0) gamepad1.setLedColor(0,255,0,-1);
                 else gamepad1.setLedColor(255,0,0,-1);
             }
-            else if (gamepad1.dpad_up) robot.inDep.setShooterPower(0.8);
-            else if (gamepad1.dpad_right) robot.inDep.setShooterPower(0.75);
-            else if (gamepad1.dpad_down) robot.inDep.setShooterPower(0.7);
-            else if (gamepad1.dpad_left) robot.inDep.setShooterPower(0.87);
+            else if (gamepad1.dpad_up) robot.inDep.setShooterPower(0.85);
+            else if (gamepad1.dpad_right) robot.inDep.setShooterPower(0.8);
+            else if (gamepad1.dpad_down) robot.inDep.setShooterPower(0.75);
+            else if (gamepad1.dpad_left) robot.inDep.setShooterPower(0.7);
             else {
                 if (gamepad2.cross) robot.inDep.setShooterPower(0);
-                robot.inDep.setShooterPower(0.3);
+                robot.inDep.setShooterPower(0);
             }
+            telemetry.addData("Corrected Heading", normalizeAngle(robot.hardwareRobot.pinpoint.getHeading(AngleUnit.DEGREES)));
             //boolean toggleShooter = gamepad1.options;
             //if (!lastToggleShootMacro && toggleShooter) robot.inDep.unloadMag(opModeTimer);
             lastToggleServoPressed = toggleServo;
             //lastToggleShootMacro = toggleShooter;
-            //lastToggleAlignMacro = toggleAlign;
+            telemetry.update();
         }
     }
 
@@ -116,18 +112,7 @@ public class FINALTELEOP extends LinearOpMode {
     public boolean xInchRadius(AprilTagDetection target, int radius) {
         return target.ftcPose.range <= radius;
     }
-    public void alignToTag(AprilTagDetection tag) {
-        PIDController pid = new PIDController(0.4,0.01,0.005);
-        pid.setTolerance(0.8);
-        pid.setSetPoint(0);
-        while (opModeIsActive() && !pid.atSetPoint()) {
-            double error = 0 - tag.ftcPose.bearing;
-            if (Math.abs(error) <= 0.8) break;
-            double power = pid.calculate(error, 0);
-            robot.inDep.clamp(power);
-            robot.drive.driveRobotCentricPowers(0,0,power);
-        }
-    }
+
     public AprilTagDetection getTargetTag(int id1, int id2) {
         ArrayList<AprilTagDetection> detections = robot.cv.aprilTagProcessor.getDetections();
         for (AprilTagDetection tag : detections) {
@@ -136,5 +121,10 @@ public class FINALTELEOP extends LinearOpMode {
             }
         }
         return null;
+    }
+    public double normalizeAngle(double angle) {
+        if (angle <= 0) return Math.abs(angle);
+        else if (angle > 0) return (180 - angle) + 180;
+        return 0;
     }
 }

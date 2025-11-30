@@ -35,7 +35,7 @@ public class FRTwoMagFarRight extends LinearOpMode {
     public Follower follower;
     public Timer pathTimer, opmodeTimer;
     public int pathState;
-    public Pose startPose = new Pose(105,134,Math.toRadians(270));
+    public Pose startPose = new Pose(115,134,Math.toRadians(270));
     public Pose pickupOne = new Pose(110, 80, Math.toRadians(0));
     public Pose pickupOneFinish = new Pose(122, 80, Math.toRadians(0));
     public Pose alignGoal = new Pose(85, 90, Math.toRadians(43));

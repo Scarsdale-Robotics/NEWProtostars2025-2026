@@ -73,7 +73,7 @@ public class HardwareRobot {
         intakeOne = new Motor(hardwareMap, "intakeOne", Motor.GoBILDA.RPM_312);
         intakeTwo = new Motor(hardwareMap, "intakeTwo", Motor.GoBILDA.RPM_312);
         shooterOne = new Motor(hardwareMap, "shooterOne", Motor.GoBILDA.RPM_1620);
-        shooterTwo = new Motor(hardwareMap, "shooterTwo", Motor.GoBILDA.RPM_1620);
+        shooterTwo =  new Motor(hardwareMap, "shooterTwo", Motor.GoBILDA.RPM_1620);
 
         intakeOne.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         intakeTwo.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -82,8 +82,8 @@ public class HardwareRobot {
 
         intakeOne.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         intakeTwo.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        shooterOne.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        shooterTwo.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        shooterOne.motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        shooterTwo.motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         intakeOne.setRunMode(Motor.RunMode.RawPower);
         intakeTwo.setRunMode(Motor.RunMode.RawPower);
