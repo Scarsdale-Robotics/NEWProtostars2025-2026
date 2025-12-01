@@ -5,6 +5,8 @@ import com.arcrobotics.ftclib.controller.PDController;
 import com.arcrobotics.ftclib.controller.PIDController;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.bylazar.configurables.annotations.Configurable;
+import com.bylazar.panels.Panels;
+import com.bylazar.telemetry.PanelsTelemetry;
 import com.pedropathing.util.Timer;
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -22,7 +24,8 @@ public class InDepSubsystem extends SubsystemBase {
     public HardwareRobot hardwareRobot;
     public DriveSubsystem drive;
     public LinearOpMode opMode;
-    public static PIDController pid1 = new PIDController(0.0008,0,0);
+    public static double KS;
+    public static PIDController pid1 = new PIDController(0.00001,0,0);
     public InDepSubsystem(LinearOpMode opMode, HardwareMap hardwareMap) {
         this.hardwareRobot = new HardwareRobot(hardwareMap);
         this.drive = new DriveSubsystem(
@@ -39,48 +42,49 @@ public class InDepSubsystem extends SubsystemBase {
     }
     public void setShooterVel(double ticksPerSecond) {
         double error = hardwareRobot.shooterOne.getCorrectedVelocity() - ticksPerSecond;
+        pid1.setP(pid1.getP() + KS);
         double power = pid1.calculate(hardwareRobot.shooterOne.getCorrectedVelocity(), ticksPerSecond);
         double clamped = clamp(power);
-        opMode.telemetry.addData("Power", power);
-        opMode.telemetry.addData("Error", error);
-        opMode.telemetry.addData("velocity", hardwareRobot.shooterOne.getCorrectedVelocity());
+        PanelsTelemetry.INSTANCE.getTelemetry().addData("KS", KS);
+        PanelsTelemetry.INSTANCE.getTelemetry().addData("P", pid1.getP());
+        PanelsTelemetry.INSTANCE.getTelemetry().addData("Power", power);
+        PanelsTelemetry.INSTANCE.getTelemetry().addData("Error", error);
+        PanelsTelemetry.INSTANCE.getTelemetry().addData("velocity", hardwareRobot.shooterOne.getCorrectedVelocity());
         hardwareRobot.shooterOne.set(-clamped);
         hardwareRobot.shooterTwo.set(clamped);
+        KS += 0.0001;
     }
-    ElapsedTime time = null;
-    double lastTicks = 0.0;
+    public ElapsedTime time = null;
     double lastV = 0.0;
-    public static double kP = 0.0008, kD = 0.0, kS = 0.0;
+    public static double kP = 0.00005, kD = 0.0, kS = 0.0;
     public void setShooterVelocity(double tps){
         if (!opMode.opModeIsActive()) return;
         if (time != null) {
             double dt = time.seconds();
             time.reset();
-            opMode.telemetry.addData("shooter dt (secs)", dt);
+            PanelsTelemetry.INSTANCE.getTelemetry().addData("shooter dt (secs)", dt);
 
-//            double ticks = hardwareRobot.shooterOne.getCurrentPosition();
-//            opMode.telemetry.addData("shooter ticks (ticks)", ticks);
-//            double dr = ticks - lastTicks;
-//            lastTicks = ticks;
-//            opMode.telemetry.addData("shooter dr (ticks)", dr);
-//
-//            double v = dr/dt;
             double v = hardwareRobot.shooterOne.getCorrectedVelocity();
             double dv = v - lastV;
             lastV = v;
-            opMode.telemetry.addData("shooter v (tps)", v);
+            PanelsTelemetry.INSTANCE.getTelemetry().addData("shooter v (tps)", v);
             double a = dv/dt;
-            opMode.telemetry.addData("shooter a (tpss)", a);
-
+            PanelsTelemetry.INSTANCE.getTelemetry().addData("shooter a (tpss)", a);
+            if (Math.abs(v - tps) > 100) kP += kS;
             double power = kP * (tps - v + kS) - kD * a;
-            opMode.telemetry.addData("shooter power", power);
-
+            PanelsTelemetry.INSTANCE.getTelemetry().addData("shooter power", power);
+            PanelsTelemetry.INSTANCE.getTelemetry().addData("KS", kS);
+            PanelsTelemetry.INSTANCE.getTelemetry().addData("KP", kP);
             double clamped = clamp(power);
+            PanelsTelemetry.INSTANCE.getTelemetry().addData("Clamped", clamped);
             hardwareRobot.shooterOne.set(-clamped);
             hardwareRobot.shooterTwo.set(clamped);
+            kS += 0.0000007;
         } else {
             time = new ElapsedTime();
-            lastTicks = hardwareRobot.shooterOne.getCurrentPosition();
+            kP = 0.00005;
+            kS = 0;
+            lastV = 0;
         }
     }
     public void setIntake(double p) {
@@ -103,25 +107,41 @@ public class InDepSubsystem extends SubsystemBase {
         int pathState = 1;
         opTimer.resetTimer();
         while (opMode.opModeIsActive()) {
-            setIntake(0);
-            setShooterPower(0.6);
-            if (opTimer.getElapsedTimeSeconds() >= 2 && pathState == 1) {
+            setShooterVelocity(1710);
+            if (opTimer.getElapsedTimeSeconds() >= 6 && pathState == 1) {
                 toggleControlServo(0, 0.31);
                 pathState++;
             }
-            if (opTimer.getElapsedTimeSeconds() >= 3 && pathState == 2) {
+            if (opTimer.getElapsedTimeSeconds() >= 6.5 && pathState == 2) {
                 setSecondIn(0.7);
                 pathState++;
             }
-            if (opTimer.getElapsedTimeSeconds() >= 7 && pathState == 3) {
-                setSecondIn(0);
+            if (opTimer.getElapsedTimeSeconds() >= 6.7 && pathState == 3) {
                 toggleControlServo(0, 0.31);
+                setSecondIn(0);
                 pathState++;
             }
-            if (pathState == 4) break;
+            if (opTimer.getElapsedTimeSeconds() >= 8.5 && pathState == 4) {
+                toggleControlServo(0,0.31);
+                pathState++;
+            }
+            if (opTimer.getElapsedTimeSeconds() >= 9 && pathState == 5) {
+                setIntake(0.7);
+                pathState++;
+            }
+            if (opTimer.getElapsedTimeSeconds() >= 10 && pathState == 6) {
+                setSecondIn(0);
+                toggleControlServo(0,0.31);
+                break;
+            }
         }
     }
     public double clamp(double value) {
-        return Math.max(-0.65, Math.min(0.65, value));
+        return Math.max(0, Math.min(1, value));
+    }
+    public void initControllers() {
+        pid1.setTolerance(5);
+        pid1.setSetPoint(0);
+        KS = 0;
     }
 }

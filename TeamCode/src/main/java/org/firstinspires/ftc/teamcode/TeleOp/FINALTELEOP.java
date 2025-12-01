@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.TeleOp;
 import com.acmerobotics.roadrunner.util.Angle;
 import com.arcrobotics.ftclib.controller.PIDController;
+import com.bylazar.telemetry.PanelsTelemetry;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.ftc.FTCCoordinates;
 import com.pedropathing.geometry.BezierCurve;
@@ -33,6 +34,7 @@ public class FINALTELEOP extends LinearOpMode {
     public boolean lastToggleServoPressed = false;
     public Timer opModeTimer;
     public boolean lastToggleShootMacro = false;
+    public boolean lastShooter = false;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -40,7 +42,8 @@ public class FINALTELEOP extends LinearOpMode {
         this.robot = new RobotSystem(hardwareMap, this);
         robot.inDep.setShooterPower(0);
         robot.hardwareRobot.initOdom();
-        this.speed = 0.35;
+        robot.inDep.initControllers();
+        this.speed = 0.5;
         opModeTimer.resetTimer();
         waitForStart();
         while (opModeIsActive()) {
@@ -52,7 +55,6 @@ public class FINALTELEOP extends LinearOpMode {
             telemetry.addData("heading", robot.hardwareRobot.pinpoint.getHeading(AngleUnit.DEGREES));
             telemetry.addData("X", robot.hardwareRobot.pinpoint.getPosX(DistanceUnit.INCH));
             telemetry.addData("Y", robot.hardwareRobot.pinpoint.getPosY(DistanceUnit.INCH));
-//            telemetry.update();
             robot.drive.driveRobotCentricPowers(strafe * speed, forward * speed, turn * speed);
             intakeOnePressed = gamepad1.left_bumper;
             if (intakeOnePressed) robot.inDep.setFrontIn(0.75);
@@ -62,27 +64,27 @@ public class FINALTELEOP extends LinearOpMode {
             if (intakeTwoPressed) robot.inDep.setSecondIn(0.75);
             else if (gamepad1.cross) robot.inDep.setSecondIn(-0.75);
             else robot.inDep.setSecondIn(0);
-            boolean toggleAlign = gamepad2.triangle;
             boolean toggleServo = gamepad1.square;
             if (!lastToggleServoPressed && toggleServo) {
                 robot.inDep.toggleControlServo(0,0.31);
                 if (robot.hardwareRobot.intakeControl.getPosition() == 0) gamepad1.setLedColor(0,255,0,-1);
                 else gamepad1.setLedColor(255,0,0,-1);
             }
-            else if (gamepad1.dpad_up) robot.inDep.setShooterPower(0.85);
-            else if (gamepad1.dpad_right) robot.inDep.setShooterPower(0.8);
-            else if (gamepad1.dpad_down) robot.inDep.setShooterPower(0.75);
-            else if (gamepad1.dpad_left) robot.inDep.setShooterPower(0.7);
+            boolean shooter = gamepad1.dpad_up;
+            if (shooter && !lastShooter) robot.inDep.time = null;
+            if (shooter) robot.inDep.setShooterVelocity(1710);
             else {
                 if (gamepad2.cross) robot.inDep.setShooterPower(0);
                 robot.inDep.setShooterPower(0);
             }
             telemetry.addData("Corrected Heading", normalizeAngle(robot.hardwareRobot.pinpoint.getHeading(AngleUnit.DEGREES)));
-            //boolean toggleShooter = gamepad1.options;
-            //if (!lastToggleShootMacro && toggleShooter) robot.inDep.unloadMag(opModeTimer);
+            boolean toggleShooter = gamepad1.options;
+            if (!lastToggleShootMacro && toggleShooter) robot.inDep.unloadMag(opModeTimer);
             lastToggleServoPressed = toggleServo;
-            //lastToggleShootMacro = toggleShooter;
+            lastToggleShootMacro = toggleShooter;
+            lastShooter = shooter;
             telemetry.update();
+            PanelsTelemetry.INSTANCE.getTelemetry().update();
         }
     }
 
