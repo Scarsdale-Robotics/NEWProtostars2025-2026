@@ -36,16 +36,13 @@ public class FRTwoMagCloseLeft extends LinearOpMode {
     public Follower follower;
     public Timer pathTimer, opmodeTimer;
     public int pathState;
-    public final Pose startPose = new Pose(63,6,Math.toRadians(90));
-    public final Pose preloadShoot = new Pose(63,6,Math.toRadians(110));
-    public Pose pickupOne = new Pose(42, 30, Math.toRadians(180));
-    public Pose pickupOneFinish = new Pose(31,30, Math.toRadians(180));
-    public Pose alignGoal = new Pose(70, 90, Math.toRadians(142));
-    public Pose controlPointOuttakeOne = new Pose(70,49,Math.toRadians(0));
-    public final Pose pickupTwo = new Pose(42,55, Math.toRadians(180));
-    public final Pose pickupTwoFinish = new Pose(31,55,Math.toRadians(180));
-    public final Pose finish = new Pose(15,6, Math.toRadians(0));
-    public final Pose finishControlPoint = new Pose(90,40,Math.toRadians(0));
+    public final Pose startPose = new Pose(61,12,Math.toRadians(90));
+    public Pose pickupOne = new Pose(40, 36, Math.toRadians(180));
+    public Pose pickupOneFinish = new Pose(25,36, Math.toRadians(180));
+    public Pose alignGoal = new Pose(61, 12, Math.toRadians(110));
+    public final Pose pickupTwo = new Pose(40,60, Math.toRadians(180));
+    public final Pose pickupTwoFinish = new Pose(25,60,Math.toRadians(180));
+    public final Pose finish = new Pose(12,10, Math.toRadians(0));
     public AprilTagDetection lastTagDetected;
     @Override
     public void runOpMode() throws InterruptedException {
@@ -75,23 +72,19 @@ public class FRTwoMagCloseLeft extends LinearOpMode {
     }
     public void buildPaths() {
         this.shootPreload = follower.pathBuilder()
-                .addPath(new BezierLine(startPose, preloadShoot))
-                .setLinearHeadingInterpolation(startPose.getHeading(),preloadShoot.getHeading())
+                .addPath(new BezierLine(startPose, alignGoal))
+                .setLinearHeadingInterpolation(startPose.getHeading(),alignGoal.getHeading())
                 .build();
         this.pickupPathOne = follower.pathBuilder()
-                .addPath(new BezierLine(preloadShoot, pickupOne))
-                .setLinearHeadingInterpolation(preloadShoot.getHeading(),pickupOne.getHeading())
+                .addPath(new BezierLine(alignGoal, pickupOne))
+                .setLinearHeadingInterpolation(alignGoal.getHeading(),pickupOne.getHeading())
                 .build();
         this.finishPickupOne = follower.pathBuilder()
                 .addPath(new BezierLine(pickupOne, pickupOneFinish))
                 .setConstantHeadingInterpolation(Math.toRadians(180))
                 .build();
         this.scorePickupOne = follower.pathBuilder()
-                .addPath(new BezierCurve(
-                        pickupOneFinish,
-                        controlPointOuttakeOne,
-                        alignGoal
-                ))
+                .addPath(new BezierLine(pickupOneFinish, alignGoal))
                 .setLinearHeadingInterpolation(pickupOneFinish.getHeading(), alignGoal.getHeading())
                 .build();
         this.pickupPathTwo = follower.pathBuilder()
@@ -107,11 +100,7 @@ public class FRTwoMagCloseLeft extends LinearOpMode {
                 .setLinearHeadingInterpolation(pickupTwoFinish.getHeading(), alignGoal.getHeading())
                 .build();
         this.returnPathChain = follower.pathBuilder()
-                .addPath(new BezierCurve(
-                        alignGoal,
-                        finishControlPoint,
-                        finish
-                ))
+                .addPath(new BezierLine(alignGoal, finish))
                 .setLinearHeadingInterpolation(alignGoal.getHeading(), finish.getHeading())
                 .build();
     }

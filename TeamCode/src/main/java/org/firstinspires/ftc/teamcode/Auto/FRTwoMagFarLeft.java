@@ -19,8 +19,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-//TODO: TUNE PID, CENTRIPETAL, ALL CONSTANTS, AND EXPERIMENT WITH INTERPOLATION.
-//TODO: download ftcdashboard and tune constants with drive test
+//This does not work.
 @Autonomous(name = "FR2MagFLeft")
 public class FRTwoMagFarLeft extends LinearOpMode {
     public RobotSystem robot;

@@ -22,7 +22,7 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
 import java.util.ArrayList;
 
-@TeleOp(name = "Tee lop")
+@TeleOp(name = "TeleOp")
 
 public class FINALTELEOP extends LinearOpMode {
     public RobotSystem robot;
@@ -35,6 +35,7 @@ public class FINALTELEOP extends LinearOpMode {
     public Timer opModeTimer;
     public boolean lastToggleShootMacro = false;
     public boolean lastShooter = false;
+    public boolean lastSlow = false;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -43,7 +44,7 @@ public class FINALTELEOP extends LinearOpMode {
         robot.inDep.setShooterPower(0);
         robot.hardwareRobot.initOdom();
         robot.inDep.initControllers();
-        this.speed = 0.5;
+        this.speed = 0.6;
         opModeTimer.resetTimer();
         waitForStart();
         while (opModeIsActive()) {
@@ -55,6 +56,9 @@ public class FINALTELEOP extends LinearOpMode {
             telemetry.addData("heading", robot.hardwareRobot.pinpoint.getHeading(AngleUnit.DEGREES));
             telemetry.addData("X", robot.hardwareRobot.pinpoint.getPosX(DistanceUnit.INCH));
             telemetry.addData("Y", robot.hardwareRobot.pinpoint.getPosY(DistanceUnit.INCH));
+            boolean slow = gamepad1.dpad_down;
+            if (slow && !lastSlow) speed = 0.35;
+            else speed = 0.6;
             robot.drive.driveRobotCentricPowers(strafe * speed, forward * speed, turn * speed);
             intakeOnePressed = gamepad1.left_bumper;
             if (intakeOnePressed) robot.inDep.setFrontIn(0.75);
@@ -83,6 +87,7 @@ public class FINALTELEOP extends LinearOpMode {
             lastToggleServoPressed = toggleServo;
             lastToggleShootMacro = toggleShooter;
             lastShooter = shooter;
+            lastSlow = slow;
             telemetry.update();
             PanelsTelemetry.INSTANCE.getTelemetry().update();
         }
