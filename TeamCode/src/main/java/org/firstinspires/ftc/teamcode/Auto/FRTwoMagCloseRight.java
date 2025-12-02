@@ -54,7 +54,6 @@ public class FRTwoMagCloseRight extends LinearOpMode {
         setPathState(0);
         follower.setStartingPose(startPose);
         buildPaths();
-        robot.inDep.setShooterPower(1);
         waitForStart();
         while (opModeIsActive()) {
             detectTags();
