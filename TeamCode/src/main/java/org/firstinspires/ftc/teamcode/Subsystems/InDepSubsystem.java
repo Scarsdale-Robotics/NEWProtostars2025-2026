@@ -57,6 +57,7 @@ public class InDepSubsystem extends SubsystemBase {
     public ElapsedTime time = null;
     double lastV = 0.0;
     public static double kP = 0.00005, kD = 0.0, kS = 0.0;
+    public double finalP = 0;
     public void setShooterVelocity(double tps){
         if (!opMode.opModeIsActive()) return;
         if (time != null) {
@@ -71,20 +72,23 @@ public class InDepSubsystem extends SubsystemBase {
             double a = dv/dt;
             PanelsTelemetry.INSTANCE.getTelemetry().addData("shooter a (tpss)", a);
             if (Math.abs(v - tps) > 100) kP += kS;
-            double power = kP * (tps - v + kS) - kD * a;
+            double pClamped = clampP(kP);
+            double power = pClamped * (tps - v + kS) - kD * a;
             PanelsTelemetry.INSTANCE.getTelemetry().addData("shooter power", power);
             PanelsTelemetry.INSTANCE.getTelemetry().addData("KS", kS);
             PanelsTelemetry.INSTANCE.getTelemetry().addData("KP", kP);
+            PanelsTelemetry.INSTANCE.getTelemetry().addData("Clamped P", pClamped);
             double clamped = clamp(power);
             PanelsTelemetry.INSTANCE.getTelemetry().addData("Clamped", clamped);
             hardwareRobot.shooterOne.set(-clamped);
             hardwareRobot.shooterTwo.set(clamped);
-            kS += 0.0000007;
+            if (Math.abs(v - tps) > 100) kS += 0.0000007;
         } else {
             time = new ElapsedTime();
-            kP = 0.00005;
+            kP = 0.001;
             kS = 0;
             lastV = 0;
+            finalP = 0;
         }
     }
     public void setIntake(double p) {
@@ -107,7 +111,7 @@ public class InDepSubsystem extends SubsystemBase {
         int pathState = 1;
         opTimer.resetTimer();
         while (opMode.opModeIsActive()) {
-            setShooterVelocity(1710);
+            setShooterVelocity(1760);
             if (opTimer.getElapsedTimeSeconds() >= 6 && pathState == 1) {
                 toggleControlServo(0, 0.31);
                 pathState++;
@@ -138,6 +142,9 @@ public class InDepSubsystem extends SubsystemBase {
     }
     public double clamp(double value) {
         return Math.max(0, Math.min(1, value));
+    }
+    public double clampP(double p) {
+        return Math.max(0, Math.min(0.007, p));
     }
     public void initControllers() {
         pid1.setTolerance(5);

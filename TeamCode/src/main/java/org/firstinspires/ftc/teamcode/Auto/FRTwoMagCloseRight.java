@@ -22,7 +22,7 @@ import java.util.List;
 //TODO: TUNE PID, CENTRIPETAL, ALL CONSTANTS, AND EXPERIMENT WITH INTERPOLATION.
 //TODO: download ftcdashboard and tune constants with drive test
 
-@Autonomous (name = "FR2MagCLeft")
+@Autonomous (name = "FR2MagCRight")
 public class FRTwoMagCloseRight extends LinearOpMode {
     public RobotSystem robot;
     public PathChain shootPreload;

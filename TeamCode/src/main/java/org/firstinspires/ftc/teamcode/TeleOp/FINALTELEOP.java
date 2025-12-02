@@ -57,8 +57,8 @@ public class FINALTELEOP extends LinearOpMode {
             telemetry.addData("X", robot.hardwareRobot.pinpoint.getPosX(DistanceUnit.INCH));
             telemetry.addData("Y", robot.hardwareRobot.pinpoint.getPosY(DistanceUnit.INCH));
             boolean slow = gamepad1.dpad_down;
-            if (slow && !lastSlow) speed = 0.35;
-            else speed = 0.6;
+            if (slow && !lastSlow) speed = 0.3;
+            else speed = 0.5;
             robot.drive.driveRobotCentricPowers(strafe * speed, forward * speed, turn * speed);
             intakeOnePressed = gamepad1.left_bumper;
             if (intakeOnePressed) robot.inDep.setFrontIn(0.75);
@@ -76,7 +76,7 @@ public class FINALTELEOP extends LinearOpMode {
             }
             boolean shooter = gamepad1.dpad_up;
             if (shooter && !lastShooter) robot.inDep.time = null;
-            if (shooter) robot.inDep.setShooterVelocity(1710);
+            if (shooter) robot.inDep.setShooterVelocity(1760);
             else {
                 if (gamepad2.cross) robot.inDep.setShooterPower(0);
                 robot.inDep.setShooterPower(0);
