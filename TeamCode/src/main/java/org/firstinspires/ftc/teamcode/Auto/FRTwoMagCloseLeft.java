@@ -22,7 +22,7 @@ import java.util.List;
 //TODO: TUNE PID, CENTRIPETAL, ALL CONSTANTS, AND EXPERIMENT WITH INTERPOLATION.
 //TODO: download ftcdashboard and tune constants with drive test
 
-@Autonomous (name = "FR2MagCLeft")
+@Autonomous (name = "FINALCLAUTO")
 public class FRTwoMagCloseLeft extends LinearOpMode {
     public RobotSystem robot;
     public PathChain shootPreload;
@@ -36,7 +36,7 @@ public class FRTwoMagCloseLeft extends LinearOpMode {
     public Follower follower;
     public Timer pathTimer, opmodeTimer;
     public int pathState;
-    public final Pose startPose = new Pose(61,12,Math.toRadians(90));
+    public final Pose startPose = new Pose(61,9,Math.toRadians(90));
     public Pose pickupOne = new Pose(40, 36, Math.toRadians(180));
     public Pose pickupOneFinish = new Pose(25,36, Math.toRadians(180));
     public Pose alignGoal = new Pose(61, 12, Math.toRadians(110));
@@ -54,8 +54,10 @@ public class FRTwoMagCloseLeft extends LinearOpMode {
         setPathState(0);
         follower.setStartingPose(startPose);
         buildPaths();
+        robot.inDep.initControllers();
         waitForStart();
         while (opModeIsActive()) {
+            robot.hardwareRobot.pinpoint.update();
             detectTags();
             follower.update();
             autonomousPathUpdate();
@@ -126,6 +128,7 @@ public class FRTwoMagCloseLeft extends LinearOpMode {
             case 0:
                 if (!follower.isBusy()) follower.followPath(shootPreload);
                 robot.inDep.unloadMag(opmodeTimer);
+                setPathState(1);
             case 1:
                 if(!follower.isBusy()) {
                     follower.followPath(pickupPathOne);

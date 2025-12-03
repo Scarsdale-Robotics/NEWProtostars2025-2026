@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.pedroPathing;
 
+import com.bylazar.configurables.annotations.Configurable;
 import com.pedropathing.control.FilteredPIDFCoefficients;
 import com.pedropathing.control.PIDFCoefficients;
 import com.pedropathing.follower.Follower;
@@ -14,7 +15,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-
+@Configurable
 //TODO: Tune all
 public class Constants {
     public static FollowerConstants followerConstants = new FollowerConstants()
@@ -23,9 +24,9 @@ public class Constants {
             .lateralZeroPowerAcceleration(-62.23)
             .mass(10.56)
             .translationalPIDFCoefficients(new PIDFCoefficients(
-                    0.0035,
+                    0.0001,
                     0,
-                    0,
+                    0.0005,
                     0.015
             ))
             .translationalPIDFSwitch(4)
@@ -36,7 +37,7 @@ public class Constants {
                     0.0006
             ))
             .headingPIDFCoefficients(new PIDFCoefficients(
-                    0.4,
+                    0.3,
                     0,
                     0,
                     0.01
@@ -48,7 +49,7 @@ public class Constants {
                     0.0005
             ))
             .drivePIDFCoefficients(new FilteredPIDFCoefficients(
-                    0.06,
+                    0.05,
                     0,
                     0.0003,
                     0.6,
@@ -62,9 +63,9 @@ public class Constants {
                     0.01
             ))
             .drivePIDFSwitch(15)
-            .centripetalScaling(0.0003);
+            .centripetalScaling(0.0008);
 
-    public static PathConstraints pathConstraints = new PathConstraints(0.99, 100, 1.05, 1);
+    public static PathConstraints pathConstraints = new PathConstraints(0.99, 100, 1.4, 1);
 
     public static Follower createFollower(HardwareMap hardwareMap) {
         return new FollowerBuilder(followerConstants, hardwareMap)

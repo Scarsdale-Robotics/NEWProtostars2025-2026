@@ -56,7 +56,7 @@ public class InDepSubsystem extends SubsystemBase {
     }
     public ElapsedTime time = null;
     double lastV = 0.0;
-    public static double kP = 0.00005, kD = 0.0, kS = 0.0;
+    public static double kP = 0.004, kD = 0.0, kS = 0.0;
     public double finalP = 0;
     public void setShooterVelocity(double tps){
         if (!opMode.opModeIsActive()) return;
@@ -71,21 +71,17 @@ public class InDepSubsystem extends SubsystemBase {
             PanelsTelemetry.INSTANCE.getTelemetry().addData("shooter v (tps)", v);
             double a = dv/dt;
             PanelsTelemetry.INSTANCE.getTelemetry().addData("shooter a (tpss)", a);
-            if (Math.abs(v - tps) > 100) kP += kS;
-            double pClamped = clampP(kP);
-            double power = pClamped * (tps - v + kS) - kD * a;
+            double power = kP * (tps - v + kS) - kD * a;
             PanelsTelemetry.INSTANCE.getTelemetry().addData("shooter power", power);
             PanelsTelemetry.INSTANCE.getTelemetry().addData("KS", kS);
             PanelsTelemetry.INSTANCE.getTelemetry().addData("KP", kP);
-            PanelsTelemetry.INSTANCE.getTelemetry().addData("Clamped P", pClamped);
             double clamped = clamp(power);
             PanelsTelemetry.INSTANCE.getTelemetry().addData("Clamped", clamped);
             hardwareRobot.shooterOne.set(-clamped);
             hardwareRobot.shooterTwo.set(clamped);
-            if (Math.abs(v - tps) > 100) kS += 0.0000007;
         } else {
             time = new ElapsedTime();
-            kP = 0.001;
+            kP = 0.004;
             kS = 0;
             lastV = 0;
             finalP = 0;
@@ -112,28 +108,28 @@ public class InDepSubsystem extends SubsystemBase {
         opTimer.resetTimer();
         while (opMode.opModeIsActive()) {
             setShooterVelocity(1760);
-            if (opTimer.getElapsedTimeSeconds() >= 6 && pathState == 1) {
+            if (opTimer.getElapsedTimeSeconds() >= 5 && pathState == 1) {
                 toggleControlServo(0, 0.31);
                 pathState++;
             }
-            if (opTimer.getElapsedTimeSeconds() >= 6.5 && pathState == 2) {
+            if (opTimer.getElapsedTimeSeconds() >= 5.5 && pathState == 2) {
                 setSecondIn(0.7);
                 pathState++;
             }
-            if (opTimer.getElapsedTimeSeconds() >= 6.7 && pathState == 3) {
+            if (opTimer.getElapsedTimeSeconds() >= 5.7 && pathState == 3) {
                 toggleControlServo(0, 0.31);
                 setSecondIn(0);
                 pathState++;
             }
-            if (opTimer.getElapsedTimeSeconds() >= 8.5 && pathState == 4) {
+            if (opTimer.getElapsedTimeSeconds() >= 7.5 && pathState == 4) {
                 toggleControlServo(0,0.31);
                 pathState++;
             }
-            if (opTimer.getElapsedTimeSeconds() >= 9 && pathState == 5) {
+            if (opTimer.getElapsedTimeSeconds() >= 8 && pathState == 5) {
                 setIntake(0.7);
                 pathState++;
             }
-            if (opTimer.getElapsedTimeSeconds() >= 10 && pathState == 6) {
+            if (opTimer.getElapsedTimeSeconds() >= 9 && pathState == 6) {
                 setSecondIn(0);
                 toggleControlServo(0,0.31);
                 break;
@@ -142,9 +138,6 @@ public class InDepSubsystem extends SubsystemBase {
     }
     public double clamp(double value) {
         return Math.max(0, Math.min(1, value));
-    }
-    public double clampP(double p) {
-        return Math.max(0, Math.min(0.007, p));
     }
     public void initControllers() {
         pid1.setTolerance(5);
