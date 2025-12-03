@@ -19,8 +19,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-//TODO: TUNE PID, CENTRIPETAL, ALL CONSTANTS, AND EXPERIMENT WITH INTERPOLATION.
-//TODO: download ftcdashboard and tune constants with drive test
+//TODO: tune drive constants for getting to pos
+//TODO: experiment with holdend
 
 @Autonomous (name = "FINALCRAUTO")
 public class FRTwoMagCloseRight extends LinearOpMode {
@@ -57,7 +57,6 @@ public class FRTwoMagCloseRight extends LinearOpMode {
         robot.inDep.initControllers();
         waitForStart();
         while (opModeIsActive()) {
-            robot.hardwareRobot.pinpoint.update();
             detectTags();
             follower.update();
             autonomousPathUpdate();
@@ -126,54 +125,58 @@ public class FRTwoMagCloseRight extends LinearOpMode {
     public void autonomousPathUpdate() {
         switch (pathState) {
             case 0:
-                if (!follower.isBusy()) follower.followPath(shootPreload);
-                robot.inDep.unloadMag(opmodeTimer);
-                setPathState(1);
-            case 1:
-                if(!follower.isBusy()) {
-                    follower.followPath(pickupPathOne);
-                    robot.inDep.setIntake(0.6);
+                follower.followPath(shootPreload);
+                if (!follower.isBusy()) {
+                    robot.inDep.unloadMag(opmodeTimer);
+                    setPathState(1);
                 }
-                setPathState(2);
+            case 1:
+                follower.followPath(pickupPathOne);
+                if(!follower.isBusy()) {
+                    robot.inDep.setIntake(0.6);
+                    setPathState(2);
+                }
                 break;
             case 2:
-                if (!follower.isBusy()) follower.followPath(finishPickupOne);
-                robot.inDep.setIntake(0);
-                setPathState(3);
+                follower.followPath(finishPickupOne);
+                if (!follower.isBusy()) {
+                    robot.inDep.setIntake(0);
+                    setPathState(3);
+                }
                 break;
             case 3:
+                follower.followPath(scorePickupOne);
                 if(!follower.isBusy()) {
-                    follower.followPath(scorePickupOne);
+                    robot.inDep.unloadMag(opmodeTimer);
+                    setPathState(4);
                 }
-                robot.inDep.unloadMag(opmodeTimer);
-                setPathState(4);
                 break;
             case 4:
+                follower.followPath(pickupPathTwo);
                 if (!follower.isBusy()) {
-                    follower.followPath(pickupPathTwo);
+                    robot.inDep.setIntake(0.6);
+                    setPathState(5);
                 }
-                robot.inDep.setIntake(0.6);
-                setPathState(5);
                 break;
             case 5:
+                follower.followPath(finishPickupPathTwo);
                 if (!follower.isBusy()) {
-                    follower.followPath(finishPickupPathTwo);
+                    robot.inDep.setIntake(0);
+                    setPathState(6);
                 }
-                robot.inDep.setIntake(0);
-                setPathState(6);
                 break;
             case 6:
+                follower.followPath(scorePickupTwo);
                 if (!follower.isBusy()) {
-                    follower.followPath(scorePickupTwo);
+                    robot.inDep.unloadMag(opmodeTimer);
+                    setPathState(7);
                 }
-                robot.inDep.unloadMag(opmodeTimer);
-                setPathState(7);
                 break;
             case 7:
+                follower.followPath(returnPathChain);
                 if (!follower.isBusy()) {
-                    follower.followPath(returnPathChain);
+                    setPathState(8);
                 }
-                setPathState(8);
                 break;
             case 8:
                 if (!follower.isBusy()) setPathState(-1);

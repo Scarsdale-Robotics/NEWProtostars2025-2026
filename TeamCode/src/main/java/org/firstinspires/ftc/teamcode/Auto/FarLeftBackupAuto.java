@@ -10,7 +10,9 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.RobotSystem;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
-//TODO: Change everything to radians'
+
+//TODO: tune drive constants for getting to pos
+//TODO: experiment with holdend
 @Autonomous(name = "FINALFLAUTO")
 public class FarLeftBackupAuto extends LinearOpMode {
     public Follower follower;
@@ -34,7 +36,6 @@ public class FarLeftBackupAuto extends LinearOpMode {
         setPathState(0);
         waitForStart();
         while (opModeIsActive()) {
-            robot.hardwareRobot.pinpoint.update();
             follower.update();
             autonomousPathUpdate();
             telemetry.addData("path state", pathState);
@@ -57,14 +58,14 @@ public class FarLeftBackupAuto extends LinearOpMode {
     public void autonomousPathUpdate() {
         switch(pathState) {
             case 0:
-                if (!(follower.isBusy())) {
-                    follower.followPath(parkAndReturn);
+                follower.followPath(parkAndReturn);
+                if (!follower.isBusy()) {
                     setPathState(1);
                 }
                 break;
             case 1:
+                follower.followPath(returnPath);
                 if (!follower.isBusy()) {
-                    follower.followPath(returnPath);
                     setPathState(2);
                 }
                 break;

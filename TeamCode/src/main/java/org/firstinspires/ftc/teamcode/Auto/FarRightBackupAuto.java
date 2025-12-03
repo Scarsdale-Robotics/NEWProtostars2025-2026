@@ -13,7 +13,9 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.RobotSystem;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
-//TODO: Change everything to radians
+
+//TODO: tune drive constants for getting to pos
+//TODO: experiment with holdend
 @Autonomous (name = "FINALFRAUTO")
 public class FarRightBackupAuto extends LinearOpMode {
     public Follower follower;
@@ -70,13 +72,13 @@ public class FarRightBackupAuto extends LinearOpMode {
         switch(pathState) {
             case 0:
                 follower.followPath(parkAndReturn);
-                if (follower.getPose().getX() == outside.getX() && follower.getPose().getY() == outside.getY()) {
+                if (!follower.isBusy()) {
                     setPathState(1);
                 }
                 break;
             case 1:
                 follower.followPath(returnPath);
-                if (follower.getPose().getX() == startPose.getX() && follower.getPose().getY() == startPose.getY()) {
+                if (!follower.isBusy()) {
                     setPathState(2);
                 }
                 break;
