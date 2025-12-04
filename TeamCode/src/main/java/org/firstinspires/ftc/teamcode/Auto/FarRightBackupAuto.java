@@ -38,7 +38,6 @@ public class FarRightBackupAuto extends LinearOpMode {
         buildPaths();
         setPathState(0);
         follower.setStartingPose(startPose);
-        follower.update();
         waitForStart();
         while (opModeIsActive()) {
             follower.update();
@@ -54,14 +53,13 @@ public class FarRightBackupAuto extends LinearOpMode {
             telemetry.addData("Outside X", outside.getX());
             telemetry.addData("Outside Y", outside.getY());
             telemetry.addData("Outside Heading", outside.getHeading());
-
             telemetry.update();
         }
     }
     public void buildPaths() {
         this.parkAndReturn = follower.pathBuilder()
                 .addPath(new BezierLine(startPose, outside))
-                .setGlobalConstantHeadingInterpolation(Math.toRadians(270))
+                .setConstantHeadingInterpolation(Math.toRadians(270))
                 .build();
         this.returnPath = follower.pathBuilder()
                 .addPath(new BezierLine(outside, startPose))
@@ -72,13 +70,13 @@ public class FarRightBackupAuto extends LinearOpMode {
         switch(pathState) {
             case 0:
                 follower.followPath(parkAndReturn);
-                if (!follower.isBusy()) {
+                if (follower.atPose(outside, 2, 2)) {
                     setPathState(1);
                 }
                 break;
             case 1:
                 follower.followPath(returnPath);
-                if (!follower.isBusy()) {
+                if (follower.atPose(startPose,2,2)) {
                     setPathState(2);
                 }
                 break;

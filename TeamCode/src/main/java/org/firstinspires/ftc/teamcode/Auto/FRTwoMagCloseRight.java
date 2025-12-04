@@ -39,7 +39,7 @@ public class FRTwoMagCloseRight extends LinearOpMode {
     public final Pose startPose = new Pose(83,9,Math.toRadians(90));
     public Pose pickupOne = new Pose(103, 36, Math.toRadians(0));
     public Pose pickupOneFinish = new Pose(118,36, Math.toRadians(0));
-    public Pose alignGoal = new Pose(61, 12, Math.toRadians(72));
+    public Pose alignGoal = new Pose(83, 12, Math.toRadians(72));
     public final Pose pickupTwo = new Pose(103,60, Math.toRadians(0));
     public final Pose pickupTwoFinish = new Pose(118,60,Math.toRadians(0));
     public final Pose finish = new Pose(130,12, Math.toRadians(180));
@@ -64,6 +64,7 @@ public class FRTwoMagCloseRight extends LinearOpMode {
             telemetry.addData("x", follower.getPose().getX());
             telemetry.addData("y", follower.getPose().getY());
             telemetry.addData("heading", follower.getPose().getHeading());
+            telemetry.addData("Pose", follower.getPose());
             telemetry.update();
         }
     }
@@ -126,55 +127,55 @@ public class FRTwoMagCloseRight extends LinearOpMode {
         switch (pathState) {
             case 0:
                 follower.followPath(shootPreload);
-                if (!follower.isBusy()) {
+                if (follower.atPose(alignGoal, 2,2)) {
                     robot.inDep.unloadMag(opmodeTimer);
                     setPathState(1);
                 }
             case 1:
                 follower.followPath(pickupPathOne);
-                if(!follower.isBusy()) {
+                if(follower.atPose(pickupOne, 2,2)) {
                     robot.inDep.setIntake(0.6);
                     setPathState(2);
                 }
                 break;
             case 2:
                 follower.followPath(finishPickupOne);
-                if (!follower.isBusy()) {
+                if (follower.atPose(pickupOneFinish, 2,2)) {
                     robot.inDep.setIntake(0);
                     setPathState(3);
                 }
                 break;
             case 3:
                 follower.followPath(scorePickupOne);
-                if(!follower.isBusy()) {
+                if(follower.atPose(alignGoal, 2,2)) {
                     robot.inDep.unloadMag(opmodeTimer);
                     setPathState(4);
                 }
                 break;
             case 4:
                 follower.followPath(pickupPathTwo);
-                if (!follower.isBusy()) {
+                if (follower.atPose(pickupTwo, 2,2)) {
                     robot.inDep.setIntake(0.6);
                     setPathState(5);
                 }
                 break;
             case 5:
                 follower.followPath(finishPickupPathTwo);
-                if (!follower.isBusy()) {
+                if (follower.atPose(pickupTwoFinish, 2,2)) {
                     robot.inDep.setIntake(0);
                     setPathState(6);
                 }
                 break;
             case 6:
                 follower.followPath(scorePickupTwo);
-                if (!follower.isBusy()) {
+                if (follower.atPose(alignGoal, 2,2)) {
                     robot.inDep.unloadMag(opmodeTimer);
                     setPathState(7);
                 }
                 break;
             case 7:
                 follower.followPath(returnPathChain);
-                if (!follower.isBusy()) {
+                if (follower.atPose(finish, 2,2)) {
                     setPathState(8);
                 }
                 break;

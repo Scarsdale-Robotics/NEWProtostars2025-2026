@@ -127,55 +127,55 @@ public class FRTwoMagCloseLeft extends LinearOpMode {
         switch (pathState) {
             case 0:
                 follower.followPath(shootPreload);
-                if (!follower.isBusy()) {
+                if (follower.atPose(alignGoal, 2,2)) {
                     robot.inDep.unloadMag(opmodeTimer);
                     setPathState(1);
                 }
             case 1:
                 follower.followPath(pickupPathOne);
-                if(!follower.isBusy()) {
+                if(follower.atPose(pickupOne, 2,2)) {
                     robot.inDep.setIntake(0.6);
                     setPathState(2);
                 }
                 break;
             case 2:
                 follower.followPath(finishPickupOne);
-                if (!follower.isBusy()) {
+                if (follower.atPose(pickupOneFinish, 2,2)) {
                     robot.inDep.setIntake(0);
                     setPathState(3);
                 }
                 break;
             case 3:
                 follower.followPath(scorePickupOne);
-                if(!follower.isBusy()) {
+                if(follower.atPose(alignGoal, 2,2)) {
                     robot.inDep.unloadMag(opmodeTimer);
                     setPathState(4);
                 }
                 break;
             case 4:
                 follower.followPath(pickupPathTwo);
-                if (!follower.isBusy()) {
+                if (follower.atPose(pickupTwo, 2,2)) {
                     robot.inDep.setIntake(0.6);
                     setPathState(5);
                 }
                 break;
             case 5:
                 follower.followPath(finishPickupPathTwo);
-                if (!follower.isBusy()) {
+                if (follower.atPose(pickupTwoFinish, 2,2)) {
                     robot.inDep.setIntake(0);
                     setPathState(6);
                 }
                 break;
             case 6:
                 follower.followPath(scorePickupTwo);
-                if (!follower.isBusy()) {
+                if (follower.atPose(alignGoal, 2,2)) {
                     robot.inDep.unloadMag(opmodeTimer);
                     setPathState(7);
                 }
                 break;
             case 7:
                 follower.followPath(returnPathChain);
-                if (!follower.isBusy()) {
+                if (follower.atPose(finish, 2,2)) {
                     setPathState(8);
                 }
                 break;

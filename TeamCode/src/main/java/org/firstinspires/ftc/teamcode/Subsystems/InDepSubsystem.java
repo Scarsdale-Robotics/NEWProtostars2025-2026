@@ -25,7 +25,7 @@ public class InDepSubsystem extends SubsystemBase {
     public DriveSubsystem drive;
     public LinearOpMode opMode;
     public static double KS;
-    public static PIDController pid1 = new PIDController(0.00001,0,0);
+    public static PIDController pid1 = new PIDController(0.0035,0.001,0);
     public InDepSubsystem(LinearOpMode opMode, HardwareMap hardwareMap) {
         this.hardwareRobot = new HardwareRobot(hardwareMap);
         this.drive = new DriveSubsystem(
@@ -42,21 +42,18 @@ public class InDepSubsystem extends SubsystemBase {
     }
     public void setShooterVel(double ticksPerSecond) {
         double error = hardwareRobot.shooterOne.getCorrectedVelocity() - ticksPerSecond;
-        pid1.setP(pid1.getP() + KS);
-        double power = pid1.calculate(hardwareRobot.shooterOne.getCorrectedVelocity(), ticksPerSecond);
+        double power = pid1.calculate(error, 0);
         double clamped = clamp(power);
-        PanelsTelemetry.INSTANCE.getTelemetry().addData("KS", KS);
         PanelsTelemetry.INSTANCE.getTelemetry().addData("P", pid1.getP());
         PanelsTelemetry.INSTANCE.getTelemetry().addData("Power", power);
         PanelsTelemetry.INSTANCE.getTelemetry().addData("Error", error);
         PanelsTelemetry.INSTANCE.getTelemetry().addData("velocity", hardwareRobot.shooterOne.getCorrectedVelocity());
         hardwareRobot.shooterOne.set(-clamped);
         hardwareRobot.shooterTwo.set(clamped);
-        KS += 0.0001;
     }
     public ElapsedTime time = null;
     double lastV = 0.0;
-    public static double kP = 0.004, kD = 0.0, kS = 0.0;
+    public static double kP = 0.0025, kS = 0.0;
     public double finalP = 0;
     public void setShooterVelocity(double tps){
         if (!opMode.opModeIsActive()) return;
@@ -64,14 +61,13 @@ public class InDepSubsystem extends SubsystemBase {
             double dt = time.seconds();
             time.reset();
             PanelsTelemetry.INSTANCE.getTelemetry().addData("shooter dt (secs)", dt);
-
             double v = hardwareRobot.shooterOne.getCorrectedVelocity();
             double dv = v - lastV;
             lastV = v;
             PanelsTelemetry.INSTANCE.getTelemetry().addData("shooter v (tps)", v);
             double a = dv/dt;
             PanelsTelemetry.INSTANCE.getTelemetry().addData("shooter a (tpss)", a);
-            double power = kP * (tps - v + kS) - kD * a;
+            double power = kP * (tps - v);
             PanelsTelemetry.INSTANCE.getTelemetry().addData("shooter power", power);
             PanelsTelemetry.INSTANCE.getTelemetry().addData("KS", kS);
             PanelsTelemetry.INSTANCE.getTelemetry().addData("KP", kP);
@@ -81,7 +77,7 @@ public class InDepSubsystem extends SubsystemBase {
             hardwareRobot.shooterTwo.set(clamped);
         } else {
             time = new ElapsedTime();
-            kP = 0.004;
+            kP = 0.0025;
             kS = 0;
             lastV = 0;
             finalP = 0;
@@ -107,7 +103,7 @@ public class InDepSubsystem extends SubsystemBase {
         int pathState = 1;
         opTimer.resetTimer();
         while (opMode.opModeIsActive()) {
-            setShooterVelocity(1760);
+            setShooterVelocity(1910);
             if (opTimer.getElapsedTimeSeconds() >= 5 && pathState == 1) {
                 toggleControlServo(0, 0.31);
                 pathState++;

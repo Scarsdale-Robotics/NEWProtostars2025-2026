@@ -76,9 +76,8 @@ public class FINALTELEOP extends LinearOpMode {
             }
             boolean shooter = gamepad1.dpad_up;
             if (shooter && !lastShooter) robot.inDep.time = null;
-            if (shooter) robot.inDep.setShooterVelocity(1760);
+            if (shooter) robot.inDep.setShooterVelocity(1910);
             else {
-                if (gamepad2.cross) robot.inDep.setShooterPower(0);
                 robot.inDep.setShooterPower(0);
             }
             telemetry.addData("Corrected Heading", normalizeAngle(robot.hardwareRobot.pinpoint.getHeading(AngleUnit.DEGREES)));

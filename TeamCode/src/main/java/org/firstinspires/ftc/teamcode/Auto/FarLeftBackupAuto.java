@@ -59,13 +59,13 @@ public class FarLeftBackupAuto extends LinearOpMode {
         switch(pathState) {
             case 0:
                 follower.followPath(parkAndReturn);
-                if (!follower.isBusy()) {
+                if (follower.atPose(outside, 1, 1)) {
                     setPathState(1);
                 }
                 break;
             case 1:
                 follower.followPath(returnPath);
-                if (!follower.isBusy()) {
+                if (follower.atPose(startPose, 2,2)) {
                     setPathState(2);
                 }
                 break;

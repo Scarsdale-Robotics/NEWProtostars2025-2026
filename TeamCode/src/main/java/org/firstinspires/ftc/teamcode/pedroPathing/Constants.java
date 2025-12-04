@@ -24,48 +24,51 @@ public class Constants {
             .lateralZeroPowerAcceleration(-62.23)
             .mass(10.56)
             .translationalPIDFCoefficients(new PIDFCoefficients(
-                    0.0001,
+                    0.06,
                     0,
-                    0.0005,
-                    0.015
+                    0.0001,
+                    0.0001
             ))
             .translationalPIDFSwitch(4)
             .secondaryTranslationalPIDFCoefficients(new PIDFCoefficients(
-                    0.4,
                     0,
-                    0.005,
-                    0.0006
+                    0,
+                    0,
+                    0
             ))
             .headingPIDFCoefficients(new PIDFCoefficients(
-                    0.3,
-                    0,
-                    0,
-                    0.01
-            ))
-            .secondaryHeadingPIDFCoefficients(new PIDFCoefficients(
-                    2.5,
-                    0,
-                    0.1,
-                    0.0005
-            ))
-            .drivePIDFCoefficients(new FilteredPIDFCoefficients(
-                    0.05,
+                    1,
                     0,
                     0.0003,
+                    0.0006
+            ))
+            .secondaryHeadingPIDFCoefficients(new PIDFCoefficients(
+                    0,
+                    0,
+                    0,
+                    0
+            ))
+            .drivePIDFCoefficients(new FilteredPIDFCoefficients(
+                    0.02,
+                    0,
+                    0.004,
                     0.6,
                     0.015
             ))
             .secondaryDrivePIDFCoefficients(new FilteredPIDFCoefficients(
-                    0.02,
                     0,
-                    0.000005,
-                    0.6,
-                    0.01
+                    0,
+                    0,
+                    0,
+                    0
             ))
+            .useSecondaryDrivePIDF(false)
+            .useSecondaryHeadingPIDF(false)
+            .useSecondaryTranslationalPIDF(false)
             .drivePIDFSwitch(15)
             .centripetalScaling(0.0008);
 
-    public static PathConstraints pathConstraints = new PathConstraints(0.99, 100, 1.4, 1);
+    public static PathConstraints pathConstraints = new PathConstraints(0.99, 100, 1.11, 1);
 
     public static Follower createFollower(HardwareMap hardwareMap) {
         return new FollowerBuilder(followerConstants, hardwareMap)
@@ -86,7 +89,7 @@ public class Constants {
             .rightFrontMotorDirection(DcMotorEx.Direction.REVERSE)
             .rightRearMotorDirection(DcMotorEx.Direction.FORWARD)
             .xVelocity(45.18)
-            .yVelocity(36.25);
+            .yVelocity(33);
     //TODO: Tune
     public static PinpointConstants localizerConstants = new PinpointConstants()
             .forwardPodY(-5)
