@@ -47,12 +47,12 @@ public class FarLeftBackupAuto extends LinearOpMode {
     }
     public void buildPaths() {
         this.parkAndReturn = follower.pathBuilder()
-                .setGlobalConstantHeadingInterpolation(Math.toRadians(270))
                 .addPath(new BezierLine(startPose, outside))
+                .setLinearHeadingInterpolation(Math.toRadians(270), Math.toRadians(180))
                 .build();
         this.returnPath = follower.pathBuilder()
                 .addPath(new BezierLine(outside, startPose))
-                .setGlobalConstantHeadingInterpolation(Math.toRadians(270))
+                .setGlobalConstantHeadingInterpolation(Math.toRadians(180))
                 .build();
     }
     public void autonomousPathUpdate() {

@@ -76,7 +76,7 @@ public class FINALTELEOP extends LinearOpMode {
             }
             boolean shooter = gamepad1.dpad_up;
             if (shooter && !lastShooter) robot.inDep.time = null;
-            if (shooter) robot.inDep.setShooterVelocity(1910);
+            if (shooter) robot.inDep.setShooterVelocity(1860);
             else {
                 robot.inDep.setShooterPower(0);
             }

@@ -53,7 +53,7 @@ public class InDepSubsystem extends SubsystemBase {
     }
     public ElapsedTime time = null;
     double lastV = 0.0;
-    public static double kP = 0.0025, kS = 0.0;
+    public static double kP = 0.0035;
     public double finalP = 0;
     public void setShooterVelocity(double tps){
         if (!opMode.opModeIsActive()) return;
@@ -69,7 +69,6 @@ public class InDepSubsystem extends SubsystemBase {
             PanelsTelemetry.INSTANCE.getTelemetry().addData("shooter a (tpss)", a);
             double power = kP * (tps - v);
             PanelsTelemetry.INSTANCE.getTelemetry().addData("shooter power", power);
-            PanelsTelemetry.INSTANCE.getTelemetry().addData("KS", kS);
             PanelsTelemetry.INSTANCE.getTelemetry().addData("KP", kP);
             double clamped = clamp(power);
             PanelsTelemetry.INSTANCE.getTelemetry().addData("Clamped", clamped);
@@ -77,8 +76,7 @@ public class InDepSubsystem extends SubsystemBase {
             hardwareRobot.shooterTwo.set(clamped);
         } else {
             time = new ElapsedTime();
-            kP = 0.0025;
-            kS = 0;
+            kP = 0.0035;
             lastV = 0;
             finalP = 0;
         }
@@ -103,7 +101,7 @@ public class InDepSubsystem extends SubsystemBase {
         int pathState = 1;
         opTimer.resetTimer();
         while (opMode.opModeIsActive()) {
-            setShooterVelocity(1910);
+            setShooterVelocity(1860);
             if (opTimer.getElapsedTimeSeconds() >= 5 && pathState == 1) {
                 toggleControlServo(0, 0.31);
                 pathState++;
