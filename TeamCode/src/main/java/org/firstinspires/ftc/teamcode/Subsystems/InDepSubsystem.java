@@ -138,4 +138,7 @@ public class InDepSubsystem extends SubsystemBase {
         pid1.setSetPoint(0);
         KS = 0;
     }
+    public void resetUnloadMacro() {
+        time = null;
+    }
 }

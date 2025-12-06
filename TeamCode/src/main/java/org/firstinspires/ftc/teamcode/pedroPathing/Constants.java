@@ -31,10 +31,10 @@ public class Constants {
             ))
             .translationalPIDFSwitch(4)
             .secondaryTranslationalPIDFCoefficients(new PIDFCoefficients(
-                    0,
-                    0,
-                    0,
-                    0
+                    0.4,
+                    0.00001,
+                    0.05,
+                    0.0004
             ))
             .headingPIDFCoefficients(new PIDFCoefficients(
                     0.8,
@@ -43,28 +43,28 @@ public class Constants {
                     0.02
             ))
             .secondaryHeadingPIDFCoefficients(new PIDFCoefficients(
+                    2.5,
                     0,
-                    0,
-                    0,
-                    0
+                    0.1,
+                    0.0005
             ))
             .drivePIDFCoefficients(new FilteredPIDFCoefficients(
-                    0.05,
+                    0.032,
                     0,
-                    0.0003,
+                    0.000025,
+                    0.6,
+                    0.0
+            ))
+            .secondaryDrivePIDFCoefficients(new FilteredPIDFCoefficients(
+                    0.015,
+                    0,
+                    0.000005,
                     0.6,
                     0.015
             ))
-            .secondaryDrivePIDFCoefficients(new FilteredPIDFCoefficients(
-                    0,
-                    0,
-                    0,
-                    0,
-                    0
-            ))
-            .useSecondaryDrivePIDF(false)
-            .useSecondaryHeadingPIDF(false)
-            .useSecondaryTranslationalPIDF(false)
+            .useSecondaryDrivePIDF(true)
+            .useSecondaryHeadingPIDF(true)
+            .useSecondaryTranslationalPIDF(true)
             .drivePIDFSwitch(15)
             .centripetalScaling(0.0005);
 

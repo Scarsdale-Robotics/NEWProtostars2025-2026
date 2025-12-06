@@ -127,58 +127,64 @@ public class FRTwoMagCloseRight extends LinearOpMode {
         switch (pathState) {
             case 0:
                 follower.followPath(shootPreload);
-                if (atPose(alignGoal, 2,2, 0)) {
-                    robot.inDep.unloadMag(opmodeTimer);
-                    robot.inDep.setShooterPower(0);
-                    setPathState(1);
+                if (follower.atPose(alignGoal,3,3,Math.toRadians(1))) {
+                    if (!follower.isBusy()) {
+                        robot.inDep.unloadMag(opmodeTimer);
+                        robot.inDep.setShooterPower(0);
+                        robot.inDep.resetUnloadMacro();
+                        setPathState(1);
+                    }
                 }
+                break;
             case 1:
                 follower.followPath(pickupPathOne);
-                if(atPose(pickupOne, 2,2, 0)) {
+                if(follower.atPose(pickupOne,3,3,Math.toRadians(1))) {
                     robot.inDep.setIntake(0.6);
                     setPathState(2);
                 }
                 break;
             case 2:
                 follower.followPath(finishPickupOne);
-                if (atPose(pickupOneFinish, 2,2, 1)) {
+                if (follower.atPose(pickupOneFinish, 3,3, Math.toRadians(1))) {
                     robot.inDep.setIntake(0);
                     setPathState(3);
                 }
                 break;
             case 3:
                 follower.followPath(scorePickupOne);
-                if(atPose(alignGoal, 2,2, 0)) {
+                if(follower.atPose(alignGoal, 3,3, Math.toRadians(1))) {
                     robot.inDep.unloadMag(opmodeTimer);
                     robot.inDep.setShooterPower(0);
+                    robot.inDep.resetUnloadMacro();
                     setPathState(4);
                 }
                 break;
             case 4:
                 follower.followPath(pickupPathTwo);
-                if (atPose(pickupTwo, 2,2, 0)) {
+                if (follower.atPose(pickupTwo, 3,3, Math.toRadians(1))) {
                     robot.inDep.setIntake(0.6);
                     setPathState(5);
                 }
                 break;
             case 5:
                 follower.followPath(finishPickupPathTwo);
-                if (atPose(pickupTwoFinish, 2,2, 0)) {
+                if (follower.atPose(pickupTwoFinish, 3,3, Math.toRadians(1))) {
                     robot.inDep.setIntake(0);
                     setPathState(6);
                 }
                 break;
             case 6:
                 follower.followPath(scorePickupTwo);
-                if (atPose(alignGoal, 2,2,0)) {
+                if (follower.atPose(alignGoal, 3,3,Math.toRadians(1))) {
                     robot.inDep.unloadMag(opmodeTimer);
                     robot.inDep.setShooterPower(0);
+                    robot.inDep.resetUnloadMacro();
                     setPathState(7);
                 }
                 break;
             case 7:
                 follower.followPath(returnPathChain);
-                if (atPose(finish, 2,2,0)) {
+                if (follower.atPose(finish, 3,3,Math.toRadians(1))) {
                     setPathState(8);
                 }
                 break;
@@ -207,7 +213,7 @@ public class FRTwoMagCloseRight extends LinearOpMode {
     }
     public boolean atPose(Pose pos, double xTol, double yTol, double angleTol) {
         boolean pose = follower.atPose(pos, xTol, yTol);
-        double angle = Math.toDegrees(follower.getHeadingError());
+        double angle = follower.getHeadingError();
         boolean ang = (angle == 0);
         return pose && ang;
     }
