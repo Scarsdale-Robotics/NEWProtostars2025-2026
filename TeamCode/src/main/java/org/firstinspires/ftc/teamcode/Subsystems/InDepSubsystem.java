@@ -53,8 +53,9 @@ public class InDepSubsystem extends SubsystemBase {
     }
     public ElapsedTime time = null;
     double lastV = 0.0;
+    //change both kP and initKP for velocity tuning
     public static double kP = 0.0035;
-    public double finalP = 0;
+    public static double initKP = 0.0035;
     public void setShooterVelocity(double tps){
         if (!opMode.opModeIsActive()) return;
         if (time != null) {
@@ -76,9 +77,8 @@ public class InDepSubsystem extends SubsystemBase {
             hardwareRobot.shooterTwo.set(clamped);
         } else {
             time = new ElapsedTime();
-            kP = 0.0035;
+            kP = initKP;
             lastV = 0;
-            finalP = 0;
         }
     }
     public void setIntake(double p) {
@@ -101,7 +101,11 @@ public class InDepSubsystem extends SubsystemBase {
         int pathState = 1;
         opTimer.resetTimer();
         while (opMode.opModeIsActive()) {
-            setShooterVelocity(1860);
+            double strafe = opMode.gamepad1.left_stick_x;
+            double forward = opMode.gamepad1.left_stick_y;
+            double turn = opMode.gamepad1.right_stick_x;
+            drive.driveRobotCentricPowers(strafe * 0.6, forward * 0.6, turn * 0.6);
+            setShooterVelocity(1810);
             if (opTimer.getElapsedTimeSeconds() >= 5 && pathState == 1) {
                 toggleControlServo(0, 0.31);
                 pathState++;

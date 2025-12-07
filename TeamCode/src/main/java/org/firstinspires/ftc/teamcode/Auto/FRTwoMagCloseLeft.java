@@ -59,7 +59,7 @@ public class FRTwoMagCloseLeft extends LinearOpMode {
         robot.inDep.initControllers();
         waitForStart();
         while (opModeIsActive()) {
-            detectTags();
+            //detectTags();
             follower.update();
             autonomousPathUpdate();
             telemetry.addData("path state", pathState);
@@ -144,13 +144,13 @@ public class FRTwoMagCloseLeft extends LinearOpMode {
                     robot.inDep.toggleControlServo(0,0.31);
                     pathF1 = false;
                 }
-                if (follower.atPose(alignGoal,3,3,Math.toRadians(1)) || pathTimer.getElapsedTimeSeconds() > 0.85) {
+                if (follower.atPose(alignGoal,3,3,Math.toRadians(1)) || pathTimer.getElapsedTimeSeconds() > 1) {
                     setPathState(-2);
                 }
                 break;
             case -2:
                 if (!follower.isBusy()) {
-                    if (follower.atPose(alignGoal,3,3,Math.toRadians(3)) || pathTimer.getElapsedTimeSeconds() > 0.85) {
+                    if (follower.atPose(alignGoal,3,3,Math.toRadians(3)) || pathTimer.getElapsedTimeSeconds() > 1) {
                         robot.inDep.unloadMag(opmodeTimer);
                         robot.inDep.setShooterPower(0);
                         robot.inDep.resetUnloadMacro();
@@ -175,8 +175,8 @@ public class FRTwoMagCloseLeft extends LinearOpMode {
                         follower.followPath(finishPickupOne);
                         pathF3 = false;
                     }
-                    if (follower.atPose(pickupOneFinish, 3,3, Math.toRadians(3)) || pathTimer.getElapsedTimeSeconds() > 0.85) {
-                        if(pathTimer.getElapsedTimeSeconds() > 1.8) {
+                    if (follower.atPose(pickupOneFinish, 3,3, Math.toRadians(3))) {
+                        if(pathTimer.getElapsedTimeSeconds() > 1.6) {
                             robot.inDep.setIntake(0);
                             setPathState(3);
                         }
