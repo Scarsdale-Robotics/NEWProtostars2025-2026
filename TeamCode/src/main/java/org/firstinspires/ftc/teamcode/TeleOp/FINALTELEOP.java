@@ -36,15 +36,29 @@ public class FINALTELEOP extends LinearOpMode {
     public boolean lastToggleShootMacro = false;
     public boolean lastShooter = false;
     public boolean lastSlow = false;
+    public boolean lastDrive = false;
+    public Timer pathTimer;
+    public static int pathState;
+    public Follower follower;
+    public Pose startPose;
+    public Pose target;
+    public PathChain path;
+    public Pose alignGoal;
 
     @Override
     public void runOpMode() throws InterruptedException {
+        this.follower = Constants.createFollower(hardwareMap);
         this.opModeTimer = new Timer();
         this.robot = new RobotSystem(hardwareMap, this);
+        this.pathTimer = new Timer();
         robot.inDep.setShooterPower(0);
         robot.hardwareRobot.initOdom();
         robot.inDep.initControllers();
         this.speed = 0.6;
+        //this.startPose = new Pose();
+        //this.alignGoal = new Pose();
+        //find some way to choose the above?
+        follower.setStartingPose(startPose);
         opModeTimer.resetTimer();
         waitForStart();
         while (opModeIsActive()) {
@@ -74,6 +88,10 @@ public class FINALTELEOP extends LinearOpMode {
                 if (robot.hardwareRobot.intakeControl.getPosition() == 0) gamepad1.setLedColor(0,255,0,-1);
                 else gamepad1.setLedColor(255,0,0,-1);
             }
+            boolean drive = gamepad1.dpad_left;
+            if (drive && !lastDrive) {
+                DTP(alignGoal);
+            }
             boolean shooter = gamepad1.dpad_up;
             if (shooter && !lastShooter) robot.inDep.time = null;
             if (shooter) robot.inDep.setShooterVelocity(1860);
@@ -87,6 +105,7 @@ public class FINALTELEOP extends LinearOpMode {
             lastToggleShootMacro = toggleShooter;
             lastShooter = shooter;
             lastSlow = slow;
+            lastDrive = drive;
             telemetry.update();
             PanelsTelemetry.INSTANCE.getTelemetry().update();
         }
@@ -132,5 +151,20 @@ public class FINALTELEOP extends LinearOpMode {
         if (angle <= 0) return Math.abs(angle);
         else if (angle > 0) return (180 - angle) + 180;
         return 0;
+    }
+    public void setPathState (int pstate) {
+        pathTimer.resetTimer();
+        pathState = pstate;
+    }
+    public void DTP (Pose target) {
+        Pose current = follower.getPose();
+        this.path = follower.pathBuilder()
+                .addPath(new BezierLine(current, target))
+                .setLinearHeadingInterpolation(current.getHeading(), target.getHeading())
+                .build();
+        while (opModeIsActive() && !follower.atPose(target, 1,1,1)) {
+            follower.followPath(path);
+            if (gamepad1.dpad_down) break;
+        }
     }
 }
