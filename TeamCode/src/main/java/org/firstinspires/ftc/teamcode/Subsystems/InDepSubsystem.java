@@ -8,6 +8,7 @@ import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.panels.Panels;
 import com.bylazar.telemetry.PanelsTelemetry;
+import com.pedropathing.geometry.Pose;
 import com.pedropathing.util.Timer;
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -17,8 +18,13 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.HardwareRobot;
+import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
+import java.nio.charset.CharacterCodingException;
 import java.util.concurrent.TimeUnit;
 
 @Configurable
@@ -148,7 +154,43 @@ public class InDepSubsystem extends SubsystemBase {
         time = null;
     }
     public PIDFController pidf = new PIDFController(0.01,0.0001,0.00001,0.015);
-    public void autoAim() {
-        
+    public void autoAim(boolean blue, boolean red) {
+        //TODO: approx polynomial curve for shooter vel
+        //Use linear regression for hood angle
+        //use trig for turret angle
+        int x;
+        int y;
+        Pose sp;
+        if (blue) {
+            x = 0;
+            y = 0;
+            sp = new Pose(0,0,0);
+            //tune
+        } else {
+            x = 0;
+            y = 0;
+            sp = new Pose(0, 0, 0);
+            //tune
+        }
+        PIDController pid = new PIDController(0.01,0.001,0.0001);
+        pid.setSetPoint(0);
+        pid.setTolerance(1);
+        while(opMode.opModeIsActive()) {
+            double tR = 0; //possibly put pinpoint here. then, use rotation to determine angle
+            double rF = hardwareRobot.pinpoint.getHeading(AngleUnit.DEGREES);
+            double gF = 180 - Math.atan2(Math.abs(x - toFieldCoordinates(sp, hardwareRobot.pinpoint.getPosition()).getX()), Math.abs(y - toFieldCoordinates(sp, hardwareRobot.pinpoint.getPosition()).getY()));
+            double tF = tR - rF;
+            double angleError = gF - tF;
+            double power = pid.calculate(angleError, 0);
+            double clamped = clamp(power);
+            //apply clamped power
+            //part 2: hood angle
+        }
+    }
+    public Pose toFieldCoordinates(Pose startPose, Pose2D currentPose) {
+        return new Pose(0,0,0);
+    }
+    public double hoodAngle(double x, double y, Pose sp) {
+        return 2 * Math.sqrt(Math.pow(x - toFieldCoordinates(sp, hardwareRobot.pinpoint.getPosition()).getX(),2) + Math.pow(y - toFieldCoordinates(sp, hardwareRobot.pinpoint.getPosition()).getY(), 2));
     }
 }
