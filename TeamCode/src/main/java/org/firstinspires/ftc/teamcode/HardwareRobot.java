@@ -28,9 +28,8 @@ public class HardwareRobot {
     public final Motor rightBack;
     public final WebcamName cameraName;
     public final GoBildaPinpointDriver pinpoint;
-    public final Servo intakeControl;
+    public final Servo transfer;
     public final Motor shooterOne;
-    public final Motor shooterTwo;
     public final Motor intakeTwo;
     public final Motor intakeOne;
 
@@ -73,29 +72,24 @@ public class HardwareRobot {
         intakeOne = new Motor(hardwareMap, "intakeOne", Motor.GoBILDA.RPM_312);
         intakeTwo = new Motor(hardwareMap, "intakeTwo", Motor.GoBILDA.RPM_312);
         shooterOne = new Motor(hardwareMap, "shooterOne", Motor.GoBILDA.RPM_1620);
-        shooterTwo =  new Motor(hardwareMap, "shooterTwo", Motor.GoBILDA.RPM_1620);
 
         intakeOne.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         intakeTwo.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         shooterOne.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        shooterTwo.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         intakeOne.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         intakeTwo.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         shooterOne.motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        shooterTwo.motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         intakeOne.setRunMode(Motor.RunMode.RawPower);
         intakeTwo.setRunMode(Motor.RunMode.RawPower);
         shooterOne.setRunMode(Motor.RunMode.RawPower);
-        shooterTwo.setRunMode(Motor.RunMode.RawPower);
 
         intakeOne.motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         intakeTwo.motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         shooterOne.motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        shooterTwo.motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        intakeControl = hardwareMap.get(Servo.class, "intakeControl");
+        transfer = hardwareMap.get(Servo.class, "intakeControl");
 
         cameraName = hardwareMap.get(WebcamName.class,  "Webcam 1");
 

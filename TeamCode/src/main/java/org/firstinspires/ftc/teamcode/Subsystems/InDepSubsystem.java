@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.Subsystems;
 
+import static java.lang.Math.abs;
+
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.arcrobotics.ftclib.controller.PDController;
 import com.arcrobotics.ftclib.controller.PIDController;
@@ -46,7 +48,6 @@ public class InDepSubsystem extends SubsystemBase {
     }
     public void setShooterPower(double power){
         hardwareRobot.shooterOne.set(-power);
-        hardwareRobot.shooterTwo.set(power);
     }
     public void setShooterVel(double ticksPerSecond) {
         double error = hardwareRobot.shooterOne.getCorrectedVelocity() - ticksPerSecond;
@@ -57,11 +58,9 @@ public class InDepSubsystem extends SubsystemBase {
         PanelsTelemetry.INSTANCE.getTelemetry().addData("Error", error);
         PanelsTelemetry.INSTANCE.getTelemetry().addData("velocity", hardwareRobot.shooterOne.getCorrectedVelocity());
         hardwareRobot.shooterOne.set(-clamped);
-        hardwareRobot.shooterTwo.set(clamped);
     }
     public ElapsedTime time = null;
     double lastV = 0.0;
-    //change both kP and initKP for velocity tuning
     public static double kP = 0.0035;
     public static double initKP = 0.0035;
     public void setShooterVelocity(double tps){
@@ -82,7 +81,6 @@ public class InDepSubsystem extends SubsystemBase {
             double clamped = clamp(power);
             PanelsTelemetry.INSTANCE.getTelemetry().addData("Clamped", clamped);
             hardwareRobot.shooterOne.set(-clamped);
-            hardwareRobot.shooterTwo.set(clamped);
         } else {
             time = new ElapsedTime();
             kP = initKP;
@@ -100,11 +98,7 @@ public class InDepSubsystem extends SubsystemBase {
         hardwareRobot.intakeTwo.set(p);
     }
 
-    public void toggleControlServo(double invertedPosition, double startingPosition) {
-        if (hardwareRobot.intakeControl.getPosition() == 0) hardwareRobot.intakeControl.setPosition(0.31);
-        else if (hardwareRobot.intakeControl.getPosition() == 0.31) hardwareRobot.intakeControl.setPosition(0);
-    }
-    //TODO: optimize
+    //TODO: redo
     public void unloadMag(Timer opTimer) {
         int pathState = 1;
         opTimer.resetTimer();
@@ -115,7 +109,6 @@ public class InDepSubsystem extends SubsystemBase {
             drive.driveRobotCentricPowers(strafe * 0.6, forward * 0.6, turn * 0.6);
             setShooterVelocity(1810);
             if (opTimer.getElapsedTimeSeconds() >= 5 && pathState == 1) {
-                toggleControlServo(0, 0.31);
                 pathState++;
             }
             if (opTimer.getElapsedTimeSeconds() >= 5.5 && pathState == 2) {
@@ -123,12 +116,10 @@ public class InDepSubsystem extends SubsystemBase {
                 pathState++;
             }
             if (opTimer.getElapsedTimeSeconds() >= 5.7 && pathState == 3) {
-                toggleControlServo(0, 0.31);
                 setSecondIn(0);
                 pathState++;
             }
             if (opTimer.getElapsedTimeSeconds() >= 7.5 && pathState == 4) {
-                toggleControlServo(0,0.31);
                 pathState++;
             }
             if (opTimer.getElapsedTimeSeconds() >= 8 && pathState == 5) {
@@ -137,7 +128,6 @@ public class InDepSubsystem extends SubsystemBase {
             }
             if (opTimer.getElapsedTimeSeconds() >= 9 && pathState == 6) {
                 setSecondIn(0);
-                toggleControlServo(0,0.31);
                 break;
             }
         }
@@ -154,43 +144,46 @@ public class InDepSubsystem extends SubsystemBase {
         time = null;
     }
     public PIDFController pidf = new PIDFController(0.01,0.0001,0.00001,0.015);
-    public void autoAim(boolean blue, boolean red) {
+    public static int x;
+    public static int y;
+    public static Pose sp;
+    public static PIDController pidA = new PIDController(0.01,0.001,0.0001);
+    public void initAutoAim(boolean blue, boolean far) {
         //TODO: approx polynomial curve for shooter vel
         //Use linear regression for hood angle
         //use trig for turret angle
-        int x;
-        int y;
-        Pose sp;
         if (blue) {
             x = 0;
             y = 0;
-            sp = new Pose(0,0,0);
             //tune
         } else {
             x = 0;
             y = 0;
-            sp = new Pose(0, 0, 0);
             //tune
         }
-        PIDController pid = new PIDController(0.01,0.001,0.0001);
-        pid.setSetPoint(0);
-        pid.setTolerance(1);
-        while(opMode.opModeIsActive()) {
-            double tR = 0; //possibly put pinpoint here. then, use rotation to determine angle
-            double rF = hardwareRobot.pinpoint.getHeading(AngleUnit.DEGREES);
-            double gF = 180 - Math.atan2(Math.abs(x - toFieldCoordinates(sp, hardwareRobot.pinpoint.getPosition()).getX()), Math.abs(y - toFieldCoordinates(sp, hardwareRobot.pinpoint.getPosition()).getY()));
-            double tF = tR - rF;
-            double angleError = gF - tF;
-            double power = pid.calculate(angleError, 0);
-            double clamped = clamp(power);
-            //apply clamped power
-            //part 2: hood angle
-        }
+        //tune
+        if (far && blue) sp = new Pose(0,0,0);
+        else if (!far && blue) sp = new Pose(0,0,0);
+        else if (far && !blue) sp = new Pose(0,0,0);
+        else if (!far && !blue) sp = new Pose(0,0,0);
+        pidA.setSetPoint(0);
+        pidA.setTolerance(1);
     }
-    public Pose toFieldCoordinates(Pose startPose, Pose2D currentPose) {
-        return new Pose(0,0,0);
+    public void autoAim(boolean blue, boolean far) {
+        double tR = 0; //possibly put pinpoint here. then, use rotation to determine angle
+        double rF = hardwareRobot.pinpoint.getHeading(AngleUnit.DEGREES);
+        double gF = 180 - Math.atan2(Math.abs(x - hardwareRobot.pinpoint.getPosition().getX(DistanceUnit.INCH)), Math.abs(y - toFieldCoordinates(sp, hardwareRobot.pinpoint.getPosition()).getY()));
+        double tF = tR - rF;
+        double angleError = gF - tF;
+        double power = pidA.calculate(angleError, 0);
+        double clamped = clamp(power);
+        //apply clamped power
+        //part 2: hood angle
     }
     public double hoodAngle(double x, double y, Pose sp) {
         return 2 * Math.sqrt(Math.pow(x - toFieldCoordinates(sp, hardwareRobot.pinpoint.getPosition()).getX(),2) + Math.pow(y - toFieldCoordinates(sp, hardwareRobot.pinpoint.getPosition()).getY(), 2));
+    }
+    public double getTurretRelToRobot(){
+        return 0.0;
     }
 }
