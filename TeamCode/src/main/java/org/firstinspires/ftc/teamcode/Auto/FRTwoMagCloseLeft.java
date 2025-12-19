@@ -141,7 +141,6 @@ public class FRTwoMagCloseLeft extends LinearOpMode {
                 if (pathF1) {
                     follower.setMaxPower(0.45);
                     follower.followPath(shootPreload, true);
-                    robot.inDep.toggleControlServo(0,0.31);
                     pathF1 = false;
                 }
                 if (follower.atPose(alignGoal,3,3,Math.toRadians(1)) || pathTimer.getElapsedTimeSeconds() > 1) {

@@ -10,6 +10,7 @@ import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.panels.Panels;
 import com.bylazar.telemetry.PanelsTelemetry;
+import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.util.Timer;
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
@@ -47,17 +48,7 @@ public class InDepSubsystem extends SubsystemBase {
         this.opMode = opMode;
     }
     public void setShooterPower(double power){
-        hardwareRobot.shooterOne.set(-power);
-    }
-    public void setShooterVel(double ticksPerSecond) {
-        double error = hardwareRobot.shooterOne.getCorrectedVelocity() - ticksPerSecond;
-        double power = pid1.calculate(error, 0);
-        double clamped = clamp(power);
-        PanelsTelemetry.INSTANCE.getTelemetry().addData("P", pid1.getP());
-        PanelsTelemetry.INSTANCE.getTelemetry().addData("Power", power);
-        PanelsTelemetry.INSTANCE.getTelemetry().addData("Error", error);
-        PanelsTelemetry.INSTANCE.getTelemetry().addData("velocity", hardwareRobot.shooterOne.getCorrectedVelocity());
-        hardwareRobot.shooterOne.set(-clamped);
+        hardwareRobot.shooter.set(power);
     }
     public ElapsedTime time = null;
     double lastV = 0.0;
@@ -69,7 +60,7 @@ public class InDepSubsystem extends SubsystemBase {
             double dt = time.seconds();
             time.reset();
             PanelsTelemetry.INSTANCE.getTelemetry().addData("shooter dt (secs)", dt);
-            double v = hardwareRobot.shooterOne.getCorrectedVelocity();
+            double v = hardwareRobot.shooter.getCorrectedVelocity();
             double dv = v - lastV;
             lastV = v;
             PanelsTelemetry.INSTANCE.getTelemetry().addData("shooter v (tps)", v);
@@ -80,7 +71,7 @@ public class InDepSubsystem extends SubsystemBase {
             PanelsTelemetry.INSTANCE.getTelemetry().addData("KP", kP);
             double clamped = clamp(power);
             PanelsTelemetry.INSTANCE.getTelemetry().addData("Clamped", clamped);
-            hardwareRobot.shooterOne.set(-clamped);
+            hardwareRobot.shooter.set(clamped);
         } else {
             time = new ElapsedTime();
             kP = initKP;
@@ -88,14 +79,33 @@ public class InDepSubsystem extends SubsystemBase {
         }
     }
     public void setIntake(double p) {
-        hardwareRobot.intakeTwo.set(p);
-        hardwareRobot.intakeOne.set(p);
+        hardwareRobot.intake.set(p);
     }
-    public void setFrontIn(double p) {
-        hardwareRobot.intakeOne.set(p);
+    public void toggleServo() {
+        if (hardwareRobot.transferServo.getPosition() == 0) {
+            hardwareRobot.transferServo.setPosition(0.2);
+        } else hardwareRobot.transferServo.setPosition(0);
     }
-    public void setSecondIn(double p) {
-        hardwareRobot.intakeTwo.set(p);
+    public static PIDController pidTurret = new PIDController(0.01,0.002,0.0005);
+    public void setTurretPosition(double ticks){
+        PIDController pidTurret = new PIDController(0.01,0.002,0.0005);
+        while (opMode.opModeIsActive()) {
+            double current = hardwareRobot.turret.getCurrentPosition();
+            double error = current - ticks;
+            if (Math.abs(error) <= 5) break;
+            double power = pidTurret.calculate(error,0);
+            double clamped = clamp(power);
+            hardwareRobot.turret.set(clamped);
+        }
+    }
+    public void setTurretPower(double p) {
+        hardwareRobot.turret.set(p);
+    }
+    public void setTransfer(double p) {
+        hardwareRobot.transferMotor.set(p);
+    }
+    public void hoodServo(double pos) {
+        hardwareRobot.hoodServo.setPosition(pos);
     }
 
     //TODO: redo
@@ -108,26 +118,26 @@ public class InDepSubsystem extends SubsystemBase {
             double turn = opMode.gamepad1.right_stick_x;
             drive.driveRobotCentricPowers(strafe * 0.6, forward * 0.6, turn * 0.6);
             setShooterVelocity(1810);
-            if (opTimer.getElapsedTimeSeconds() >= 5 && pathState == 1) {
+            setTransfer(0.5);
+            if (opTimer.getElapsedTimeSeconds() >= 3 && pathState == 1) {
+                toggleServo();
                 pathState++;
             }
-            if (opTimer.getElapsedTimeSeconds() >= 5.5 && pathState == 2) {
-                setSecondIn(0.7);
+            if (opTimer.getElapsedTimeSeconds() >= 3.5 && pathState == 2) {
+                toggleServo();
                 pathState++;
             }
-            if (opTimer.getElapsedTimeSeconds() >= 5.7 && pathState == 3) {
-                setSecondIn(0);
+            if (opTimer.getElapsedTimeSeconds() >= 5 && pathState == 3) {
+                toggleServo();
                 pathState++;
             }
-            if (opTimer.getElapsedTimeSeconds() >= 7.5 && pathState == 4) {
+            if (opTimer.getElapsedTimeSeconds() >= 5.5 && pathState == 4) {
+                toggleServo();
                 pathState++;
             }
             if (opTimer.getElapsedTimeSeconds() >= 8 && pathState == 5) {
-                setIntake(0.7);
-                pathState++;
-            }
-            if (opTimer.getElapsedTimeSeconds() >= 9 && pathState == 6) {
-                setSecondIn(0);
+                setTransfer(0);
+                setShooterVelocity(0);
                 break;
             }
         }
@@ -138,12 +148,14 @@ public class InDepSubsystem extends SubsystemBase {
     public void initControllers() {
         pid1.setTolerance(5);
         pid1.setSetPoint(0);
+        pidTurret.setTolerance(2);
+        pidTurret.setSetPoint(0);
         KS = 0;
     }
     public void resetUnloadMacro() {
         time = null;
     }
-    public PIDFController pidf = new PIDFController(0.01,0.0001,0.00001,0.015);
+
     public static int x;
     public static int y;
     public static Pose sp;
@@ -169,20 +181,28 @@ public class InDepSubsystem extends SubsystemBase {
         pidA.setSetPoint(0);
         pidA.setTolerance(1);
     }
-    public void autoAim(boolean blue, boolean far) {
+    public void autoAim(Follower follower) {
         double tR = 0; //possibly put pinpoint here. then, use rotation to determine angle
         double rF = hardwareRobot.pinpoint.getHeading(AngleUnit.DEGREES);
-        double gF = 180 - Math.atan2(Math.abs(x - hardwareRobot.pinpoint.getPosition().getX(DistanceUnit.INCH)), Math.abs(y - toFieldCoordinates(sp, hardwareRobot.pinpoint.getPosition()).getY()));
+        double gF = 180 - Math.atan2(Math.abs(x - follower.getPose().getX()), Math.abs(y - follower.getPose().getY()));
         double tF = tR - rF;
         double angleError = gF - tF;
         double power = pidA.calculate(angleError, 0);
         double clamped = clamp(power);
-        //apply clamped power
+        setTurretPower(clamped);
         //part 2: hood angle
+        hoodServo(hoodAngle(x,y,follower));
+        //part 3: approx poly curve for shooter velocity
+        setShooterVelocity(shooterVelocity(x,y,follower));
     }
-    public double hoodAngle(double x, double y, Pose sp) {
-        return 2 * Math.sqrt(Math.pow(x - toFieldCoordinates(sp, hardwareRobot.pinpoint.getPosition()).getX(),2) + Math.pow(y - toFieldCoordinates(sp, hardwareRobot.pinpoint.getPosition()).getY(), 2));
+    public double hoodAngle(double x, double y, Follower follower) {
+        return 2 * Math.sqrt(Math.pow(x - follower.getPose().getX(),2) + Math.pow(y - follower.getPose().getY(), 2));
     }
+    public double shooterVelocity(double x, double y, Follower follower) {
+        double dist = Math.sqrt(Math.pow(x - follower.getPose().getX(),2) + Math.pow(y - follower.getPose().getY(),2));
+        return 2 * Math.pow(dist,2) + 6 * dist - 5;
+    }
+    //TODO: implement ticks - angle rel to robot
     public double getTurretRelToRobot(){
         return 0.0;
     }

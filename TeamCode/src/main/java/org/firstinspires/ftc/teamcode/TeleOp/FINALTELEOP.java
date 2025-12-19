@@ -28,15 +28,9 @@ public class FINALTELEOP extends LinearOpMode {
     public RobotSystem robot;
     public AprilTagDetection lastTagDetected;
     public double speed;
-    public boolean intakeOnePressed = false;
-    public boolean intakeTwoPressed = false;
-
-    public boolean lastToggleServoPressed = false;
     public Timer opModeTimer;
     public boolean lastToggleShootMacro = false;
     public boolean lastShooter = false;
-    public boolean lastSlow = false;
-    public boolean lastDrive = false;
     public Timer pathTimer;
     public static int pathState;
     public Follower follower;
@@ -53,10 +47,11 @@ public class FINALTELEOP extends LinearOpMode {
         this.pathTimer = new Timer();
         robot.inDep.setShooterPower(0);
         robot.hardwareRobot.initOdom();
+        robot.inDep.initAutoAim(false,false);
         robot.inDep.initControllers();
         this.speed = 0.6;
-        //this.startPose = new Pose();
-        //this.alignGoal = new Pose();
+        this.startPose = new Pose();
+        this.alignGoal = new Pose();
         //find some way to choose the above?
         follower.setStartingPose(startPose);
         opModeTimer.resetTimer();
@@ -70,42 +65,23 @@ public class FINALTELEOP extends LinearOpMode {
             telemetry.addData("heading", robot.hardwareRobot.pinpoint.getHeading(AngleUnit.DEGREES));
             telemetry.addData("X", robot.hardwareRobot.pinpoint.getPosX(DistanceUnit.INCH));
             telemetry.addData("Y", robot.hardwareRobot.pinpoint.getPosY(DistanceUnit.INCH));
-            boolean slow = gamepad1.dpad_down;
-            if (slow && !lastSlow) speed = 0.3;
-            else speed = 0.5;
             robot.drive.driveRobotCentricPowers(strafe * speed, forward * speed, turn * speed);
-            intakeOnePressed = gamepad1.left_bumper;
-            if (intakeOnePressed) robot.inDep.setFrontIn(0.75);
-            else if (gamepad1.right_bumper) robot.inDep.setFrontIn(-0.75);
-            else robot.inDep.setFrontIn(0);
-            intakeTwoPressed = gamepad1.triangle;
-            if (intakeTwoPressed) robot.inDep.setSecondIn(0.75);
-            else if (gamepad1.cross) robot.inDep.setSecondIn(-0.75);
-            else robot.inDep.setSecondIn(0);
-            boolean toggleServo = gamepad1.square;
-            if (!lastToggleServoPressed && toggleServo) {
-                robot.inDep.toggleControlServo(0,0.31);
-                if (robot.hardwareRobot.intakeControl.getPosition() == 0) gamepad1.setLedColor(0,255,0,-1);
-                else gamepad1.setLedColor(255,0,0,-1);
-            }
-            boolean drive = gamepad1.dpad_left;
-            if (drive && !lastDrive) {
-                DTP(alignGoal);
-            }
-            boolean shooter = gamepad1.dpad_up;
-            if (shooter && !lastShooter) robot.inDep.time = null;
-            if (shooter) robot.inDep.setShooterVelocity(1860);
-            else {
-                robot.inDep.setShooterPower(0);
-            }
+            boolean intakePressed = gamepad1.left_bumper;
+            if (intakePressed) robot.inDep.setIntake(0.75);
+            else if (gamepad1.right_bumper) robot.inDep.setIntake(-0.75);
+            else robot.inDep.setIntake(0);
+            //boolean shooter = gamepad1.dpad_up;
+            //if (shooter && !lastShooter) robot.inDep.time = null;
+            //if (shooter) robot.inDep.setShooterVelocity(1860);
+            //else {
+                //robot.inDep.setShooterPower(0);
+            //}
+            robot.inDep.autoAim(follower);
             telemetry.addData("Corrected Heading", normalizeAngle(robot.hardwareRobot.pinpoint.getHeading(AngleUnit.DEGREES)));
             boolean toggleShooter = gamepad1.options;
             if (!lastToggleShootMacro && toggleShooter) robot.inDep.unloadMag(opModeTimer);
-            lastToggleServoPressed = toggleServo;
             lastToggleShootMacro = toggleShooter;
-            lastShooter = shooter;
-            lastSlow = slow;
-            lastDrive = drive;
+            //lastShooter = shooter;
             telemetry.update();
             PanelsTelemetry.INSTANCE.getTelemetry().update();
         }
@@ -155,16 +131,5 @@ public class FINALTELEOP extends LinearOpMode {
     public void setPathState (int pstate) {
         pathTimer.resetTimer();
         pathState = pstate;
-    }
-    public void DTP (Pose target) {
-        Pose current = follower.getPose();
-        this.path = follower.pathBuilder()
-                .addPath(new BezierLine(current, target))
-                .setLinearHeadingInterpolation(current.getHeading(), target.getHeading())
-                .build();
-        while (opModeIsActive() && !follower.atPose(target, 1,1,1)) {
-            follower.followPath(path);
-            if (gamepad1.dpad_down) break;
-        }
     }
 }

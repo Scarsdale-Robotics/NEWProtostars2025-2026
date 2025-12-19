@@ -28,10 +28,12 @@ public class HardwareRobot {
     public final Motor rightBack;
     public final WebcamName cameraName;
     public final GoBildaPinpointDriver pinpoint;
-    public final Servo transfer;
-    public final Motor shooterOne;
-    public final Motor intakeTwo;
-    public final Motor intakeOne;
+    public final Motor turret;
+    public final Servo transferServo;
+    public final Motor transferMotor;
+    public final Motor shooter;
+    public final Motor intake;
+    public final Servo hoodServo;
 
     public HardwareRobot(HardwareMap hardwareMap) {
         leftFront = new Motor(hardwareMap, "leftFront", Motor.GoBILDA.RPM_312);
@@ -69,29 +71,37 @@ public class HardwareRobot {
         leftBack.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
         rightBack.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
 
-        intakeOne = new Motor(hardwareMap, "intakeOne", Motor.GoBILDA.RPM_312);
-        intakeTwo = new Motor(hardwareMap, "intakeTwo", Motor.GoBILDA.RPM_312);
-        shooterOne = new Motor(hardwareMap, "shooterOne", Motor.GoBILDA.RPM_1620);
+        turret = new Motor(hardwareMap, "turret", Motor.GoBILDA.RPM_312);
+        intake = new Motor(hardwareMap, "intake", Motor.GoBILDA.RPM_312);
+        shooter = new Motor(hardwareMap, "shooter", Motor.GoBILDA.RPM_1620);
+        transferMotor = new Motor(hardwareMap, "transferMotor", Motor.GoBILDA.RPM_312);
 
-        intakeOne.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        intakeTwo.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        shooterOne.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        turret.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        intake.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        shooter.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        transferMotor.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        intakeOne.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        intakeTwo.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        shooterOne.motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        turret.motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        intake.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        shooter.motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        transferMotor.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        intakeOne.setRunMode(Motor.RunMode.RawPower);
-        intakeTwo.setRunMode(Motor.RunMode.RawPower);
-        shooterOne.setRunMode(Motor.RunMode.RawPower);
+        turret.setRunMode(Motor.RunMode.RawPower);
+        intake.setRunMode(Motor.RunMode.RawPower);
+        shooter.setRunMode(Motor.RunMode.RawPower);
+        transferMotor.setRunMode(Motor.RunMode.RawPower);
 
-        intakeOne.motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        intakeTwo.motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        shooterOne.motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        turret.motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        intake.motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        shooter.motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        transferMotor.motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        transfer = hardwareMap.get(Servo.class, "intakeControl");
+
+        transferServo = hardwareMap.get(Servo.class, "transferServo");
 
         cameraName = hardwareMap.get(WebcamName.class,  "Webcam 1");
+
+        hoodServo = hardwareMap.get(Servo.class, "hoodServo");
 
         pinpoint = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
     }
