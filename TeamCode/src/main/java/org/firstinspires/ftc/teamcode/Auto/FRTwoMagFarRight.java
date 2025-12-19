@@ -19,27 +19,28 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-//This does not work.
 @Autonomous(name = "FR2MagFRight")
 public class FRTwoMagFarRight extends LinearOpMode {
     public RobotSystem robot;
-    public PathChain scorePreloadPath;
-    public PathChain pickupOnePath;
-    public PathChain finishPickupOnePath;
-    public PathChain scorePickupOnePath;
-    public PathChain pickupTwoPath;
-    public PathChain finishPickupTwoPath;
-    public PathChain scorePickupTwoPath;
-    public PathChain returnPath;
+    public PathChain shootPreload;
+    public PathChain pickupPathOne;
+    public PathChain finishPickupOne;
+    public PathChain scorePickupOne;
+    public PathChain pickupPathTwo;
+    public PathChain finishPickupPathTwo;
+    public PathChain scorePickupTwo;
+    public PathChain returnPathChain;
     public Follower follower;
     public Timer pathTimer, opmodeTimer;
     public int pathState;
     public Pose startPose = new Pose(115,134,Math.toRadians(270));
+    public Pose startPosAfter = new Pose(115,120,Math.toRadians(270));
     public Pose pickupOne = new Pose(110, 80, Math.toRadians(0));
     public Pose pickupOneFinish = new Pose(122, 80, Math.toRadians(0));
     public Pose alignGoal = new Pose(85, 90, Math.toRadians(43));
     public Pose pickupTwo = new Pose(110,55,Math.toRadians(0));
-    public Pose finishPickupTwo = new Pose(122,55,Math.toRadians(0));
+    public Pose pickupTwoFinish = new Pose(122,55,Math.toRadians(0));
+    public Pose finish = new Pose(115,134,Math.toRadians(270));
     public AprilTagDetection lastTagDetected;
     @Override
     public void runOpMode() throws InterruptedException {
@@ -48,19 +49,19 @@ public class FRTwoMagFarRight extends LinearOpMode {
         opmodeTimer = new Timer();
         opmodeTimer.resetTimer();
         follower = Constants.createFollower(hardwareMap);
-        setPathState(-1);
+        setPathState(0);
         follower.setStartingPose(startPose);
         buildPaths();
-        robot.inDep.setShooterPower(1);
+        robot.inDep.initControllers();
         waitForStart();
         while (opModeIsActive()) {
-            detectTags();
+            //detectTags();
             follower.update();
             autonomousPathUpdate();
             telemetry.addData("path state", pathState);
             telemetry.addData("x", follower.getPose().getX());
             telemetry.addData("y", follower.getPose().getY());
-            telemetry.addData("heading", follower.getPose().getHeading());
+            telemetry.addData("heading", Math.toDegrees(follower.getPose().getHeading()));
             telemetry.update();
         }
     }
@@ -68,37 +69,40 @@ public class FRTwoMagFarRight extends LinearOpMode {
         return target.ftcPose.range <= radius;
     }
     public void buildPaths() {
-        this.scorePreloadPath = follower.pathBuilder()
-                .addPath(new BezierLine(startPose, alignGoal))
-                .setLinearHeadingInterpolation(startPose.getHeading(), alignGoal.getHeading())
+        this.shootPreload = follower.pathBuilder()
+                .addPath(new BezierLine(startPose, startPosAfter))
+                .addPath(new BezierLine(startPosAfter, alignGoal))
+                .setLinearHeadingInterpolation(startPose.getHeading(),alignGoal.getHeading() - Math.toRadians(4.5))
                 .build();
-        this.pickupOnePath = follower.pathBuilder()
+        this.pickupPathOne = follower.pathBuilder()
                 .addPath(new BezierLine(alignGoal, pickupOne))
-                .setLinearHeadingInterpolation(alignGoal.getHeading(), pickupOne.getHeading())
+                .setLinearHeadingInterpolation(alignGoal.getHeading(),pickupOne.getHeading())
                 .build();
-        this.finishPickupOnePath = follower.pathBuilder()
+        this.finishPickupOne = follower.pathBuilder()
                 .addPath(new BezierLine(pickupOne, pickupOneFinish))
-                .setConstantHeadingInterpolation(pickupOne.getHeading())
+                .setConstantHeadingInterpolation(Math.toRadians(180))
                 .build();
-        this.scorePickupOnePath = follower.pathBuilder()
+        this.scorePickupOne = follower.pathBuilder()
                 .addPath(new BezierLine(pickupOneFinish, alignGoal))
+//                .addPath(new BezierLine(alignGoal, startPosAfter))
+//                .addPath(new BezierLine(startPosAfter, alignGoal))
                 .setLinearHeadingInterpolation(pickupOneFinish.getHeading(), alignGoal.getHeading())
                 .build();
-        this.pickupTwoPath = follower.pathBuilder()
+        this.pickupPathTwo = follower.pathBuilder()
                 .addPath(new BezierLine(alignGoal, pickupTwo))
                 .setLinearHeadingInterpolation(alignGoal.getHeading(), pickupTwo.getHeading())
                 .build();
-        this.finishPickupTwoPath = follower.pathBuilder()
-                .addPath(new BezierLine(pickupTwo, finishPickupTwo))
+        this.finishPickupPathTwo = follower.pathBuilder()
+                .addPath(new BezierLine(pickupTwo, pickupTwoFinish))
                 .setConstantHeadingInterpolation(pickupTwo.getHeading())
                 .build();
-        this.scorePickupTwoPath = follower.pathBuilder()
-                .addPath(new BezierLine(finishPickupTwo, alignGoal))
-                .setLinearHeadingInterpolation(finishPickupTwo.getHeading(), alignGoal.getHeading())
+        this.scorePickupTwo = follower.pathBuilder()
+                .addPath(new BezierLine(pickupTwoFinish, alignGoal))
+                .setLinearHeadingInterpolation(pickupTwoFinish.getHeading(), alignGoal.getHeading())
                 .build();
-        this.returnPath = follower.pathBuilder()
-                .addPath(new BezierLine(alignGoal, startPose))
-                .setLinearHeadingInterpolation(alignGoal.getHeading(), startPose.getHeading())
+        this.returnPathChain = follower.pathBuilder()
+                .addPath(new BezierLine(alignGoal, finish))
+                .setLinearHeadingInterpolation(alignGoal.getHeading(), finish.getHeading())
                 .build();
     }
     public void detectTags() {
@@ -114,62 +118,130 @@ public class FRTwoMagFarRight extends LinearOpMode {
                 telemetry.addData("Yaw", tag.ftcPose.yaw);
                 telemetry.addData("Range: ", tag.ftcPose.range);
                 lastTagDetected = tag;
-                break;
             }
         } else {
             lastTagDetected = null; // clear old tag when none detected
         }
     }
+    boolean pathF1 = true;
+    boolean pathF2 = true;
+    boolean pathF3 = true;
+    boolean pathF4 = true;
+    boolean pathF5 = true;
+    boolean pathF6 = true;
+    boolean pathF7 = true;
+    boolean pathF8 = true;
     public void autonomousPathUpdate() {
         switch (pathState) {
             case 0:
-                if (!follower.isBusy()) follower.followPath(scorePreloadPath);
-                robot.inDep.unloadMag(opmodeTimer);
-            case 1:
-                if(!follower.isBusy()) {
-                    follower.followPath(pickupOnePath);
-                    robot.inDep.setIntake(0.6);
+                if (pathF1) {
+                    follower.setMaxPower(0.45);
+                    follower.followPath(shootPreload, true);
+                    pathF1 = false;
                 }
-                setPathState(2);
+                if (follower.atPose(alignGoal,3,3,Math.toRadians(1)) || pathTimer.getElapsedTimeSeconds() > 1) {
+                    setPathState(-2);
+                }
+                break;
+            case -2:
+                if (!follower.isBusy()) {
+                    if (follower.atPose(alignGoal,3,3,Math.toRadians(3)) || pathTimer.getElapsedTimeSeconds() > 1) {
+                        robot.inDep.unloadMag(opmodeTimer);
+                        robot.inDep.setShooterPower(0);
+                        robot.inDep.resetUnloadMacro();
+                        setPathState(1);
+                    }
+                }
+                break;
+            case 1:
+                if (pathF2){
+                    follower.setMaxPower(0.55);
+                    follower.followPath(pickupPathOne, true);
+                    pathF2 = false;
+                }
+                if(follower.atPose(pickupOne,3,3,Math.toRadians(3))) {
+                    robot.inDep.setIntake(0.6);
+                    setPathState(2);
+                }
                 break;
             case 2:
-                if (!follower.isBusy()) follower.followPath(finishPickupOnePath);
-                robot.inDep.setIntake(0);
-                setPathState(3);
+                if (!follower.isBusy()){
+                    if (pathF3){
+                        follower.followPath(finishPickupOne);
+                        pathF3 = false;
+                    }
+                    if (follower.atPose(pickupOneFinish, 3,3, Math.toRadians(3))) {
+                        if(pathTimer.getElapsedTimeSeconds() > 1.6) {
+                            robot.inDep.setIntake(0);
+                            setPathState(3);
+                        }
+                    }
+                }
                 break;
             case 3:
-                if(!follower.isBusy()) {
-                    follower.followPath(scorePickupOnePath);
+                if (!follower.isBusy()){
+                    if (pathF4){
+                        follower.setMaxPower(0.65);
+                        follower.followPath(scorePickupOne, true);
+                        pathF4 = false;
+                    }
+                    if(follower.atPose(alignGoal, 3,3, Math.toRadians(3))) {
+                        robot.inDep.unloadMag(opmodeTimer);
+                        robot.inDep.setShooterPower(0);
+                        robot.inDep.resetUnloadMacro();
+                        robot.inDep.setIntake(0);
+                        setPathState(7);
+                    }
                 }
-                robot.inDep.unloadMag(opmodeTimer);
-                setPathState(4);
                 break;
             case 4:
-                if (!follower.isBusy()) {
-                    follower.followPath(pickupTwoPath);
+                if (!follower.isBusy()){
+                    if (pathF5){
+                        follower.followPath(pickupPathTwo);
+                        pathF5 = false;
+                    }
+                    if (follower.atPose(pickupTwo, 3,3, Math.toRadians(3))) {
+                        robot.inDep.setIntake(0.6);
+                        setPathState(5);
+                    }
                 }
-                robot.inDep.setIntake(0.6);
-                setPathState(5);
                 break;
             case 5:
-                if (!follower.isBusy()) {
-                    follower.followPath(finishPickupTwoPath);
+                if (!follower.isBusy()){
+                    if (pathF6){
+                        follower.followPath(finishPickupPathTwo);
+                        pathF6 = false;
+                    }
+                    if (follower.atPose(pickupTwoFinish, 3,3, Math.toRadians(3))) {
+                        robot.inDep.setIntake(0);
+                        setPathState(6);
+                    }
                 }
-                robot.inDep.setIntake(0);
-                setPathState(6);
                 break;
             case 6:
-                if (!follower.isBusy()) {
-                    follower.followPath(scorePickupTwoPath);
+                if (!follower.isBusy()){
+                    if (pathF7){
+                        follower.followPath(scorePickupTwo, true);
+                        pathF7 = false;
+                    }
+                    if (follower.atPose(alignGoal, 3,3,Math.toRadians(3))) {
+                        robot.inDep.unloadMag(opmodeTimer);
+                        robot.inDep.setShooterPower(0);
+                        robot.inDep.resetUnloadMacro();
+                        setPathState(7);
+                    }
                 }
-                robot.inDep.unloadMag(opmodeTimer);
-                setPathState(7);
                 break;
             case 7:
-                if (!follower.isBusy()) {
-                    follower.followPath(returnPath);
+                if (!follower.isBusy()){
+                    if (pathF8){
+                        follower.followPath(returnPathChain);
+                        pathF8 = false;
+                    }
+                    if (follower.atPose(finish, 3,3,Math.toRadians(1))) {
+                        setPathState(8);
+                    }
                 }
-                setPathState(8);
                 break;
             case 8:
                 if (!follower.isBusy()) setPathState(-1);
@@ -179,9 +251,6 @@ public class FRTwoMagFarRight extends LinearOpMode {
     public void setPathState(int pState) {
         pathState = pState;
         pathTimer.resetTimer();
-    }
-    private Pose getRobotPoseFromCamera(AprilTagDetection tag) {
-        return new Pose(tag.robotPose.getPosition().x, tag.robotPose.getPosition().y, follower.getHeading(), FTCCoordinates.INSTANCE).getAsCoordinateSystem(PedroCoordinates.INSTANCE);
     }
     public AprilTagDetection getTargetTag(int targetId1, int targetId2, int targetId3) {
         List<AprilTagDetection> detections = robot.cv.aprilTagProcessor.getDetections();
@@ -193,5 +262,14 @@ public class FRTwoMagFarRight extends LinearOpMode {
             }
         }
         return sol;
+    }
+    private Pose getRobotPoseFromCamera(AprilTagDetection tag) {
+        return new Pose(tag.robotPose.getPosition().x, tag.robotPose.getPosition().y, follower.getHeading(), FTCCoordinates.INSTANCE).getAsCoordinateSystem(PedroCoordinates.INSTANCE);
+    }
+    public boolean atPose(Pose pos, double xTol, double yTol, double angleTol) {
+        boolean pose = follower.atPose(pos, xTol, yTol);
+        double angle = follower.getHeadingError();
+        boolean ang = (angle == 0);
+        return pose && ang;
     }
 }
