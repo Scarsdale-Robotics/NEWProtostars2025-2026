@@ -56,7 +56,7 @@ public class FarLeftTeleOp extends LinearOpMode {
         opModeTimer.resetTimer();
         waitForStart();
         while (opModeIsActive()) {
-            robot.hardwareRobot.pinpoint.update();
+            follower.update();
             detectTags();
             double strafe = gamepad1.left_stick_x;
             double forward = gamepad1.left_stick_y;
@@ -130,5 +130,21 @@ public class FarLeftTeleOp extends LinearOpMode {
     public void setPathState (int pstate) {
         pathTimer.resetTimer();
         pathState = pstate;
+    }
+    public void DTP(Pose pose) {
+        Pose current = follower.getPose();
+        this.path = follower.pathBuilder()
+                .addPath(new BezierLine(current, pose))
+                .setLinearHeadingInterpolation(current.getHeading(), pose.getHeading())
+                .build();
+        follower.followPath(path);
+        boolean p1 = true;
+        while (opModeIsActive()) {
+            if (p1) {
+                follower.followPath(path);
+                p1 = false;
+            }
+            if (follower.atPose(pose, 2,2,Math.toRadians(2))) break;
+        }
     }
 }
