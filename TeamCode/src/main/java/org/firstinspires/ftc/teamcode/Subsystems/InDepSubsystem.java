@@ -55,6 +55,7 @@ public class InDepSubsystem extends SubsystemBase {
     double lastV = 0.0;
     public static double kP = 0.0035;
     public static double initKP = 0.0035;
+    //TODO: tune for consistency so auto aim actually works
     public void setShooterVelocity(double tps){
         if (!opMode.opModeIsActive()) return;
         if (time != null) {
@@ -162,38 +163,30 @@ public class InDepSubsystem extends SubsystemBase {
     public static Pose sp;
     public static PIDController pidA = new PIDController(0.01,0.001,0.0001);
     public void initAutoAim(boolean blue, boolean far) {
-        //TODO: approx polynomial curve for shooter vel
-        //Use linear regression for hood angle
-        //use trig for turret angle
         if (blue) {
-            x = 0;
-            y = 0;
-            //tune
+            x = 13;
+            y = 135;
         } else {
-            x = 0;
-            y = 0;
-            //tune
+            x = 133;
+            y = 135;
         }
-        //tune
-        if (far && blue) sp = new Pose(0,0,0);
-        else if (!far && blue) sp = new Pose(0,0,0);
-        else if (far && !blue) sp = new Pose(0,0,0);
-        else if (!far && !blue) sp = new Pose(0,0,0);
+        if (far && blue) sp = new Pose(33,135,Math.toRadians(270));
+        else if (!far && blue) sp = new Pose(56,8,Math.toRadians(90));
+        else if (far && !blue) sp = new Pose(111,135,Math.toRadians(270));
+        else if (!far && !blue) sp = new Pose(88,8.5,Math.toRadians(90));
         pidA.setSetPoint(0);
         pidA.setTolerance(1);
     }
     public void autoAim(Follower follower) {
         double tR = getTurretRelToRobot();
         double rF = hardwareRobot.pinpoint.getHeading(AngleUnit.DEGREES);
-        double gF = 180 - Math.atan2(Math.abs(x - follower.getPose().getX()), Math.abs(y - follower.getPose().getY()));
+        double gF = Math.atan2(Math.abs(x - follower.getPose().getX()), Math.abs(y - follower.getPose().getY()));
         double tF = tR - rF;
-        double angleError = gF - tF;
+        double angleError = 90 - gF - tF;
         double power = pidA.calculate(angleError, 0);
         double clamped = clamp(power);
         setTurretPower(clamped);
-        //part 2: hood angle
         hoodServo(hoodAngle(x,y,follower));
-        //part 3: approx poly curve for shooter velocity
         setShooterVelocity(shooterVelocity(x,y,follower));
     }
     public double hoodAngle(double x, double y, Follower follower) {

@@ -33,14 +33,14 @@ public class FRTwoMagFarLeft extends LinearOpMode {
     public Follower follower;
     public Timer pathTimer, opmodeTimer;
     public int pathState;
-    public Pose startPose = new Pose(37,134,Math.toRadians(270));
+    public Pose startPose = new Pose(33,135,Math.toRadians(270));
     public Pose startPosAfter = new Pose(37,110, Math.toRadians(270));
     public Pose pickupOne = new Pose(41, 84, Math.toRadians(180));
-    public Pose pickupOneFinish = new Pose(29, 81, Math.toRadians(180));
-    public Pose alignGoal = new Pose(67, 90, Math.toRadians(143));
+    public Pose pickupOneFinish = new Pose(27, 84, Math.toRadians(180));
+    public Pose alignGoal = new Pose(50, 100, Math.toRadians(135));
     public Pose pickupTwo = new Pose(41,60,Math.toRadians(180));
-    public Pose pickupTwoFinish = new Pose(29,60,Math.toRadians(180));
-    public Pose finish = new Pose(37,134, Math.toRadians(270));
+    public Pose pickupTwoFinish = new Pose(27,60,Math.toRadians(180));
+    public Pose finish = new Pose(33,135, Math.toRadians(270));
     public AprilTagDetection lastTagDetected;
     @Override
     public void runOpMode() throws InterruptedException {

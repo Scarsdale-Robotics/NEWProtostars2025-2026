@@ -47,7 +47,7 @@ public class CloseLeftTeleOp extends LinearOpMode {
         this.pathTimer = new Timer();
         robot.inDep.setShooterPower(0);
         robot.hardwareRobot.initOdom();
-        robot.inDep.initAutoAim(false,false);
+        robot.inDep.initAutoAim(true,false);
         robot.inDep.initControllers();
         this.speed = 0.6;
         this.startPose = new Pose(56,8,Math.toRadians(90));
@@ -69,18 +69,18 @@ public class CloseLeftTeleOp extends LinearOpMode {
             if (intakePressed) robot.inDep.setIntake(0.75);
             else if (gamepad1.right_bumper) robot.inDep.setIntake(-0.75);
             else robot.inDep.setIntake(0);
-            //boolean shooter = gamepad1.dpad_up;
-            //if (shooter && !lastShooter) robot.inDep.time = null;
-            //if (shooter) robot.inDep.setShooterVelocity(1860);
-            //else {
-            //robot.inDep.setShooterPower(0);
-            //}
+            boolean shooter = gamepad1.dpad_up;
+            if (shooter && !lastShooter) robot.inDep.time = null;
+            if (shooter) robot.inDep.setShooterVelocity(1860);
+            else {
+                robot.inDep.setShooterPower(0);
+            }
             robot.inDep.autoAim(follower);
             telemetry.addData("Corrected Heading", normalizeAngle(robot.hardwareRobot.pinpoint.getHeading(AngleUnit.DEGREES)));
             boolean toggleShooter = gamepad1.options;
             if (!lastToggleShootMacro && toggleShooter) robot.inDep.unloadMag(opModeTimer);
             lastToggleShootMacro = toggleShooter;
-            //lastShooter = shooter;
+            lastShooter = shooter;
             telemetry.update();
             PanelsTelemetry.INSTANCE.getTelemetry().update();
         }

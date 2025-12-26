@@ -69,18 +69,18 @@ public class CloseRightTeleOp extends LinearOpMode {
             if (intakePressed) robot.inDep.setIntake(0.75);
             else if (gamepad1.right_bumper) robot.inDep.setIntake(-0.75);
             else robot.inDep.setIntake(0);
-            //boolean shooter = gamepad1.dpad_up;
-            //if (shooter && !lastShooter) robot.inDep.time = null;
-            //if (shooter) robot.inDep.setShooterVelocity(1860);
-            //else {
-            //robot.inDep.setShooterPower(0);
-            //}
+            boolean shooter = gamepad1.dpad_up;
+            if (shooter && !lastShooter) robot.inDep.time = null;
+            if (shooter) robot.inDep.setShooterVelocity(1860);
+            else {
+            robot.inDep.setShooterPower(0);
+            }
             robot.inDep.autoAim(follower);
             telemetry.addData("Corrected Heading", normalizeAngle(robot.hardwareRobot.pinpoint.getHeading(AngleUnit.DEGREES)));
             boolean toggleShooter = gamepad1.options;
             if (!lastToggleShootMacro && toggleShooter) robot.inDep.unloadMag(opModeTimer);
             lastToggleShootMacro = toggleShooter;
-            //lastShooter = shooter;
+            lastShooter = shooter;
             telemetry.update();
             PanelsTelemetry.INSTANCE.getTelemetry().update();
         }
