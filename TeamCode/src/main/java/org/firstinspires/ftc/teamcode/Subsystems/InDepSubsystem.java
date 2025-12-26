@@ -25,6 +25,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.HardwareRobot;
+import org.firstinspires.ftc.teamcode.RobotConstants;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
 import java.nio.charset.CharacterCodingException;
@@ -182,7 +183,7 @@ public class InDepSubsystem extends SubsystemBase {
         pidA.setTolerance(1);
     }
     public void autoAim(Follower follower) {
-        double tR = 0; //possibly put pinpoint here. then, use rotation to determine angle
+        double tR = getTurretRelToRobot();
         double rF = hardwareRobot.pinpoint.getHeading(AngleUnit.DEGREES);
         double gF = 180 - Math.atan2(Math.abs(x - follower.getPose().getX()), Math.abs(y - follower.getPose().getY()));
         double tF = tR - rF;
@@ -203,7 +204,9 @@ public class InDepSubsystem extends SubsystemBase {
         return 2 * Math.pow(dist,2) + 6 * dist - 5;
     }
     //TODO: implement ticks - angle rel to robot
-    public double getTurretRelToRobot(){
-        return 0.0;
+    public double getTurretRelToRobot() {
+        double current = hardwareRobot.turret.getCurrentPosition();
+        double curFrac = current / new RobotConstants().fullTurnTurret;
+        return curFrac * 360;
     }
 }

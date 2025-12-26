@@ -11,4 +11,5 @@ public class RobotConstants {
     public final double WHEEL_DIAMETER_INCHES = 2.0; // goBILDA omni
     public final double WHEEL_CIRCUMFERENCE = Math.PI * WHEEL_DIAMETER_INCHES;
     public final double TICKS_PER_INCH = TICKS_PER_REV / WHEEL_CIRCUMFERENCE;
+    public final double fullTurnTurret = 1000;
 }
