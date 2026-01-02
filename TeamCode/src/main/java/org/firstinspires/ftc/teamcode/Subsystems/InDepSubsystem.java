@@ -37,7 +37,6 @@ public class InDepSubsystem extends SubsystemBase {
     public DriveSubsystem drive;
     public LinearOpMode opMode;
     public static double KS;
-    public static PIDController pid1 = new PIDController(0.0035,0.001,0);
     public InDepSubsystem(LinearOpMode opMode, HardwareMap hardwareMap) {
         this.hardwareRobot = new HardwareRobot(hardwareMap);
         this.drive = new DriveSubsystem(
@@ -148,8 +147,6 @@ public class InDepSubsystem extends SubsystemBase {
         return Math.max(0, Math.min(1, value));
     }
     public void initControllers() {
-        pid1.setTolerance(5);
-        pid1.setSetPoint(0);
         pidTurret.setTolerance(2);
         pidTurret.setSetPoint(0);
         KS = 0;
@@ -171,9 +168,9 @@ public class InDepSubsystem extends SubsystemBase {
             y = 135;
         }
         if (far && blue) sp = new Pose(33,135,Math.toRadians(270));
-        else if (!far && blue) sp = new Pose(56,8,Math.toRadians(90));
-        else if (far && !blue) sp = new Pose(111,135,Math.toRadians(270));
-        else if (!far && !blue) sp = new Pose(88,8.5,Math.toRadians(90));
+        if (!far && blue) sp = new Pose(56,8,Math.toRadians(90));
+        if (far && !blue) sp = new Pose(111,135,Math.toRadians(270));
+        if (!far && !blue) sp = new Pose(88,8.5,Math.toRadians(90));
         pidA.setSetPoint(0);
         pidA.setTolerance(1);
     }
@@ -200,6 +197,7 @@ public class InDepSubsystem extends SubsystemBase {
     public double getTurretRelToRobot() {
         double current = hardwareRobot.turret.getCurrentPosition();
         double curFrac = current / new RobotConstants().fullTurnTurret;
-        return curFrac * 360;
+        double ans = curFrac * 360;
+        return ans;
     }
 }
