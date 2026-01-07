@@ -1,29 +1,20 @@
 package org.firstinspires.ftc.teamcode.Auto;
 
 import com.pedropathing.follower.Follower;
-import com.pedropathing.ftc.FTCCoordinates;
-import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
-import com.pedropathing.geometry.PedroCoordinates;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.RobotSystem;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
-//TODO: tune drive constants for getting to pos
-//TODO: experiment with holdend
-
-@Autonomous (name = "FINALCRAUTO")
-public class FRTwoMagCloseRight extends LinearOpMode {
+@Autonomous(name = "FR2MagFLeft")
+public class PeekskillFL extends LinearOpMode {
     public RobotSystem robot;
     public PathChain shootPreload;
     public PathChain pickupPathOne;
@@ -39,18 +30,16 @@ public class FRTwoMagCloseRight extends LinearOpMode {
     public Follower follower;
     public Timer pathTimer, opmodeTimer;
     public int pathState;
-    //TODO: tune poses
-    public final Pose startPose = new Pose(88,8.5,Math.toRadians(90));
-    public final Pose startPosAfter = new Pose(88,28);
-    public Pose pickupOne = new Pose(103, 35.5, Math.toRadians(0));
-    public Pose pickupOneFinish = new Pose(118,35.5, Math.toRadians(0));
-
-    public Pose alignGoal = new Pose(89, 12, Math.toRadians(64.5));
-    public final Pose pickupTwo = new Pose(103,60, Math.toRadians(0));
-    public final Pose pickupTwoFinish = new Pose(118,60,Math.toRadians(0));
-    public final Pose pickupThree = new Pose(103,84, Math.toRadians(0));
-    public final Pose pickupThreeFinish = new Pose(118,84, Math.toRadians(0));
-    public final Pose finish = new Pose(130,12, Math.toRadians(180));
+    public Pose startPose = new Pose(33,135,Math.toRadians(270));
+    public Pose startPosAfter = new Pose(37,110, Math.toRadians(270));
+    public Pose pickupOne = new Pose(41, 84, Math.toRadians(180));
+    public Pose pickupOneFinish = new Pose(27, 84, Math.toRadians(180));
+    public Pose alignGoal = new Pose(50, 100, Math.toRadians(135));
+    public Pose pickupTwo = new Pose(41,60,Math.toRadians(180));
+    public Pose pickupTwoFinish = new Pose(27,60,Math.toRadians(180));
+    public final Pose pickupThree = new Pose(41,36, Math.toRadians(180));
+    public final Pose pickupThreeFinish = new Pose(27,36, Math.toRadians(180));
+    public Pose finish = new Pose(33,135, Math.toRadians(270));
     public AprilTagDetection lastTagDetected;
     @Override
     public void runOpMode() throws InterruptedException {

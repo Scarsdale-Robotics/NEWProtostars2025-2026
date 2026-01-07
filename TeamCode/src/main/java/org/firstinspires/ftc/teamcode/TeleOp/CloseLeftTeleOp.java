@@ -21,7 +21,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
 import java.util.ArrayList;
-
+//TODO: add manual aim backup
 @TeleOp(name = "CLTele")
 
 public class CloseLeftTeleOp extends LinearOpMode {
@@ -73,12 +73,15 @@ public class CloseLeftTeleOp extends LinearOpMode {
             if (transferPressed) robot.inDep.setTransfer(0.65);
             else if (gamepad1.circle) robot.inDep.setTransfer(-0.65);
             else robot.inDep.setTransfer(0);
-            boolean shooter = gamepad1.dpad_up;
+            boolean shooter = gamepad2.dpad_up;
             if (shooter && !lastShooter) robot.inDep.time = null;
             if (shooter) robot.inDep.setShooterVelocity(1860);
             else {
                 robot.inDep.setShooterPower(0);
             }
+            boolean turret = gamepad2.right_bumper;
+            if (turret) robot.inDep.setTurretPower(0.65);
+            else if (gamepad2.left_bumper) robot.inDep.setTurretPower(-0.65);
             robot.inDep.autoAim(follower);
             telemetry.addData("Corrected Heading", normalizeAngle(robot.hardwareRobot.pinpoint.getHeading(AngleUnit.DEGREES)));
             boolean toggleShooter = gamepad1.options;

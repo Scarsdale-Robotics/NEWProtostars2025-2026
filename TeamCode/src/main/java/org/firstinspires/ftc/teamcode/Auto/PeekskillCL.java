@@ -1,29 +1,23 @@
 package org.firstinspires.ftc.teamcode.Auto;
 
 import com.pedropathing.follower.Follower;
-import com.pedropathing.ftc.FTCCoordinates;
-import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
-import com.pedropathing.geometry.PedroCoordinates;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.RobotSystem;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 
 //add pathtimer.getelapsedtimeseconds > x for failsafes incase atpose doesnt work
 
 @Autonomous (name = "FINALCLAUTO")
-public class FRTwoMagCloseLeft extends LinearOpMode {
+public class PeekskillCL extends LinearOpMode {
     public RobotSystem robot;
     public PathChain shootPreload;
     public PathChain pickupPathOne;
