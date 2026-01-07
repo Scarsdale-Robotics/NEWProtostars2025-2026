@@ -69,6 +69,10 @@ public class FarLeftTeleOp extends LinearOpMode {
             if (intakePressed) robot.inDep.setIntake(0.75);
             else if (gamepad1.right_bumper) robot.inDep.setIntake(-0.75);
             else robot.inDep.setIntake(0);
+            boolean transferPressed = gamepad1.triangle;
+            if (transferPressed) robot.inDep.setTransfer(0.65);
+            else if (gamepad1.circle) robot.inDep.setTransfer(-0.65);
+            else robot.inDep.setTransfer(0);
             boolean shooter = gamepad1.dpad_up;
             if (shooter && !lastShooter) robot.inDep.time = null;
             if (shooter) robot.inDep.setShooterVelocity(1860);
