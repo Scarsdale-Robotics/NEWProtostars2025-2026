@@ -152,12 +152,9 @@ public class CloseLeftTeleOp extends LinearOpMode {
                 follower.followPath(path);
                 p1 = false;
             }
-            if (follower.atPose(pose, 2,2,Math.toRadians(2)) || pathTimer.getElapsedTimeSeconds() > dt(current, pose)) {
+            if (follower.atPose(pose, 2, 2, Math.toRadians(2)) || pathTimer.getElapsedTimeSeconds() > 1) {
                 break;
             }
         }
-    }
-    public double dt(Pose sp, Pose target) {
-
     }
 }
