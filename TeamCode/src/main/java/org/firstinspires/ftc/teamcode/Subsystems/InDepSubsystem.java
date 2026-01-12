@@ -177,7 +177,7 @@ public class InDepSubsystem extends SubsystemBase {
     public void autoAim(Follower follower) {
         double tR = getTurretRelToRobot();
         double rF = hardwareRobot.pinpoint.getHeading(AngleUnit.DEGREES);
-        double gF = Math.atan2(Math.abs(x - follower.getPose().getX()), Math.abs(y - follower.getPose().getY()));
+        double gF = Math.toDegrees(Math.atan2(Math.abs(x - follower.getPose().getX()), Math.abs(y - follower.getPose().getY())));
         double tF = tR - rF;
         double angleError = 90 - gF - tF;
         double power = pidA.calculate(angleError, 0);
