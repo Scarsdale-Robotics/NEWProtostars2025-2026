@@ -83,9 +83,9 @@ public class InDepSubsystem extends SubsystemBase {
         hardwareRobot.intake.set(p);
     }
     public void toggleServo() {
-        if (hardwareRobot.transferServo.getPosition() == 0) {
-            hardwareRobot.transferServo.setPosition(0.2);
-        } else hardwareRobot.transferServo.setPosition(0);
+        if (hardwareRobot.transferServo.getPosition() == 0.38) {
+            hardwareRobot.transferServo.setPosition(0.57);
+        } else hardwareRobot.transferServo.setPosition(0.38);
     }
     public static PIDController pidTurret = new PIDController(0.01,0.002,0.0005);
     public void setTurretPosition(double ticks){
