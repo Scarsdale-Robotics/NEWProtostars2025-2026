@@ -174,7 +174,6 @@ public class PeekskillCL extends LinearOpMode {
                     pathF2 = false;
                 }
                 if(follower.atPose(pickupOne,3,3,Math.toRadians(3))) {
-                    robot.inDep.setIntake(0.6);
                     robot.inDep.setTransfer(0.6);
                     setPathState(2);
                 }
@@ -186,7 +185,6 @@ public class PeekskillCL extends LinearOpMode {
                         pathF3 = false;
                     }
                     if (follower.atPose(pickupOneFinish, 3,3, Math.toRadians(3))) {
-                        robot.inDep.setIntake(0);
                         robot.inDep.setTransfer(0);
                         setPathState(3);
                     }
@@ -213,7 +211,6 @@ public class PeekskillCL extends LinearOpMode {
                         pathF5 = false;
                     }
                     if (follower.atPose(pickupTwo, 3,3, Math.toRadians(3))) {
-                        robot.inDep.setIntake(0.6);
                         robot.inDep.setTransfer(0.6);
                         setPathState(5);
                     }
@@ -226,7 +223,6 @@ public class PeekskillCL extends LinearOpMode {
                         pathF6 = false;
                     }
                     if (follower.atPose(pickupTwoFinish, 3,3, Math.toRadians(3))) {
-                        robot.inDep.setIntake(0);
                         robot.inDep.setTransfer(0);
                         setPathState(6);
                     }
@@ -253,7 +249,6 @@ public class PeekskillCL extends LinearOpMode {
                         pathF8 = false;
                     }
                     if (follower.atPose(pickupThree, 3,3,Math.toRadians(3))) {
-                        robot.inDep.setIntake(0.6);
                         robot.inDep.setTransfer(0.6);
                         setPathState(8);
                     }
@@ -266,7 +261,6 @@ public class PeekskillCL extends LinearOpMode {
                         pathF9 = false;
                     }
                     if (follower.atPose(pickupThreeFinish,3,3,Math.toRadians(3))) {
-                        robot.inDep.setIntake(0);
                         robot.inDep.setTransfer(0);
                         setPathState(9);
                     }

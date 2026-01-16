@@ -73,14 +73,12 @@ public class InDepSubsystem extends SubsystemBase {
             double clamped = clamp(power);
             PanelsTelemetry.INSTANCE.getTelemetry().addData("Clamped", clamped);
             hardwareRobot.shooter.set(clamped);
+            hardwareRobot.shooter2.set(clamped);
         } else {
             time = new ElapsedTime();
             kP = initKP;
             lastV = 0;
         }
-    }
-    public void setIntake(double p) {
-        hardwareRobot.intake.set(p);
     }
     public void toggleServo() {
         if (hardwareRobot.transferServo.getPosition() == 0.38) {

@@ -13,7 +13,6 @@ public class IntakeTest extends LinearOpMode {
         this.robot = new RobotSystem(hardwareMap, this);
         waitForStart();
         while (opModeIsActive()) {
-            robot.inDep.setIntake(0.6);
         }
     }
 }

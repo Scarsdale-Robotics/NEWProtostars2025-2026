@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.CV;
 
+import com.arcrobotics.ftclib.controller.PIDController;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.PanelsTelemetry;
@@ -23,21 +24,28 @@ public class DrTest extends LinearOpMode {
     public static double kP = 0.0005;
     public static double initKP = 0.0005;
     public double lastV = 0;
+    public static double ticks = -1200;
+    public static double power = -0.6;
     public double kD = 0.000001;
     public Motor rightFront;
     public Motor rightBack;
     public Motor leftFront;
     public Motor leftBack;
     public Motor shooter;
+    public Motor shooter2;
     public Servo hoodServo;
     public DriveSubsystem drive;
+    public PIDController pid;
     public GoBildaPinpointDriver pp;
+    public boolean lastServo = false;
     //public Motor transfer;
     @Override
     public void runOpMode() throws InterruptedException {
+        this.pid = new PIDController(0.0001, 0.001, 0.0001);
         this.time = null;
         this.hoodServo = hardwareMap.get(Servo.class, "servo");
         this.shooter = new Motor(hardwareMap, "shooter", Motor.GoBILDA.RPM_1620);
+        this.shooter2 = new Motor(hardwareMap, "shooter2", Motor.GoBILDA.RPM_1620);
         this.pp = hardwareMap.get(GoBildaPinpointDriver.class, "pp");
         pp.setOffsets(7,1.5, DistanceUnit.INCH);
         pp.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
@@ -54,6 +62,7 @@ public class DrTest extends LinearOpMode {
         leftBack.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rightBack.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         shooter.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        shooter2.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         //transfer.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         leftFront.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -61,6 +70,7 @@ public class DrTest extends LinearOpMode {
         leftBack.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         rightBack.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         shooter.motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        shooter2.motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         //transfer.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         leftFront.setRunMode(Motor.RunMode.RawPower);
@@ -68,6 +78,7 @@ public class DrTest extends LinearOpMode {
         leftBack.setRunMode(Motor.RunMode.RawPower);
         rightBack.setRunMode(Motor.RunMode.RawPower);
         shooter.setRunMode(Motor.RunMode.RawPower);
+        shooter2.setRunMode(Motor.RunMode.RawPower);
         //transfer.setRunMode(Motor.RunMode.RawPower);
 
         leftFront.setInverted(false);
@@ -80,6 +91,7 @@ public class DrTest extends LinearOpMode {
         leftBack.motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightBack.motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         shooter.motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        shooter2.motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         //transfer.motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
 
@@ -89,6 +101,7 @@ public class DrTest extends LinearOpMode {
         leftBack.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
         rightBack.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
         shooter.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
+        shooter2.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
         //transfer.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
 
 
@@ -102,21 +115,28 @@ public class DrTest extends LinearOpMode {
         waitForStart();
         while (opModeIsActive()) {
             pp.update();
-            if (gamepad1.circle) {
-                hoodServo.setPosition(hoodServo.getPosition() + 0.001);
-            }
-            else if (gamepad1.triangle) {
-                hoodServo.setPosition(hoodServo.getPosition() - 0.001);
+            boolean servo = gamepad1.circle;
+            if (servo && !lastServo) {
+                if (hoodServo.getPosition() == 0) {
+                    hoodServo.setPosition(0.3);
+                } else hoodServo.setPosition(0);
             }
             double strafe = gamepad1.left_stick_x;
             double forward = -gamepad1.left_stick_y;
             double turn = gamepad1.right_stick_x;
             double speed = 0.5;
-            if (gamepad1.dpad_up) setShooterVelocity(1400);
-            if (gamepad1.dpad_down) setShooterVelocity(1100);
-            if (gamepad1.dpad_left) shooter.set(0.9);
-            if (gamepad1.dpad_down) shooter.set(0.8);
-            else setShooterVelocity(0);
+            if (gamepad1.dpad_up) setShooterVelocity(ticks);
+            else if (gamepad1.dpad_left) {
+                shooter.set(-0.6);
+                shooter2.set(-0.6);
+            }
+            else if (gamepad1.dpad_down) {
+                shooterVelocityTwo(ticks);
+            }
+            else {
+                shooter.set(0);
+                shooter2.set(0);
+            }
             //transfer.set(-gamepad1.right_trigger);
             telemetry.addData("X", pp.getPosX(DistanceUnit.INCH));
             telemetry.addData("Y", pp.getPosY(DistanceUnit.INCH));
@@ -125,8 +145,10 @@ public class DrTest extends LinearOpMode {
             telemetry.addData("dpad down", gamepad1.dpad_down);
             telemetry.addData("dpad right", gamepad1.dpad_right);
             telemetry.addData("dpad left", gamepad1.dpad_left);
+            telemetry.addData("Hood", hoodServo.getPosition());
             telemetry.update();
             drive.driveRobotCentricPowers(strafe * speed, forward * speed, turn * speed);
+            lastServo = servo;
         }
     }
     public void setShooterVelocity(double tps){
@@ -146,14 +168,26 @@ public class DrTest extends LinearOpMode {
             telemetry.addData("KP", kP);
             double clamped = clamp(power);
             telemetry.addData("Clamped", clamped);
-            shooter.set(clamped);
+            shooter.set(-clamped);
+            shooter2.set(-clamped);
         } else {
             time = new Timer();
             kP = initKP;
             lastV = 0;
         }
     }
+    public void shooterVelocityTwo(double tps) {
+        double error = shooter.getCorrectedVelocity() - tps;
+        double power = pid.calculate(error,0);
+        double clamped = clamp(power);
+        shooter.set(clamped);
+        shooter2.set(clamped);
+        telemetry.addData("Error", error);
+        telemetry.addData("Power", power);
+        telemetry.addData("Clamped", clamped);
+        telemetry.addData("Shooter Vel", shooter.getCorrectedVelocity());
+    }
     public double clamp(double value) {
-        return Math.max(0, Math.min(1, value));
+        return Math.max(-1, Math.min(1, value));
     }
 }

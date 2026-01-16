@@ -32,7 +32,7 @@ public class HardwareRobot {
     public final Servo transferServo;
     public final Motor transferMotor;
     public final Motor shooter;
-    public final Motor intake;
+    public final Motor shooter2;
     public final Servo hoodServo;
 
     public HardwareRobot(HardwareMap hardwareMap) {
@@ -72,27 +72,27 @@ public class HardwareRobot {
         rightBack.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
 
         turret = new Motor(hardwareMap, "turret", Motor.GoBILDA.RPM_312);
-        intake = new Motor(hardwareMap, "intake", Motor.GoBILDA.RPM_312);
+        shooter2 = new Motor(hardwareMap, "intake", Motor.GoBILDA.RPM_312);
         shooter = new Motor(hardwareMap, "shooter", Motor.GoBILDA.RPM_1620);
         transferMotor = new Motor(hardwareMap, "transferMotor", Motor.GoBILDA.RPM_312);
 
         turret.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        intake.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        shooter2.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         shooter.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         transferMotor.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         turret.motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        intake.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        shooter2.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         shooter.motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         transferMotor.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         turret.setRunMode(Motor.RunMode.RawPower);
-        intake.setRunMode(Motor.RunMode.RawPower);
+        shooter2.setRunMode(Motor.RunMode.RawPower);
         shooter.setRunMode(Motor.RunMode.RawPower);
         transferMotor.setRunMode(Motor.RunMode.RawPower);
 
         turret.motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        intake.motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        shooter2.motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         shooter.motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         transferMotor.motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 

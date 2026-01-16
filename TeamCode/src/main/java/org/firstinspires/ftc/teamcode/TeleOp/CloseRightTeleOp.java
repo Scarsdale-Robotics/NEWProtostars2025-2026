@@ -65,10 +65,6 @@ public class CloseRightTeleOp extends LinearOpMode {
             telemetry.addData("X", robot.hardwareRobot.pinpoint.getPosX(DistanceUnit.INCH));
             telemetry.addData("Y", robot.hardwareRobot.pinpoint.getPosY(DistanceUnit.INCH));
             robot.drive.driveRobotCentricPowers(strafe * speed, forward * speed, turn * speed);
-            boolean intakePressed = gamepad1.left_bumper;
-            if (intakePressed) robot.inDep.setIntake(0.75);
-            else if (gamepad1.right_bumper) robot.inDep.setIntake(-0.75);
-            else robot.inDep.setIntake(0);
             boolean transferPressed = gamepad1.triangle;
             if (transferPressed) robot.inDep.setTransfer(0.65);
             else if (gamepad1.circle) robot.inDep.setTransfer(-0.65);
