@@ -51,7 +51,6 @@ public class PeekskillFL extends LinearOpMode {
         setPathState(0);
         follower.setStartingPose(startPose);
         buildPaths();
-        robot.inDep.initControllers();
         waitForStart();
         while (opModeIsActive()) {
             //detectTags();

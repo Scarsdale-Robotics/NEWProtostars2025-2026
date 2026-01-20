@@ -48,7 +48,6 @@ public class CloseRightTeleOp extends LinearOpMode {
         robot.inDep.setShooterPower(0);
         robot.hardwareRobot.initOdom();
         robot.inDep.initAutoAim(false,false);
-        robot.inDep.initControllers();
         this.speed = 0.6;
         this.startPose = new Pose(88,8.5, Math.toRadians(90));
         this.alignGoal = new Pose(89,12, Math.toRadians(64.5));

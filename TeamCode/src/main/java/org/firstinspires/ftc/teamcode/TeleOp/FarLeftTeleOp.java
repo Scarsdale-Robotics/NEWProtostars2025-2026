@@ -48,7 +48,6 @@ public class FarLeftTeleOp extends LinearOpMode {
         robot.inDep.setShooterPower(0);
         robot.hardwareRobot.initOdom();
         robot.inDep.initAutoAim(true,true);
-        robot.inDep.initControllers();
         this.speed = 0.6;
         this.startPose = new Pose(37,134, Math.toRadians(270));
         this.alignGoal = new Pose(67,90, Math.toRadians(143));

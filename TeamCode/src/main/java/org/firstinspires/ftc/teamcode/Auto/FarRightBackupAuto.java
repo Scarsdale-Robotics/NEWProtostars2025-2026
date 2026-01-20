@@ -33,7 +33,6 @@ public class FarRightBackupAuto extends LinearOpMode {
         this.pathTimer = new Timer();
         this.opModeTimer = new Timer();
         opModeTimer.resetTimer();
-        robot.inDep.initControllers();
         follower = Constants.createFollower(hardwareMap);
         buildPaths();
         setPathState(0);

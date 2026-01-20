@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.CV;
 
 import com.arcrobotics.ftclib.controller.PIDController;
+import com.arcrobotics.ftclib.controller.PIDFController;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.PanelsTelemetry;
@@ -21,12 +22,10 @@ import org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem;
 @TeleOp(name = "Drive + Shooter 1/14")
 public class DrTest extends LinearOpMode {
     public Timer time;
-    public static double kP = 0.0005;
-    public static double initKP = 0.0005;
+    public static double kP = 0.0027;
+    public static double initKP = 0.0027;
     public double lastV = 0;
-    public static double ticks = -1200;
-    public static double power = -0.6;
-    public double kD = 0.000001;
+    public static double kF = 0;
     public Motor rightFront;
     public Motor rightBack;
     public Motor leftFront;
@@ -35,13 +34,15 @@ public class DrTest extends LinearOpMode {
     public Motor shooter2;
     public Servo hoodServo;
     public DriveSubsystem drive;
-    public PIDController pid;
+    public PIDFController pid;
     public GoBildaPinpointDriver pp;
     public boolean lastServo = false;
+    public PIDController pidTur;
+    public Motor turret;
     //public Motor transfer;
     @Override
     public void runOpMode() throws InterruptedException {
-        this.pid = new PIDController(0.0001, 0.001, 0.0001);
+        this.pid = new PIDFController(kP, 0, 0,kF);
         this.time = null;
         this.hoodServo = hardwareMap.get(Servo.class, "servo");
         this.shooter = new Motor(hardwareMap, "shooter", Motor.GoBILDA.RPM_1620);
@@ -54,6 +55,7 @@ public class DrTest extends LinearOpMode {
         rightFront = new Motor(hardwareMap, "rightFront", Motor.GoBILDA.RPM_435);
         leftBack = new Motor(hardwareMap, "leftBack", Motor.GoBILDA.RPM_435);
         rightBack = new Motor(hardwareMap, "rightBack", Motor.GoBILDA.RPM_435);
+        turret = new Motor(hardwareMap, "turret", Motor.GoBILDA.RPM_1150);
         //transfer = new Motor(hardwareMap, "transfer", Motor.GoBILDA.RPM_1620);
 
 
@@ -63,6 +65,7 @@ public class DrTest extends LinearOpMode {
         rightBack.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         shooter.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         shooter2.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        turret.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         //transfer.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         leftFront.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -71,6 +74,7 @@ public class DrTest extends LinearOpMode {
         rightBack.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         shooter.motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         shooter2.motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        turret.motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         //transfer.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         leftFront.setRunMode(Motor.RunMode.RawPower);
@@ -79,6 +83,7 @@ public class DrTest extends LinearOpMode {
         rightBack.setRunMode(Motor.RunMode.RawPower);
         shooter.setRunMode(Motor.RunMode.RawPower);
         shooter2.setRunMode(Motor.RunMode.RawPower);
+        turret.setRunMode(Motor.RunMode.RawPower);
         //transfer.setRunMode(Motor.RunMode.RawPower);
 
         leftFront.setInverted(false);
@@ -92,6 +97,7 @@ public class DrTest extends LinearOpMode {
         rightBack.motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         shooter.motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         shooter2.motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        turret.motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         //transfer.motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
 
@@ -102,6 +108,7 @@ public class DrTest extends LinearOpMode {
         rightBack.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
         shooter.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
         shooter2.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
+        turret.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
         //transfer.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
 
 
@@ -125,18 +132,16 @@ public class DrTest extends LinearOpMode {
             double forward = -gamepad1.left_stick_y;
             double turn = gamepad1.right_stick_x;
             double speed = 0.5;
-            if (gamepad1.dpad_up) setShooterVelocity(ticks);
-            else if (gamepad1.dpad_left) {
-                shooter.set(-0.6);
-                shooter2.set(-0.6);
-            }
+            if (gamepad1.dpad_up) setShooterVelocity(1200);
             else if (gamepad1.dpad_down) {
-                shooterVelocityTwo(ticks);
+                shooterVelocityTwo(-1400);
             }
             else {
                 shooter.set(0);
                 shooter2.set(0);
             }
+            double tp = gamepad1.right_stick_x;
+            turret.set(tp);
             //transfer.set(-gamepad1.right_trigger);
             telemetry.addData("X", pp.getPosX(DistanceUnit.INCH));
             telemetry.addData("Y", pp.getPosY(DistanceUnit.INCH));
@@ -146,6 +151,7 @@ public class DrTest extends LinearOpMode {
             telemetry.addData("dpad right", gamepad1.dpad_right);
             telemetry.addData("dpad left", gamepad1.dpad_left);
             telemetry.addData("Hood", hoodServo.getPosition());
+            telemetry.addData("TurretPosition", turret.getCurrentPosition());
             telemetry.update();
             drive.driveRobotCentricPowers(strafe * speed, forward * speed, turn * speed);
             lastServo = servo;
@@ -175,6 +181,16 @@ public class DrTest extends LinearOpMode {
             kP = initKP;
             lastV = 0;
         }
+    }
+    public void turretPID(double tps) {
+        double error = turret.getCorrectedVelocity() - tps;
+        double power = pidTur.calculate(error,0);
+        double clamped = clamp(power);
+        turret.set(clamped);
+        telemetry.addData("Error", error);
+        telemetry.addData("Power", power);
+        telemetry.addData("Clamped", clamped);
+        telemetry.addData("Tur Pos", turret.getCurrentPosition());
     }
     public void shooterVelocityTwo(double tps) {
         double error = shooter.getCorrectedVelocity() - tps;

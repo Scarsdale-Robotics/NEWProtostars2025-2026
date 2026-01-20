@@ -48,7 +48,6 @@ public class FINALTELEOP extends LinearOpMode {
         robot.inDep.setShooterPower(0);
         robot.hardwareRobot.initOdom();
         robot.inDep.initAutoAim(false,false);
-        robot.inDep.initControllers();
         this.speed = 0.6;
         this.startPose = new Pose();
         this.alignGoal = new Pose();

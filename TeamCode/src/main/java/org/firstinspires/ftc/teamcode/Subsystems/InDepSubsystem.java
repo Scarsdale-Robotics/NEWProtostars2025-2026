@@ -36,7 +36,8 @@ public class InDepSubsystem extends SubsystemBase {
     public HardwareRobot hardwareRobot;
     public DriveSubsystem drive;
     public LinearOpMode opMode;
-    public static double KS;
+    public PIDFController pid;
+    public PIDController pidTurret;
     public InDepSubsystem(LinearOpMode opMode, HardwareMap hardwareMap) {
         this.hardwareRobot = new HardwareRobot(hardwareMap);
         this.drive = new DriveSubsystem(
@@ -46,46 +47,28 @@ public class InDepSubsystem extends SubsystemBase {
           hardwareRobot.rightBack
         );
         this.opMode = opMode;
+        this.pid = new PIDFController(0.0027,0,0,0);
+        this.pidTurret = new PIDController(0.01,0.002,0.0005);
     }
     public void setShooterPower(double power){
         hardwareRobot.shooter.set(power);
     }
-    public ElapsedTime time = null;
-    double lastV = 0.0;
-    public static double kP = 0.0035;
-    public static double initKP = 0.0035;
-    //TODO: tune for consistency so auto aim actually works
-    public void setShooterVelocity(double tps){
-        if (!opMode.opModeIsActive()) return;
-        if (time != null) {
-            double dt = time.seconds();
-            time.reset();
-            PanelsTelemetry.INSTANCE.getTelemetry().addData("shooter dt (secs)", dt);
-            double v = hardwareRobot.shooter.getCorrectedVelocity();
-            double dv = v - lastV;
-            lastV = v;
-            PanelsTelemetry.INSTANCE.getTelemetry().addData("shooter v (tps)", v);
-            double a = dv/dt;
-            PanelsTelemetry.INSTANCE.getTelemetry().addData("shooter a (tpss)", a);
-            double power = kP * (tps - v);
-            PanelsTelemetry.INSTANCE.getTelemetry().addData("shooter power", power);
-            PanelsTelemetry.INSTANCE.getTelemetry().addData("KP", kP);
-            double clamped = clamp(power);
-            PanelsTelemetry.INSTANCE.getTelemetry().addData("Clamped", clamped);
-            hardwareRobot.shooter.set(clamped);
-            hardwareRobot.shooter2.set(clamped);
-        } else {
-            time = new ElapsedTime();
-            kP = initKP;
-            lastV = 0;
-        }
+    public void setShooterVelocity(double tps) {
+        double error = hardwareRobot.shooter.getCorrectedVelocity() - tps;
+        double power = pid.calculate(error,0);
+        double clamped = clamp(power);
+        hardwareRobot.shooter.set(clamped);
+        hardwareRobot.shooter2.set(clamped);
+        opMode.telemetry.addData("Error", error);
+        opMode.telemetry.addData("Power", power);
+        opMode.telemetry.addData("Clamped", clamped);
+        opMode.telemetry.addData("Shooter Vel", hardwareRobot.shooter.getCorrectedVelocity());
     }
     public void toggleServo() {
         if (hardwareRobot.transferServo.getPosition() == 0.38) {
             hardwareRobot.transferServo.setPosition(0.57);
         } else hardwareRobot.transferServo.setPosition(0.38);
     }
-    public static PIDController pidTurret = new PIDController(0.01,0.002,0.0005);
     public void setTurretPosition(double ticks){
         PIDController pidTurret = new PIDController(0.01,0.002,0.0005);
         while (opMode.opModeIsActive()) {
@@ -144,11 +127,7 @@ public class InDepSubsystem extends SubsystemBase {
     public double clamp(double value) {
         return Math.max(0, Math.min(1, value));
     }
-    public void initControllers() {
-        pidTurret.setTolerance(2);
-        pidTurret.setSetPoint(0);
-        KS = 0;
-    }
+    public ElapsedTime time;
     public void resetUnloadMacro() {
         time = null;
     }
@@ -156,7 +135,6 @@ public class InDepSubsystem extends SubsystemBase {
     public static int x;
     public static int y;
     public static Pose sp;
-    public static PIDController pidA = new PIDController(0.01,0.001,0.0001);
     public void initAutoAim(boolean blue, boolean far) {
         if (blue) {
             x = 13;
@@ -169,8 +147,6 @@ public class InDepSubsystem extends SubsystemBase {
         if (!far && blue) sp = new Pose(56,8,Math.toRadians(90));
         if (far && !blue) sp = new Pose(111,135,Math.toRadians(270));
         if (!far && !blue) sp = new Pose(88,8.5,Math.toRadians(90));
-        pidA.setSetPoint(0);
-        pidA.setTolerance(1);
     }
     public void autoAim(Follower follower) {
         double tR = getTurretRelToRobot();
@@ -178,7 +154,7 @@ public class InDepSubsystem extends SubsystemBase {
         double gF = Math.toDegrees(Math.atan2(Math.abs(x - follower.getPose().getX()), Math.abs(y - follower.getPose().getY())));
         double tF = tR - rF;
         double angleError = 90 - gF - tF;
-        double power = pidA.calculate(angleError, 0);
+        double power = pidTurret.calculate(angleError, 0);
         double clamped = clamp(power);
         setTurretPower(clamped);
         hoodServo(hoodAngle(x,y,follower));

@@ -29,7 +29,6 @@ public class FarLeftBackupAuto extends LinearOpMode {
         this.robot = new RobotSystem(hardwareMap, this);
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(startPose);
-        robot.inDep.initControllers();
         this.pathTimer = new Timer();
         this.opModeTimer = new Timer();
         buildPaths();
