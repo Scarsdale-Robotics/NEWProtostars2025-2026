@@ -48,7 +48,7 @@ public class InDepSubsystem extends SubsystemBase {
         );
         this.opMode = opMode;
         this.pid = new PIDFController(0.0027,0,0,0);
-        this.pidTurret = new PIDController(0.01,0.002,0.0005);
+        this.pidTurret = new PIDController(0.003,0,0);
     }
     public void setShooterPower(double power){
         hardwareRobot.shooter.set(power);
@@ -69,16 +69,16 @@ public class InDepSubsystem extends SubsystemBase {
             hardwareRobot.transferServo.setPosition(0.57);
         } else hardwareRobot.transferServo.setPosition(0.38);
     }
-    public void setTurretPosition(double ticks){
-        PIDController pidTurret = new PIDController(0.01,0.002,0.0005);
-        while (opMode.opModeIsActive()) {
-            double current = hardwareRobot.turret.getCurrentPosition();
-            double error = current - ticks;
-            if (Math.abs(error) <= 5) break;
-            double power = pidTurret.calculate(error,0);
-            double clamped = clamp(power);
-            hardwareRobot.turret.set(clamped);
-        }
+    public void setTurretPosition(double turretPos){
+      double error = hardwareRobot.turret.getCurrentPosition() - turretPos;
+      double power = pidTurret.calculate(error,0);
+      double clamped = clamp(power);
+      hardwareRobot.turret.set(clamped);
+      opMode.telemetry.addData("Error", error);
+      opMode.telemetry.addData("Power", power);
+      opMode.telemetry.addData("Clamped", clamped);
+      opMode.telemetry.addData("Tur Pos", hardwareRobot.turret.getCurrentPosition());
+      opMode.telemetry.update();
     }
     public void setTurretPower(double p) {
         hardwareRobot.turret.set(p);
@@ -156,7 +156,7 @@ public class InDepSubsystem extends SubsystemBase {
         double angleError = 90 - gF - tF;
         double power = pidTurret.calculate(angleError, 0);
         double clamped = clamp(power);
-        setTurretPower(clamped);
+        hardwareRobot.turret.set(clamped);
         hoodServo(hoodAngle(x,y,follower));
         setShooterVelocity(shooterVelocity(x,y,follower));
     }

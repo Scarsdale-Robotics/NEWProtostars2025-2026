@@ -14,7 +14,7 @@ public class TurTest extends LinearOpMode {
     public static double kD = 0.00001;
     @Override
     public void runOpMode() throws InterruptedException {
-        this.pidTur = new PIDController(0.0001,0.01,0.00001);
+        this.pidTur = new PIDController(0.003,0,0);
         turret = new Motor(hardwareMap, "turret", Motor.GoBILDA.RPM_1150);
         //transfer = new Motor(hardwareMap, "transfer", Motor.GoBILDA.RPM_1620);
         turret.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -30,6 +30,7 @@ public class TurTest extends LinearOpMode {
         waitForStart();
         if (opModeIsActive()) {
             turretPID(400);
+            turretPID(0);
         }
     }
     public void turretPID(double turretPos) {
@@ -43,6 +44,7 @@ public class TurTest extends LinearOpMode {
             telemetry.addData("Clamped", clamped);
             telemetry.addData("Tur Pos", turret.getCurrentPosition());
             telemetry.update();
+            if (Math.abs(error) < 1) break;
         }
     }
     public double clamp(double value) {
