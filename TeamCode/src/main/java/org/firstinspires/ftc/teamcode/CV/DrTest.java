@@ -23,6 +23,9 @@ import org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem;
 public class DrTest extends LinearOpMode {
     public Timer time;
     public static double kP = 0.0027;
+    public static double kP2 = 0.001;
+    public static double kI2 = 0.001;
+    public static double kD2 = 0.001;
     public static double initKP = 0.0027;
     public double lastV = 0;
     public static double kF = 0;
@@ -32,6 +35,7 @@ public class DrTest extends LinearOpMode {
     public Motor leftBack;
     public Motor shooter;
     public Motor shooter2;
+    public boolean lastTurret = false;
     public Servo hoodServo;
     public DriveSubsystem drive;
     public PIDFController pid;
@@ -42,6 +46,7 @@ public class DrTest extends LinearOpMode {
     //public Motor transfer;
     @Override
     public void runOpMode() throws InterruptedException {
+        this.pidTur = new PIDController(kP2,kI2,kD2);
         this.pid = new PIDFController(kP, 0, 0,kF);
         this.time = null;
         this.hoodServo = hardwareMap.get(Servo.class, "servo");
@@ -140,8 +145,6 @@ public class DrTest extends LinearOpMode {
                 shooter.set(0);
                 shooter2.set(0);
             }
-            double tp = gamepad1.right_stick_x;
-            turret.set(tp);
             //transfer.set(-gamepad1.right_trigger);
             telemetry.addData("X", pp.getPosX(DistanceUnit.INCH));
             telemetry.addData("Y", pp.getPosY(DistanceUnit.INCH));
@@ -155,6 +158,7 @@ public class DrTest extends LinearOpMode {
             telemetry.update();
             drive.driveRobotCentricPowers(strafe * speed, forward * speed, turn * speed);
             lastServo = servo;
+            lastTurret = gamepad1.right_bumper;
         }
     }
     public void setShooterVelocity(double tps){
@@ -183,14 +187,16 @@ public class DrTest extends LinearOpMode {
         }
     }
     public void turretPID(double tps) {
-        double error = turret.getCorrectedVelocity() - tps;
-        double power = pidTur.calculate(error,0);
-        double clamped = clamp(power);
-        turret.set(clamped);
-        telemetry.addData("Error", error);
-        telemetry.addData("Power", power);
-        telemetry.addData("Clamped", clamped);
-        telemetry.addData("Tur Pos", turret.getCurrentPosition());
+        while (opModeIsActive()) {
+            double error = turret.getCorrectedVelocity() - tps;
+            double power = pidTur.calculate(error,0);
+            double clamped = clamp(power);
+            turret.set(clamped);
+            telemetry.addData("Error", error);
+            telemetry.addData("Power", power);
+            telemetry.addData("Clamped", clamped);
+            telemetry.addData("Tur Pos", turret.getCurrentPosition());
+        }
     }
     public void shooterVelocityTwo(double tps) {
         double error = shooter.getCorrectedVelocity() - tps;
