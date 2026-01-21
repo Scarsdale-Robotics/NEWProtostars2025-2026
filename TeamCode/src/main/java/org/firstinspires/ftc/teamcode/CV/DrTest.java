@@ -91,8 +91,8 @@ public class DrTest extends LinearOpMode {
         turret.setRunMode(Motor.RunMode.RawPower);
         //transfer.setRunMode(Motor.RunMode.RawPower);
 
-        leftFront.setInverted(false);
-        rightFront.setInverted(true);
+        leftFront.setInverted(true);
+        rightFront.setInverted(false);
         leftBack.setInverted(true);
         rightBack.setInverted(false);
 

@@ -15,7 +15,7 @@ public class DriveSubsystem extends SubsystemBase {
     private final Motor rightFront;
     private final Motor leftBack;
     private final Motor rightBack;
-    private final MecanumDrive controller;
+    public final MecanumDrive controller;
 
     /// POWERS ///
     public double driveSpeed;
