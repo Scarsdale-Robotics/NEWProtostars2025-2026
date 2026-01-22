@@ -152,10 +152,10 @@ public class InDepSubsystem extends SubsystemBase {
     }
     public void autoAim(Follower follower) {
         double tR = getTurretRelToRobot();
-        double rF = hardwareRobot.pinpoint.getHeading(AngleUnit.DEGREES);
-        double gF = Math.toDegrees(Math.atan2(Math.abs(x - follower.getPose().getX()), Math.abs(y - follower.getPose().getY())));
-        double tF = tR - rF;
-        double angleError = 90 - gF - tF;
+        double rF = Math.toDegrees(follower.getHeading());
+        double gF = Math.toDegrees(Math.atan2(y - follower.getPose().getY(), x - follower.getPose().getX()));
+        double tt = gF - rF;
+        double angleError = tt - tR;
         double power = pidTurret.calculate(angleError, 0);
         double clamped = clamp(power);
         hardwareRobot.turret.set(clamped);
@@ -172,7 +172,7 @@ public class InDepSubsystem extends SubsystemBase {
     //TODO: implement ticks - angle rel to robot
     public double getTurretRelToRobot() {
         double current = hardwareRobot.turret.getCurrentPosition();
-        double curFrac = current / new RobotConstants().fullTurnTurret;
+        double curFrac = current / (1484*2);
         double ans = curFrac * 360;
         return ans;
     }

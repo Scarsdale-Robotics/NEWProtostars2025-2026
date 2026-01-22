@@ -19,12 +19,13 @@ public class AutoAimTest extends LinearOpMode {
   public Motor turret;
   public PIDController pidTur;
   public static double tps = -1400;
+  public boolean lastAlign = false;
   public GoBildaPinpointDriver pinpoint;
   public static double x = 13;
   public static double y = 135;
   public Follower follower;
   public FollowerConstants constants;
-  public Pose startPose = new Pose(0,0,0);
+  public Pose startPose = new Pose(56,8,0);
   @Override
   public void runOpMode() throws InterruptedException {
       follower = Constants.createFollower(hardwareMap);
@@ -46,7 +47,25 @@ public class AutoAimTest extends LinearOpMode {
       waitForStart();
       while (opModeIsActive()) {
           follower.update();
-          autoAim(follower);
+          telemetry.addData("Follower X", follower.getPose().getX());
+          telemetry.addData("Follower Y", follower.getPose().getY());
+          telemetry.addData("Follower H", Math.toDegrees(follower.getPose().getHeading()));
+          telemetry.addData("tr", getTurretRelToRobot());
+          telemetry.addData("rf", Math.toDegrees(follower.getHeading()));
+          telemetry.addData("gf", Math.toDegrees(Math.atan2(y - follower.getPose().getY(), x - follower.getPose().getX())));
+          telemetry.addData("tt", Math.toDegrees(Math.atan2(y - follower.getPose().getY(), x - follower.getPose().getX())) - Math.toDegrees(follower.getHeading()));
+          double tR = getTurretRelToRobot();
+          double rF = Math.toDegrees(follower.getHeading());
+          double gF = Math.toDegrees(Math.atan2(y - follower.getPose().getY(), x - follower.getPose().getX()));
+          double tt = gF - rF;
+          double angleError = tt - tR;
+          telemetry.addData("error", angleError);
+          boolean align = gamepad1.dpad_up;
+          if (align && !lastAlign){
+              autoAim(follower);
+          }
+          telemetry.update();
+          lastAlign = align;
       }
   }
     public double hoodAngle(double x, double y, Follower follower) {
@@ -57,17 +76,22 @@ public class AutoAimTest extends LinearOpMode {
         return 2 * Math.pow(dist,2) + 6 * dist - 5;
     }
     public void autoAim(Follower follower) {
-        double tR = getTurretRelToRobot();
-        double rF = pinpoint.getHeading(AngleUnit.DEGREES);
-        double gF = Math.toDegrees(Math.atan2(Math.abs(x - follower.getPose().getX()), Math.abs(y - follower.getPose().getY())));
-        double tF = tR - rF;
-        double angleError = 90 - gF - tF;
-        double power = pidTur.calculate(angleError, 0);
-        double clamped = clamp(power);
-        turret.set(clamped);
+      while (opModeIsActive()) {
+          double tR = getTurretRelToRobot();
+          double rF = Math.toDegrees(follower.getHeading());
+          double gF = Math.toDegrees(Math.atan2(y - follower.getPose().getY(), x - follower.getPose().getX()));
+          double tt = gF - rF;
+          double angleError = tt - tR;
+          double power = pidTur.calculate(angleError, 0);
+          double clamped = clamp(power);
+          turret.set(-clamped);
+          telemetry.addData("clamped", clamped);
+          telemetry.addData("power", power);
+          if (Math.abs(angleError) < 3) break;
+      }
     }
   public double clamp(double value) {
-    return Math.max(-0.8, Math.min(0.8, value));
+    return Math.max(-0.6, Math.min(0.6, value));
   }
   public double getTurretRelToRobot() {
     double current = turret.getCurrentPosition();
