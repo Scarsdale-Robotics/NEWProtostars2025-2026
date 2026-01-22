@@ -65,9 +65,9 @@ public class InDepSubsystem extends SubsystemBase {
         opMode.telemetry.addData("Shooter Vel", hardwareRobot.shooter.getCorrectedVelocity());
     }
     public void toggleServo() {
-        if (hardwareRobot.transferServo.getPosition() == 0.38) {
-            hardwareRobot.transferServo.setPosition(0.57);
-        } else hardwareRobot.transferServo.setPosition(0.38);
+        if (hardwareRobot.transferServo.getPosition() == 0.75) {
+            hardwareRobot.transferServo.setPosition(0.67);
+        } else hardwareRobot.transferServo.setPosition(0.75);
     }
     public void setTurretPosition(double turretPos){
       double error = hardwareRobot.turret.getCurrentPosition() - turretPos;

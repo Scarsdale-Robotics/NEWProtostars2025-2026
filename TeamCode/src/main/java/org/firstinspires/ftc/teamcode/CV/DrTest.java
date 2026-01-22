@@ -52,7 +52,7 @@ public class DrTest extends LinearOpMode {
         this.hoodServo = hardwareMap.get(Servo.class, "servo");
         this.shooter = new Motor(hardwareMap, "shooter", Motor.GoBILDA.RPM_1620);
         this.shooter2 = new Motor(hardwareMap, "shooter2", Motor.GoBILDA.RPM_1620);
-        this.pp = hardwareMap.get(GoBildaPinpointDriver.class, "pp");
+        this.pp = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
         pp.setOffsets(7,1.5, DistanceUnit.INCH);
         pp.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
         pp.resetPosAndIMU();
@@ -139,7 +139,7 @@ public class DrTest extends LinearOpMode {
             double speed = 0.5;
             if (gamepad1.dpad_up) setShooterVelocity(1200);
             else if (gamepad1.dpad_down) {
-                shooterVelocityTwo(-1400);
+                shooterVelocityTwo(-2000);
             }
             else {
                 shooter.set(0);
