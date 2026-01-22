@@ -72,7 +72,7 @@ public class InDepSubsystem extends SubsystemBase {
     public void setTurretPosition(double turretPos){
       double error = hardwareRobot.turret.getCurrentPosition() - turretPos;
       double power = pidTurret.calculate(error,0);
-      double clamped = clamp(power);
+      double clamped = clamp2(power);
       hardwareRobot.turret.set(clamped);
       opMode.telemetry.addData("Error", error);
       opMode.telemetry.addData("Power", power);
@@ -99,7 +99,6 @@ public class InDepSubsystem extends SubsystemBase {
             double forward = opMode.gamepad1.left_stick_y;
             double turn = opMode.gamepad1.right_stick_x;
             drive.driveRobotCentricPowers(strafe * 0.6, forward * 0.6, turn * 0.6);
-            setShooterVelocity(1810);
             setTransfer(0.5);
             if (opTimer.getElapsedTimeSeconds() >= 3 && pathState == 1) {
                 toggleServo();
@@ -119,14 +118,17 @@ public class InDepSubsystem extends SubsystemBase {
             }
             if (opTimer.getElapsedTimeSeconds() >= 8 && pathState == 5) {
                 setTransfer(0);
-                setShooterVelocity(0);
                 break;
             }
         }
     }
     public double clamp(double value) {
-        return Math.max(0, Math.min(1, value));
+        return Math.max(-1, Math.min(1, value));
     }
+    public double clamp2(double value) {
+        return Math.max(-0.8, Math.min(0.8, value));
+    }
+
     public ElapsedTime time;
     public void resetUnloadMacro() {
         time = null;
