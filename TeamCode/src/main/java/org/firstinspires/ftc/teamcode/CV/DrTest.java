@@ -52,7 +52,7 @@ public class DrTest extends LinearOpMode {
         this.hoodServo = hardwareMap.get(Servo.class, "servo");
         this.shooter = new Motor(hardwareMap, "shooter", Motor.GoBILDA.RPM_1620);
         this.shooter2 = new Motor(hardwareMap, "shooter2", Motor.GoBILDA.RPM_1620);
-        this.pp = hardwareMap.get(GoBildaPinpointDriver.class, "pp");
+        this.pp = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
         pp.setOffsets(7,1.5, DistanceUnit.INCH);
         pp.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
         pp.resetPosAndIMU();
@@ -130,7 +130,7 @@ public class DrTest extends LinearOpMode {
             boolean servo = gamepad1.circle;
             if (servo && !lastServo) {
                 if (hoodServo.getPosition() == 0) {
-                    hoodServo.setPosition(0.3);
+                    hoodServo.setPosition(-0.3);
                 } else hoodServo.setPosition(0);
             }
             double strafe = gamepad1.left_stick_x;
@@ -139,7 +139,7 @@ public class DrTest extends LinearOpMode {
             double speed = 0.5;
             if (gamepad1.dpad_up) setShooterVelocity(1200);
             else if (gamepad1.dpad_down) {
-                shooterVelocityTwo(-1400);
+                shooterVelocityTwo(-2000);
             }
             else {
                 shooter.set(0);
@@ -155,6 +155,7 @@ public class DrTest extends LinearOpMode {
             telemetry.addData("dpad left", gamepad1.dpad_left);
             telemetry.addData("Hood", hoodServo.getPosition());
             telemetry.addData("TurretPosition", turret.getCurrentPosition());
+            telemetry.addData("TR", getTurretRelToRobot());
             telemetry.update();
             drive.driveRobotCentricPowers(strafe * speed, forward * speed, turn * speed);
             lastServo = servo;
@@ -197,6 +198,12 @@ public class DrTest extends LinearOpMode {
             telemetry.addData("Clamped", clamped);
             telemetry.addData("Tur Pos", turret.getCurrentPosition());
         }
+    }
+    public double getTurretRelToRobot() {
+        double current = turret.getCurrentPosition();
+        double curFrac = current / (1484 * 2);
+        double ans = curFrac * 360;
+        return ans;
     }
     public void shooterVelocityTwo(double tps) {
         double error = shooter.getCorrectedVelocity() - tps;
