@@ -74,7 +74,7 @@ public class AutoAimTest extends LinearOpMode {
           double tR = getTurretRelToRobot();
           double rF = Math.toDegrees(follower.getHeading());
           double gF = Math.toDegrees(Math.atan2(y - follower.getPose().getY(), x - follower.getPose().getX()));
-          double tt = gF - rF;
+          double tt = rF - gF;
           double angleError = tt - tR;
           double power = pidTur.calculate(angleError, 0);
           double clamped = clamp(power);
