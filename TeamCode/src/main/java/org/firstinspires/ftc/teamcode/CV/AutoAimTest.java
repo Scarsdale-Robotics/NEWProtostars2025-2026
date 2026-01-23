@@ -13,7 +13,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.RobotConstants;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
-
+//TODO: WHEN THIS WORKS COPY INTO INDEPSUBSYSTEM
 @TeleOp (name = "AATest1/21")
 public class AutoAimTest extends LinearOpMode {
   public Motor turret;
@@ -60,7 +60,7 @@ public class AutoAimTest extends LinearOpMode {
         double tR = getTurretRelToRobot();
         double rF = pinpoint.getHeading(AngleUnit.DEGREES);
         double gF = Math.toDegrees(Math.atan2(Math.abs(x - follower.getPose().getX()), Math.abs(y - follower.getPose().getY())));
-        double tF = tR - rF;
+        double tF = rF - tR;
         double angleError = 90 - gF - tF;
         double power = pidTur.calculate(angleError, 0);
         double clamped = clamp(power);
