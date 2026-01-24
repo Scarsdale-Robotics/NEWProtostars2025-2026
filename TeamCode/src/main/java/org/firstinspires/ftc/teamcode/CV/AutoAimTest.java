@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.CV;
 import com.arcrobotics.ftclib.controller.PIDController;
 import com.arcrobotics.ftclib.controller.PIDFController;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
+import com.bylazar.configurables.annotations.Configurable;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.follower.FollowerConstants;
 import com.pedropathing.geometry.Pose;
@@ -10,28 +11,32 @@ import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.RobotConstants;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
-
+@Configurable
 @TeleOp (name = "AATest1/21")
 public class AutoAimTest extends LinearOpMode {
   public Motor turret;
   public PIDController pidTur;
-  public static double ticks = -1400;
+  public static double ticks = 1400;
+  public Servo hoodServo;
   public boolean lastAlign = false;
   public GoBildaPinpointDriver pinpoint;
-  public static double x = 13;
-  public static double y = 135;
+  public static double x = 10;
+  public static double y = 141;
   public Follower follower;
   public FollowerConstants constants;
   public Pose startPose = new Pose(56,8,Math.toRadians(90));
   public Motor shooter;
   public Motor shooter2;
   public PIDFController pid;
+  public static double hoodPos = 0.18;
   @Override
   public void runOpMode() throws InterruptedException {
+      this.hoodServo = hardwareMap.get(Servo.class, "hoodServo");
       follower = Constants.createFollower(hardwareMap);
       follower.setStartingPose(startPose);
       this.pid = new PIDFController(0.0027,0,0,0);
@@ -58,6 +63,8 @@ public class AutoAimTest extends LinearOpMode {
       shooter.motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
       shooter2.motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
       //transfer.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+      shooter.setInverted(true);
+      shooter2.setInverted(true);
 
       shooter.setRunMode(Motor.RunMode.RawPower);
       shooter2.setRunMode(Motor.RunMode.RawPower);
@@ -78,8 +85,10 @@ public class AutoAimTest extends LinearOpMode {
           telemetry.addData("Follower X", follower.getPose().getX());
           telemetry.addData("Follower Y", follower.getPose().getY());
           telemetry.addData("Follower H", Math.toDegrees(follower.getPose().getHeading()));
+          telemetry.addData("distance", Math.sqrt(Math.pow(x - follower.getPose().getX(),2) + Math.pow(y - follower.getPose().getY(),2)));
           autoAim(follower);
           shooterVelocityTwo(ticks);
+          hoodServo.setPosition(hoodPos);
           telemetry.update();
       }
   }
@@ -119,7 +128,6 @@ public class AutoAimTest extends LinearOpMode {
         telemetry.addData("rF", rF);
         telemetry.addData("gF", gF);
         telemetry.addData("tt", tt);
-        telemetry.update();
     }
   public double clamp(double value) {
     return Math.max(-1, Math.min(1, value));
