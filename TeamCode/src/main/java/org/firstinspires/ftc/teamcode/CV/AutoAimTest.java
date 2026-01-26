@@ -111,23 +111,23 @@ public class AutoAimTest extends LinearOpMode {
         telemetry.addData("Shooter Vel", shooter.getCorrectedVelocity());
     }
     public void autoAim(Follower follower) {
-          double tR = getTurretRelToRobot();
-          double rF = Math.toDegrees(follower.getHeading());
-          double gF = Math.toDegrees(Math.atan2(y - follower.getPose().getY(), x - follower.getPose().getX()));
-          double tt = rF - gF;
-          double ttClamped = clamp2(tt);
-          double angleError = tt - tR;
-          double power = pidTur.calculate(angleError, 0);
-          double clamped = clamp(power);
-          turret.set(clamped);
-          telemetry.addData("clamped", clamped);
-          telemetry.addData("ttclamped", ttClamped);
-          telemetry.addData("power", power);
-          telemetry.addData("error", angleError);
-          telemetry.addData("tR", tR);
-        telemetry.addData("rF", rF);
-        telemetry.addData("gF", gF);
-        telemetry.addData("tt", tt);
+      double tR = getTurretRelToRobot();
+      double rF = Math.toDegrees(follower.getHeading());
+      double gF = Math.toDegrees(Math.atan2(y - follower.getPose().getY(), x - follower.getPose().getX()));
+      double tt = rF - gF;
+      double ttClamped = clamp2(tt);
+      double angleError = tt - tR;
+      double power = pidTur.calculate(angleError, 0);
+      double clamped = clamp(power);
+      turret.set(clamped);
+      telemetry.addData("clamped", clamped);
+      telemetry.addData("ttclamped", ttClamped);
+      telemetry.addData("power", power);
+      telemetry.addData("error", angleError);
+      telemetry.addData("tR", tR);
+      telemetry.addData("rF", rF);
+      telemetry.addData("gF", gF);
+      telemetry.addData("tt", tt);
     }
   public double clamp(double value) {
     return Math.max(-1, Math.min(1, value));
