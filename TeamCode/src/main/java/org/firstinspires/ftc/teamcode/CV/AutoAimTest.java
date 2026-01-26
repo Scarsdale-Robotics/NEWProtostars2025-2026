@@ -17,13 +17,12 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.RobotConstants;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 @Configurable
-@TeleOp (name = "AATest1/21")
+@TeleOp (name = "AATest1/27")
 public class AutoAimTest extends LinearOpMode {
   public Motor turret;
   public PIDController pidTur;
   public static double ticks = 1400;
   public Servo hoodServo;
-  public boolean lastAlign = false;
   public GoBildaPinpointDriver pinpoint;
   public static double x = 10;
   public static double y = 141;
@@ -33,7 +32,6 @@ public class AutoAimTest extends LinearOpMode {
   public Motor shooter;
   public Motor shooter2;
   public PIDFController pid;
-  public static double hoodPos = 0.18;
   @Override
   public void runOpMode() throws InterruptedException {
       this.hoodServo = hardwareMap.get(Servo.class, "hoodServo");
@@ -88,12 +86,13 @@ public class AutoAimTest extends LinearOpMode {
           telemetry.addData("distance", Math.sqrt(Math.pow(x - follower.getPose().getX(),2) + Math.pow(y - follower.getPose().getY(),2)));
           autoAim(follower);
           shooterVelocityTwo(ticks);
-          hoodServo.setPosition(hoodPos);
+          hoodServo.setPosition(hoodAngle(x,y,follower));
           telemetry.update();
       }
   }
     public double hoodAngle(double x, double y, Follower follower) {
-        return 2 * Math.sqrt(Math.pow(x - follower.getPose().getX(),2) + Math.pow(y - follower.getPose().getY(), 2));
+      double dist = Math.sqrt(Math.pow(x - follower.getPose().getX(),2) + Math.pow(y - follower.getPose().getY(), 2));
+      return (-0.000818182 * dist) + 0.214545;
     }
     public double shooterVelocity(double x, double y, Follower follower) {
         double dist = Math.sqrt(Math.pow(x - follower.getPose().getX(),2) + Math.pow(y - follower.getPose().getY(),2));

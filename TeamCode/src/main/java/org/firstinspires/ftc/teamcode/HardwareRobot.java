@@ -26,7 +26,7 @@ public class HardwareRobot {
     public final Motor rightFront;
     public final Motor leftBack;
     public final Motor rightBack;
-    public final WebcamName cameraName;
+
     public final GoBildaPinpointDriver pinpoint;
     public final Motor turret;
     public final Servo transferServo;
@@ -95,11 +95,10 @@ public class HardwareRobot {
         shooter2.motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         shooter.motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         transferMotor.motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-
+        shooter.setInverted(true);
+        shooter2.setInverted(true);
 
         transferServo = hardwareMap.get(Servo.class, "transferServo");
-
-        cameraName = hardwareMap.get(WebcamName.class,  "Webcam 1");
 
         hoodServo = hardwareMap.get(Servo.class, "hoodServo");
 

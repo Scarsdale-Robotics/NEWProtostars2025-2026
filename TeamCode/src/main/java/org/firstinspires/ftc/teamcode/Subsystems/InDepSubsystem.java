@@ -139,11 +139,11 @@ public class InDepSubsystem extends SubsystemBase {
     public static Pose sp;
     public void initAutoAim(boolean blue, boolean far) {
         if (blue) {
-            x = 13;
-            y = 135;
+            x = 10;
+            y = 141;
         } else {
             x = 133;
-            y = 135;
+            y = 141;
         }
         if (far && blue) sp = new Pose(33,135,Math.toRadians(270));
         if (!far && blue) sp = new Pose(56,8,Math.toRadians(90));
@@ -154,26 +154,35 @@ public class InDepSubsystem extends SubsystemBase {
         double tR = getTurretRelToRobot();
         double rF = Math.toDegrees(follower.getHeading());
         double gF = Math.toDegrees(Math.atan2(y - follower.getPose().getY(), x - follower.getPose().getX()));
-        double tt = gF - rF;
+        double tt = rF - gF;
+        double ttClamped = clamp2(tt);
         double angleError = tt - tR;
         double power = pidTurret.calculate(angleError, 0);
         double clamped = clamp(power);
         hardwareRobot.turret.set(clamped);
+        opMode.telemetry.addData("clamped", clamped);
+        opMode.telemetry.addData("ttclamped", ttClamped);
+        opMode.telemetry.addData("power", power);
+        opMode.telemetry.addData("error", angleError);
+        opMode.telemetry.addData("tR", tR);
+        opMode.telemetry.addData("rF", rF);
+        opMode.telemetry.addData("gF", gF);
+        opMode.telemetry.addData("tt", tt);
         hoodServo(hoodAngle(x,y,follower));
         setShooterVelocity(shooterVelocity(x,y,follower));
     }
     public double hoodAngle(double x, double y, Follower follower) {
-        return 2 * Math.sqrt(Math.pow(x - follower.getPose().getX(),2) + Math.pow(y - follower.getPose().getY(), 2));
+        double dist = Math.sqrt(Math.pow(x - follower.getPose().getX(),2) + Math.pow(y - follower.getPose().getY(), 2));
+        return (-0.000818182 * dist) + 0.214545;
     }
     public double shooterVelocity(double x, double y, Follower follower) {
         double dist = Math.sqrt(Math.pow(x - follower.getPose().getX(),2) + Math.pow(y - follower.getPose().getY(),2));
         return 2 * Math.pow(dist,2) + 6 * dist - 5;
     }
-    //TODO: implement ticks - angle rel to robot
     public double getTurretRelToRobot() {
         double current = hardwareRobot.turret.getCurrentPosition();
-        double curFrac = current / (1484*2);
-        double ans = curFrac * 360;
+        double curFrac = current / (1484 * 2);
+        double ans = (-curFrac * 360) % 360;
         return ans;
     }
 }
