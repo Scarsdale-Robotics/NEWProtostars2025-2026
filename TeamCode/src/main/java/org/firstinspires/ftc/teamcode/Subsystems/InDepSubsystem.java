@@ -128,7 +128,9 @@ public class InDepSubsystem extends SubsystemBase {
     public double clamp2(double value) {
         return Math.max(-0.8, Math.min(0.8, value));
     }
-
+    public double clamp3(double val) {
+        return Math.max(45,Math.min(315, val));
+    }
     public ElapsedTime time;
     public void resetUnloadMacro() {
         time = null;
@@ -155,10 +157,10 @@ public class InDepSubsystem extends SubsystemBase {
         double rF = Math.toDegrees(follower.getHeading());
         double gF = Math.toDegrees(Math.atan2(y - follower.getPose().getY(), x - follower.getPose().getX()));
         double tt = rF - gF;
-        double ttClamped = clamp2(tt);
+        double ttClamped = clamp3(tt);
         double angleError = tt - tR;
         double power = pidTurret.calculate(angleError, 0);
-        double clamped = clamp(power);
+        double clamped = clamp2(power);
         hardwareRobot.turret.set(clamped);
         opMode.telemetry.addData("clamped", clamped);
         opMode.telemetry.addData("ttclamped", ttClamped);

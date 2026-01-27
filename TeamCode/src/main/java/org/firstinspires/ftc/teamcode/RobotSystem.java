@@ -12,7 +12,6 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import java.util.Optional;
 
 public class RobotSystem {
-    public final CVSubsystem cv;
     public final HardwareRobot hardwareRobot;
     public final DriveSubsystem drive;
     public final LinearOpMode opMode;
@@ -26,7 +25,6 @@ public class RobotSystem {
           hardwareRobot.rightBack
         );
         this.opMode = opMode;
-        this.cv = new CVSubsystem(hardwareRobot.cameraName, opMode, hardwareMap);
         this.inDep = new InDepSubsystem(opMode, hardwareMap);
     }
     public String decode(AprilTagDetection target) {

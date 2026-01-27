@@ -66,9 +66,6 @@ public class PeekskillCL extends LinearOpMode {
             telemetry.update();
         }
     }
-    public boolean xInchRadius(int radius, AprilTagDetection target) {
-        return target.ftcPose.range <= radius;
-    }
     public void buildPaths() {
         this.shootPreload = follower.pathBuilder()
                 .addPath(new BezierLine(startPose, startPosAfter))
@@ -116,24 +113,6 @@ public class PeekskillCL extends LinearOpMode {
                 .addPath(new BezierLine(alignGoal, finish))
                 .setLinearHeadingInterpolation(alignGoal.getHeading(), finish.getHeading())
                 .build();
-    }
-    public void detectTags() {
-        ArrayList<AprilTagDetection> detections = robot.cv.aprilTagProcessor.getDetections();
-        if (detections != null && !detections.isEmpty()) {
-            for (AprilTagDetection tag : detections) {
-                telemetry.addLine("AprilTag Detected.");
-                telemetry.addData("ID", tag.id);
-                telemetry.addData("X (Sideways offset)", tag.ftcPose.x);
-                telemetry.addData("Y (Forward/Back Offset)", tag.ftcPose.y);
-                telemetry.addData("Z", tag.ftcPose.z);
-                telemetry.addData("Bearing", tag.ftcPose.bearing);
-                telemetry.addData("Yaw", tag.ftcPose.yaw);
-                telemetry.addData("Range: ", tag.ftcPose.range);
-                lastTagDetected = tag;
-            }
-        } else {
-            lastTagDetected = null; // clear old tag when none detected
-        }
     }
     boolean pathF1 = true;
     boolean pathF2 = true;

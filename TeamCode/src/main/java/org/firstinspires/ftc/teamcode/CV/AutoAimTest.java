@@ -21,7 +21,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 public class AutoAimTest extends LinearOpMode {
   public Motor turret;
   public PIDController pidTur;
-  public static double ticks = 1400;
+  public static double ticks = 1000;
   public Servo hoodServo;
   public GoBildaPinpointDriver pinpoint;
   public static double x = 10;
@@ -114,11 +114,12 @@ public class AutoAimTest extends LinearOpMode {
       double rF = Math.toDegrees(follower.getHeading());
       double gF = Math.toDegrees(Math.atan2(y - follower.getPose().getY(), x - follower.getPose().getX()));
       double tt = rF - gF;
-      double ttClamped = clamp2(tt);
+      double ttClamped = clamp3(tt);
       double angleError = tt - tR;
       double power = pidTur.calculate(angleError, 0);
-      double clamped = clamp(power);
+      double clamped = clamp2(power);
       turret.set(clamped);
+      telemetry.addData("turret ticks", turret.getCurrentPosition());
       telemetry.addData("clamped", clamped);
       telemetry.addData("ttclamped", ttClamped);
       telemetry.addData("power", power);
@@ -131,6 +132,7 @@ public class AutoAimTest extends LinearOpMode {
   public double clamp(double value) {
     return Math.max(-1, Math.min(1, value));
   }
+
   public double getTurretRelToRobot() {
     double current = turret.getCurrentPosition();
     double curFrac = current / (1484 * 2);
@@ -138,6 +140,9 @@ public class AutoAimTest extends LinearOpMode {
     return ans;
   }
   public double clamp2(double val) {
+      return Math.max(-0.8, Math.min(0.8, val));
+  }
+  public double clamp3(double val) {
       return Math.max(45,Math.min(315, val));
     }
 }
