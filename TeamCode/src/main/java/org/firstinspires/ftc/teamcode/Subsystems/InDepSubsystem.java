@@ -149,7 +149,7 @@ public class InDepSubsystem extends SubsystemBase {
         if (!far && blue) sp = new Pose(56,8,Math.toRadians(90));
         if (far && !blue) sp = new Pose(111,135,Math.toRadians(270));
         if (!far && !blue) sp = new Pose(88,8.5,Math.toRadians(90));
-    }
+    } //test
     public void autoAim(Follower follower) {
         double tR = getTurretRelToRobot();
         double rF = Math.toDegrees(follower.getHeading());
