@@ -24,6 +24,9 @@ public class ShooterTest extends LinearOpMode {
         shooter2.setRunMode(Motor.RunMode.RawPower);
         //transfer.setRunMode(Motor.RunMode.RawPower);
 
+        shooter.setInverted(true);
+        shooter2.setInverted(true);
+
         shooter.motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         shooter2.motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         //transfer.motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);

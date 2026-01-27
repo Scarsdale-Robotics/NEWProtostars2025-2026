@@ -44,8 +44,18 @@ public class DrTest extends LinearOpMode {
     public PIDController pidTur;
     public Motor turret;
     //public Motor transfer;
+    public static boolean lb = false;
+    public static boolean rb = false;
+    public static boolean rf = false;
+    public static boolean lf = false;
+    public GoBildaPinpointDriver pinpoint;
     @Override
     public void runOpMode() throws InterruptedException {
+        this.pinpoint = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
+        pinpoint.resetPosAndIMU();
+        pinpoint.setOffsets(-6.2, -2, DistanceUnit.INCH);
+        pinpoint.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
+        pinpoint.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.REVERSED, GoBildaPinpointDriver.EncoderDirection.REVERSED);
         leftFront = new Motor(hardwareMap, "leftFront", Motor.GoBILDA.RPM_435);
         rightFront = new Motor(hardwareMap, "rightFront", Motor.GoBILDA.RPM_435);
         leftBack = new Motor(hardwareMap, "leftBack", Motor.GoBILDA.RPM_435);
@@ -66,10 +76,10 @@ public class DrTest extends LinearOpMode {
         leftBack.setRunMode(Motor.RunMode.RawPower);
         rightBack.setRunMode(Motor.RunMode.RawPower);
 
-        leftFront.setInverted(false);
+        leftFront.setInverted(true);
         rightFront.setInverted(true);
-        leftBack.setInverted(false);
-        rightBack.setInverted(false);
+        leftBack.setInverted(true);
+        rightBack.setInverted(true);
 
 
         leftFront.motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -93,6 +103,7 @@ public class DrTest extends LinearOpMode {
         );
         waitForStart();
         while (opModeIsActive()) {
+            pinpoint.update();
             double strafe = gamepad1.left_stick_x;
             double forward = -gamepad1.left_stick_y;
             double turn = gamepad1.right_stick_x;
@@ -105,8 +116,7 @@ public class DrTest extends LinearOpMode {
             telemetry.addData("RBPower", rightBack.get());
             telemetry.addData("RFPower", rightFront.get());
             telemetry.update();
-            drive.driveRobotCentricPowers(strafe * speed, forward * speed, turn * speed);
-
+            drive.controller.driveRobotCentric(strafe * speed, forward * speed, turn * speed);
         }
     }
 }

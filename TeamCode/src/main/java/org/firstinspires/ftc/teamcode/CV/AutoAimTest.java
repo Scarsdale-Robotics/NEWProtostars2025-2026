@@ -15,13 +15,19 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.RobotConstants;
+import org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 @Configurable
 @TeleOp (name = "AATest1/27")
 public class AutoAimTest extends LinearOpMode {
   public Motor turret;
+  public DriveSubsystem drive;
   public PIDController pidTur;
   public static double ticks = 1000;
+    public Motor rightFront;
+    public Motor rightBack;
+    public Motor leftFront;
+    public Motor leftBack;
   public Servo hoodServo;
   public GoBildaPinpointDriver pinpoint;
   public static double x = 8;
@@ -77,9 +83,65 @@ public class AutoAimTest extends LinearOpMode {
       shooter.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
       shooter2.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
       //transfer.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
+      leftFront = new Motor(hardwareMap, "leftFront", Motor.GoBILDA.RPM_435);
+      rightFront = new Motor(hardwareMap, "rightFront", Motor.GoBILDA.RPM_435);
+      leftBack = new Motor(hardwareMap, "leftBack", Motor.GoBILDA.RPM_435);
+      rightBack = new Motor(hardwareMap, "rightBack", Motor.GoBILDA.RPM_435);
+
+      leftFront.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+      rightFront.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+      leftBack.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+      rightBack.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+      leftFront.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+      rightFront.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+      leftBack.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+      rightBack.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+      leftFront.setRunMode(Motor.RunMode.RawPower);
+      rightFront.setRunMode(Motor.RunMode.RawPower);
+      leftBack.setRunMode(Motor.RunMode.RawPower);
+      rightBack.setRunMode(Motor.RunMode.RawPower);
+
+      leftFront.setInverted(true);
+      rightFront.setInverted(true);
+      leftBack.setInverted(true);
+      rightBack.setInverted(true);
+
+
+      leftFront.motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+      rightFront.motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+      leftBack.motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+      rightBack.motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+
+
+      leftFront.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
+      rightFront.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
+      leftBack.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
+      rightBack.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
+
+
+      this.drive = new DriveSubsystem(
+              leftFront,
+              rightFront,
+              leftBack,
+              rightBack
+      );
       waitForStart();
       while (opModeIsActive()) {
           follower.update();
+          double strafe = gamepad1.left_stick_x;
+          double forward = -gamepad1.left_stick_y;
+          double turn = gamepad1.right_stick_x;
+          double speed = 0.5;
+          telemetry.addData("strafe", strafe);
+          telemetry.addData("forward", forward);
+          telemetry.addData("turn", turn);
+          telemetry.addData("LBPower", leftBack.get());
+          telemetry.addData("LFPower", leftFront.get());
+          telemetry.addData("RBPower", rightBack.get());
+          telemetry.addData("RFPower", rightFront.get());
           telemetry.addData("Servo pos", hoodServo.getPosition());
           telemetry.addData("Follower X", follower.getPose().getX());
           telemetry.addData("Follower Y", follower.getPose().getY());
@@ -88,6 +150,7 @@ public class AutoAimTest extends LinearOpMode {
           autoAim(follower);
           shooterVelocityTwo(shooterVelocity(x,y,follower));
           hoodServo.setPosition(hoodAngle(x,y,follower));
+          drive.controller.driveRobotCentric(strafe * speed, forward * speed, turn * speed);
           telemetry.update();
       }
   }
