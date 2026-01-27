@@ -24,7 +24,7 @@ public class AutoAimTest extends LinearOpMode {
   public static double ticks = 1000;
   public Servo hoodServo;
   public GoBildaPinpointDriver pinpoint;
-  public static double x = 10;
+  public static double x = 8;
   public static double y = 141;
   public Follower follower;
   public FollowerConstants constants;
@@ -41,7 +41,7 @@ public class AutoAimTest extends LinearOpMode {
       this.shooter = new Motor(hardwareMap, "shooter", Motor.GoBILDA.RPM_1620);
       this.shooter2 = new Motor(hardwareMap, "shooter2", Motor.GoBILDA.RPM_1620);
       this.pinpoint = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
-      this.pidTur = new PIDController(0.006,0,0);
+      this.pidTur = new PIDController(0.007,0,0);
       turret = new Motor(hardwareMap, "turret", Motor.GoBILDA.RPM_1150);
     //transfer = new Motor(hardwareMap, "transfer", Motor.GoBILDA.RPM_1620);
       turret.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -80,23 +80,24 @@ public class AutoAimTest extends LinearOpMode {
       waitForStart();
       while (opModeIsActive()) {
           follower.update();
+          telemetry.addData("Servo pos", hoodServo.getPosition());
           telemetry.addData("Follower X", follower.getPose().getX());
           telemetry.addData("Follower Y", follower.getPose().getY());
           telemetry.addData("Follower H", Math.toDegrees(follower.getPose().getHeading()));
           telemetry.addData("distance", Math.sqrt(Math.pow(x - follower.getPose().getX(),2) + Math.pow(y - follower.getPose().getY(),2)));
           autoAim(follower);
-          shooterVelocityTwo(ticks);
+          shooterVelocityTwo(shooterVelocity(x,y,follower));
           hoodServo.setPosition(hoodAngle(x,y,follower));
           telemetry.update();
       }
   }
     public double hoodAngle(double x, double y, Follower follower) {
       double dist = Math.sqrt(Math.pow(x - follower.getPose().getX(),2) + Math.pow(y - follower.getPose().getY(), 2));
-      return (-0.000818182 * dist) + 0.214545;
+      return (-0.000452 * dist) + 0.179;
     }
     public double shooterVelocity(double x, double y, Follower follower) {
         double dist = Math.sqrt(Math.pow(x - follower.getPose().getX(),2) + Math.pow(y - follower.getPose().getY(),2));
-        return 2 * Math.pow(dist,2) + 6 * dist - 5;
+        return (0.0000000000000000000329 * Math.pow(dist,2)) + (4.78 * dist) + 927;
     }
     public void shooterVelocityTwo(double tps) {
         double error = shooter.getCorrectedVelocity() - tps;
