@@ -148,7 +148,8 @@ public class AutoAimTest extends LinearOpMode {
           telemetry.addData("Follower H", Math.toDegrees(follower.getPose().getHeading()));
           telemetry.addData("distance", Math.sqrt(Math.pow(x - follower.getPose().getX(),2) + Math.pow(y - follower.getPose().getY(),2)));
           autoAim(follower);
-          shooterVelocityTwo(shooterVelocity(x,y,follower));
+          //shooterVelocityTwo(shooterVelocity(x,y,follower));
+          shooterVelocityTwo(ticks);
           hoodServo.setPosition(hoodAngle(x,y,follower));
           drive.controller.driveRobotCentric(strafe * speed, forward * speed, turn * speed);
           telemetry.update();
@@ -160,7 +161,7 @@ public class AutoAimTest extends LinearOpMode {
     }
     public double shooterVelocity(double x, double y, Follower follower) {
         double dist = Math.sqrt(Math.pow(x - follower.getPose().getX(),2) + Math.pow(y - follower.getPose().getY(),2));
-        return (0.0000000000000000000329 * Math.pow(dist,2)) + (4.78 * dist) + 927;
+        return (-0.0464 * Math.pow(dist,2)) + (16.5 * dist) + 203;
     }
     public void shooterVelocityTwo(double tps) {
         double error = shooter.getCorrectedVelocity() - tps;
