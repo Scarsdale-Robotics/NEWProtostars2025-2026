@@ -30,7 +30,7 @@ public class AutoAimTest extends LinearOpMode {
     public Motor leftBack;
   public Servo hoodServo;
   public GoBildaPinpointDriver pinpoint;
-  public static double x = 8;
+  public static double x = 133;
   public static double y = 141;
   public Follower follower;
   public FollowerConstants constants;
@@ -103,7 +103,7 @@ public class AutoAimTest extends LinearOpMode {
       leftBack.setRunMode(Motor.RunMode.RawPower);
       rightBack.setRunMode(Motor.RunMode.RawPower);
 
-      leftFront.setInverted(true);
+      leftFront.setInverted(false);
       rightFront.setInverted(true);
       leftBack.setInverted(true);
       rightBack.setInverted(true);
@@ -161,7 +161,7 @@ public class AutoAimTest extends LinearOpMode {
     }
     public double shooterVelocity(double x, double y, Follower follower) {
         double dist = Math.sqrt(Math.pow(x - follower.getPose().getX(),2) + Math.pow(y - follower.getPose().getY(),2));
-        return (-0.0467 * Math.pow(dist,2)) + (16.8 * dist) + 175;
+        return (-0.0164 * Math.pow(dist,2)) + (10.3 * dist) + 540;
     }
     public void shooterVelocityTwo(double tps) {
         double error = shooter.getCorrectedVelocity() - tps;
@@ -175,18 +175,22 @@ public class AutoAimTest extends LinearOpMode {
         telemetry.addData("Shooter Vel", shooter.getCorrectedVelocity());
     }
     public void autoAim(Follower follower) {
+      if (getTurretRelToRobot() == 179) {
+          //switchback condition to true
+      }
+      else if (getTurretRelToRobot() == -179) {
+          //switchback condition to true
+      }
       double tR = getTurretRelToRobot();
       double rF = Math.toDegrees(follower.getHeading());
       double gF = Math.toDegrees(Math.atan2(y - follower.getPose().getY(), x - follower.getPose().getX()));
       double tt = rF - gF;
-      double ttClamped = clamp3(tt);
       double angleError = tt - tR;
       double power = pidTur.calculate(angleError, 0);
       double clamped = clamp2(power);
       turret.set(clamped);
       telemetry.addData("turret ticks", turret.getCurrentPosition());
       telemetry.addData("clamped", clamped);
-      telemetry.addData("ttclamped", ttClamped);
       telemetry.addData("power", power);
       telemetry.addData("error", angleError);
       telemetry.addData("tR", tR);

@@ -179,7 +179,7 @@ public class InDepSubsystem extends SubsystemBase {
     }
     public double shooterVelocity(double x, double y, Follower follower) {
         double dist = Math.sqrt(Math.pow(x - follower.getPose().getX(),2) + Math.pow(y - follower.getPose().getY(),2));
-        return (-0.0467 * Math.pow(dist,2)) + (16.8 * dist) + 175;
+        return (-0.0164 * Math.pow(dist,2)) + (10.3 * dist) + 540;
     }
     public double getTurretRelToRobot() {
         double current = hardwareRobot.turret.getCurrentPosition();

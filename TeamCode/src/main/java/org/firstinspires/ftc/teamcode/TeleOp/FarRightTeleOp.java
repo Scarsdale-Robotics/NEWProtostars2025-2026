@@ -52,7 +52,7 @@ public class FarRightTeleOp extends LinearOpMode {
             telemetry.addData("heading", Math.toRadians(follower.getHeading()));
             telemetry.addData("X", follower.getPose().getX());
             telemetry.addData("Y", follower.getPose().getY());
-            robot.drive.driveRobotCentricPowers(strafe * speed, forward * speed, turn * speed);
+            robot.drive.controller.driveRobotCentric(strafe * speed, forward * speed, turn * speed);
             boolean transferPressed = gamepad1.triangle;
             if (transferPressed) robot.inDep.setTransfer(0.65);
             else if (gamepad1.circle) robot.inDep.setTransfer(-0.65);
