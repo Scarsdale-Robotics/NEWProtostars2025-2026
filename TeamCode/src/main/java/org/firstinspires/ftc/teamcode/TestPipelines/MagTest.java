@@ -1,38 +1,35 @@
 package org.firstinspires.ftc.teamcode.TestPipelines;
 
 import com.arcrobotics.ftclib.hardware.motors.Motor;
+import com.bylazar.configurables.annotations.Configurable;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
-@TeleOp (name = "Mag Test 1/14")
+@Configurable
+@TeleOp (name = "Mag Test 1/29")
 public class MagTest extends LinearOpMode {
     public Motor transfer;
     public Timer time;
     public Servo servo;
     public boolean lastUnload = false;
     public boolean lastServo = false;
+    public static int servopos = 0;
     @Override
     public void runOpMode() throws InterruptedException {
         transfer = new Motor(hardwareMap, "transfer", Motor.GoBILDA.RPM_1620);
-        transfer.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        transfer.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         transfer.setRunMode(Motor.RunMode.RawPower);
-        transfer.motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        transfer.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
-        this.servo = hardwareMap.get(Servo.class, "servo");
+        this.servo = hardwareMap.get(Servo.class, "tsservo");
         this.time = new Timer();
         waitForStart();
         while (opModeIsActive()) {
-            boolean transferPressed = gamepad1.triangle;
-            if (transferPressed) transfer.set(0.6);
-            else if (gamepad1.circle) transfer.set(-0.6);
-            else transfer.set(0);
+            transfer.motor.setPower(0.7);
             boolean serv = gamepad1.square;
-            if (serv && !lastServo) toggleServo();
+            //if (serv && !lastServo) toggleServo();
+            servo.setPosition(servopos);
             boolean macro = gamepad1.options;
-            if (macro && !lastUnload) unloadMag(time);
+            //if (macro && !lastUnload) unloadMag(time);
             lastServo = serv;
             lastUnload = macro;
             telemetry.addData("Servo Last", lastServo);
@@ -42,7 +39,6 @@ public class MagTest extends LinearOpMode {
             telemetry.addData("Macro", macro);
             telemetry.addData("options (macro)", gamepad1.options);
             telemetry.addData("macro Last", lastUnload);
-            telemetry.addData("transfer pressed", transferPressed);
             telemetry.addData("transfer power", transfer.get());
             telemetry.addData("triangle (transfer)", gamepad1.triangle);
             telemetry.addData("circle (reverse transfer)", gamepad1.circle);

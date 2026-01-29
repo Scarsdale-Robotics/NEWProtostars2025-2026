@@ -72,9 +72,9 @@ public class HardwareRobot {
         rightBack.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
 
         turret = new Motor(hardwareMap, "turret", Motor.GoBILDA.RPM_312);
-        shooter2 = new Motor(hardwareMap, "intake", Motor.GoBILDA.RPM_312);
+        shooter2 = new Motor(hardwareMap, "shooter2", Motor.GoBILDA.RPM_312);
         shooter = new Motor(hardwareMap, "shooter", Motor.GoBILDA.RPM_1620);
-        transferMotor = new Motor(hardwareMap, "transferMotor", Motor.GoBILDA.RPM_312);
+        transferMotor = new Motor(hardwareMap, "transfer", Motor.GoBILDA.RPM_312);
 
         turret.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         shooter2.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -97,10 +97,11 @@ public class HardwareRobot {
         transferMotor.motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         shooter.setInverted(true);
         shooter2.setInverted(true);
+        transferMotor.setInverted(true);
 
-        transferServo = hardwareMap.get(Servo.class, "transferServo");
+        transferServo = hardwareMap.get(Servo.class, "tsservo");
 
-        hoodServo = hardwareMap.get(Servo.class, "hoodServo");
+        hoodServo = hardwareMap.get(Servo.class, "servo");
 
         pinpoint = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
     }

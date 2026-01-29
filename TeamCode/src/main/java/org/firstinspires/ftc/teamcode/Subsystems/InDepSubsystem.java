@@ -48,7 +48,7 @@ public class InDepSubsystem extends SubsystemBase {
         );
         this.opMode = opMode;
         this.pid = new PIDFController(0.0027,0,0,0);
-        this.pidTurret = new PIDController(0.007,0,0);
+        this.pidTurret = new PIDController(0.004,0,0);
     }
     public void setShooterPower(double power){
         hardwareRobot.shooter.set(power);
@@ -141,7 +141,7 @@ public class InDepSubsystem extends SubsystemBase {
     public static Pose sp;
     public void initAutoAim(boolean blue, boolean far) {
         if (blue) {
-            x = 8;
+            x = 10;
             y = 141;
         } else {
             x = 133;
@@ -175,7 +175,7 @@ public class InDepSubsystem extends SubsystemBase {
     }
     public double hoodAngle(double x, double y, Follower follower) {
         double dist = Math.sqrt(Math.pow(x - follower.getPose().getX(),2) + Math.pow(y - follower.getPose().getY(), 2));
-        return (-0.000452 * dist) + 0.179;
+        return (-0.000551 * dist) + 0.128;
     }
     public double shooterVelocity(double x, double y, Follower follower) {
         double dist = Math.sqrt(Math.pow(x - follower.getPose().getX(),2) + Math.pow(y - follower.getPose().getY(),2));

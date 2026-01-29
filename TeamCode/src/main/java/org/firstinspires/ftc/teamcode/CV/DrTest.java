@@ -33,6 +33,7 @@ public class DrTest extends LinearOpMode {
     public static double initKP = 0.0027;
     public double lastV = 0;
     public static double kF = 0;
+    public static double hoodpos = 0;
     public Motor rightFront;
     public Motor rightBack;
     public Motor leftFront;
@@ -121,7 +122,7 @@ public class DrTest extends LinearOpMode {
         this.pid = new PIDFController(0.0027,0,0,0);
         this.shooter = new Motor(hardwareMap, "shooter", Motor.GoBILDA.RPM_1620);
         this.shooter2 = new Motor(hardwareMap, "shooter2", Motor.GoBILDA.RPM_1620);
-        this.pidTur = new PIDController(0.007,0,0);
+        this.pidTur = new PIDController(0.004,0,0);
         turret = new Motor(hardwareMap, "turret", Motor.GoBILDA.RPM_1150);
         //transfer = new Motor(hardwareMap, "transfer", Motor.GoBILDA.RPM_1620);
         turret.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -158,6 +159,7 @@ public class DrTest extends LinearOpMode {
         shooter2.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
         waitForStart();
         while (opModeIsActive()) {
+            follower.update();
             double strafe = gamepad1.left_stick_x;
             double forward = -gamepad1.left_stick_y;
             double turn = gamepad1.right_stick_x;
@@ -176,7 +178,6 @@ public class DrTest extends LinearOpMode {
             telemetry.addData("distance", Math.sqrt(Math.pow(x - follower.getPose().getX(),2) + Math.pow(y - follower.getPose().getY(),2)));
             drive.controller.driveRobotCentric(strafe * speed, forward * speed, turn * speed);
             autoAim(follower);
-            //shooterVelocityTwo(shooterVelocity(x,y,follower));
             shooterVelocityTwo(shooterVelocity(x,y,follower));
             hoodServo.setPosition(hoodAngle(x,y,follower));
             telemetry.update();
@@ -184,7 +185,7 @@ public class DrTest extends LinearOpMode {
     }
     public double hoodAngle(double x, double y, Follower follower) {
         double dist = Math.sqrt(Math.pow(x - follower.getPose().getX(),2) + Math.pow(y - follower.getPose().getY(), 2));
-        return (-0.000452 * dist) + 0.179;
+        return (-0.000551 * dist) + 0.128;
     }
     public double shooterVelocity(double x, double y, Follower follower) {
         double dist = Math.sqrt(Math.pow(x - follower.getPose().getX(),2) + Math.pow(y - follower.getPose().getY(),2));
@@ -233,6 +234,12 @@ public class DrTest extends LinearOpMode {
         double current = turret.getCurrentPosition();
         double curFrac = current / (1484 * 2);
         double ans = (-curFrac * 360) % 360;
+        return ans;
+    }
+    public double cumulativeTR() {
+        double current = turret.getCurrentPosition();
+        double curFrace = current / (1484 * 2);
+        double ans = (-curFrace * 360);
         return ans;
     }
     public double clamp2(double val) {
