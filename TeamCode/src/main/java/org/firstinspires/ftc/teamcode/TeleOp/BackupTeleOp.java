@@ -16,9 +16,9 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-@Configurable
-@TeleOp(name = "CRTELE 1/31")
-public class CloseRightTeleOp extends LinearOpMode {
+
+@TeleOp(name = "AutoAimBroken")
+public class BackupTeleOp extends LinearOpMode {
     public Motor rightFront;
     public Motor rightBack;
     public Motor leftFront;
@@ -30,14 +30,10 @@ public class CloseRightTeleOp extends LinearOpMode {
     public PIDFController pid;
     public PIDController pidTur;
     public Motor turret;
-    public Follower follower;
-    public FollowerConstants constants;
     public Motor transfer;
     public boolean lastServo = false;
+    public double hoodPosition = 0.34;
     public Servo servo;
-    public static int x = 133;
-    public static int y = 141;
-    public Pose startPose = new Pose(88,8.5,Math.toRadians(90));
     @Override
     public void runOpMode() throws InterruptedException {
         leftFront = new Motor(hardwareMap, "leftFront", Motor.GoBILDA.RPM_435);
@@ -99,8 +95,6 @@ public class CloseRightTeleOp extends LinearOpMode {
         transfer.setRunMode(Motor.RunMode.RawPower);
         this.servo = hardwareMap.get(Servo.class, "tsservo");
         this.hoodServo = hardwareMap.get(Servo.class, "hoodServo");
-        follower = Constants.createFollower(hardwareMap);
-        follower.setStartingPose(startPose);
         this.pid = new PIDFController(0.0027,0,0,0);
         this.shooter = new Motor(hardwareMap, "shooter", Motor.GoBILDA.RPM_1620);
         this.shooter2 = new Motor(hardwareMap, "shooter2", Motor.GoBILDA.RPM_1620);
@@ -149,25 +143,22 @@ public class CloseRightTeleOp extends LinearOpMode {
             else if (gamepad1.circle) transfer.motor.setPower(1);
             else transfer.motor.setPower(0);
             if (gamepad1.dpad_up && !lastServo) toggleServo();
-            telemetry.addData("Follower X", follower.getPose().getX());
-            telemetry.addData("Follower Y", follower.getPose().getY());
-            telemetry.addData("Follower H", Math.toDegrees(follower.getHeading()));
-            telemetry.addData("distance", Math.sqrt(Math.pow(x - follower.getPose().getX(),2) + Math.pow(y - follower.getPose().getY(),2)));
             drive.controller.driveRobotCentric(strafee * speed, forwardd * speed, turn * speed);
-            autoAim(follower);
-            shooterVelocityTwo(shooterVelocity(x,y,follower));
-            hoodServo.setPosition(hoodAngle(x,y,follower));
+            turret.set(gamepad1.right_stick_x);
+            if (gamepad2.left_bumper) {
+                //far zone
+                hoodPosition = 0.11;
+                shooterVelocityTwo(1610);
+            }
+            else if (gamepad2.right_bumper) {
+                //close zone
+                hoodPosition = 0.184;
+                shooterVelocityTwo(1300);
+            }
+            hoodServo.setPosition(hoodPosition);
             telemetry.update();
             lastServo = gamepad1.dpad_up;
         }
-    }
-    public double hoodAngle(double x, double y, Follower follower) {
-        double dist = Math.sqrt(Math.pow(x - follower.getPose().getX(),2) + Math.pow(y - follower.getPose().getY(), 2));
-        return (-0.000687 * dist) + 0.207;
-    }
-    public double shooterVelocity(double x, double y, Follower follower) {
-        double dist = Math.sqrt(Math.pow(x - follower.getPose().getX(),2) + Math.pow(y - follower.getPose().getY(),2));
-        return (-0.0265 * Math.pow(dist,2)) + (11.5 * dist) + 580;
     }
     public void shooterVelocityTwo(double tps) {
         double error = shooter.getCorrectedVelocity() - tps;
@@ -180,34 +171,10 @@ public class CloseRightTeleOp extends LinearOpMode {
         telemetry.addData("Clamped", clamped);
         telemetry.addData("Shooter Vel", shooter.getCorrectedVelocity());
     }
-    public void autoAim(Follower follower) {
-        double tR = getTurretRelToRobot();
-        double rF = Math.toDegrees(follower.getHeading());
-        double gF = Math.toDegrees(Math.atan2(y - follower.getPose().getY(), x - follower.getPose().getX()));
-        double tt = rF - gF;
-        double angleError = tt - tR;
-        double power = pidTur.calculate(angleError, 0);
-        double clamped = clamp2(power);
-        turret.set(clamped);
-        telemetry.addData("turret ticks", turret.getCurrentPosition());
-        telemetry.addData("clamped", clamped);
-        telemetry.addData("power", power);
-        telemetry.addData("error", angleError);
-        telemetry.addData("tR", tR);
-        telemetry.addData("rF", rF);
-        telemetry.addData("gF", gF);
-        telemetry.addData("tt", tt);
-    }
     public double clamp(double value) {
         return Math.max(-1, Math.min(1, value));
     }
 
-    public double getTurretRelToRobot() {
-        double current = turret.getCurrentPosition();
-        double curFrac = current / (1484 * 2);
-        double ans = (-curFrac * 360) % 360;
-        return ans;
-    }
     public double clamp2(double val) {
         return Math.max(-0.8, Math.min(0.8, val));
     }

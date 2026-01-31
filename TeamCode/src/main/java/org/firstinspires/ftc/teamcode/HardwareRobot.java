@@ -30,7 +30,7 @@ public class HardwareRobot {
     public final GoBildaPinpointDriver pinpoint;
     public final Motor turret;
     public final Servo transferServo;
-    public final Motor transferMotor;
+    public final Motor transfer;
     public final Motor shooter;
     public final Motor shooter2;
     public final Servo hoodServo;
@@ -74,31 +74,26 @@ public class HardwareRobot {
         turret = new Motor(hardwareMap, "turret", Motor.GoBILDA.RPM_312);
         shooter2 = new Motor(hardwareMap, "shooter2", Motor.GoBILDA.RPM_312);
         shooter = new Motor(hardwareMap, "shooter", Motor.GoBILDA.RPM_1620);
-        transferMotor = new Motor(hardwareMap, "transfer", Motor.GoBILDA.RPM_312);
 
         turret.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         shooter2.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         shooter.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        transferMotor.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         turret.motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         shooter2.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         shooter.motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        transferMotor.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         turret.setRunMode(Motor.RunMode.RawPower);
         shooter2.setRunMode(Motor.RunMode.RawPower);
         shooter.setRunMode(Motor.RunMode.RawPower);
-        transferMotor.setRunMode(Motor.RunMode.RawPower);
 
         turret.motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         shooter2.motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         shooter.motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        transferMotor.motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         shooter.setInverted(true);
         shooter2.setInverted(true);
-        transferMotor.setInverted(true);
-
+        transfer = new Motor(hardwareMap, "transfer", Motor.GoBILDA.RPM_1620);
+        transfer.setRunMode(Motor.RunMode.RawPower);
         transferServo = hardwareMap.get(Servo.class, "tsservo");
 
         hoodServo = hardwareMap.get(Servo.class, "servo");

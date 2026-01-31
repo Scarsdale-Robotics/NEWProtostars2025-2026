@@ -18,7 +18,7 @@ import org.firstinspires.ftc.teamcode.RobotConstants;
 import org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 @Configurable
-@TeleOp (name = "AATest1/27")
+@TeleOp (name = "AATest1/30")
 public class AutoAimTest extends LinearOpMode {
   public Motor turret;
   public DriveSubsystem drive;

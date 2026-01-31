@@ -48,7 +48,7 @@ public class InDepSubsystem extends SubsystemBase {
         );
         this.opMode = opMode;
         this.pid = new PIDFController(0.0027,0,0,0);
-        this.pidTurret = new PIDController(0.004,0,0);
+        this.pidTurret = new PIDController(0.008,0,0);
     }
     public void setShooterPower(double power){
         hardwareRobot.shooter.set(power);
@@ -84,7 +84,7 @@ public class InDepSubsystem extends SubsystemBase {
         hardwareRobot.turret.set(p);
     }
     public void setTransfer(double p) {
-        hardwareRobot.transferMotor.set(p);
+        hardwareRobot.transfer.motor.setPower(p);
     }
     public void hoodServo(double pos) {
         hardwareRobot.hoodServo.setPosition(pos);

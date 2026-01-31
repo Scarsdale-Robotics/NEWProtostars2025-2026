@@ -15,7 +15,8 @@ public class MagTest extends LinearOpMode {
     public Servo servo;
     public boolean lastUnload = false;
     public boolean lastServo = false;
-    public static int servopos = 0;
+    public static double servopos = 0;
+    public static double p = 0.7;
     @Override
     public void runOpMode() throws InterruptedException {
         transfer = new Motor(hardwareMap, "transfer", Motor.GoBILDA.RPM_1620);
@@ -24,9 +25,9 @@ public class MagTest extends LinearOpMode {
         this.time = new Timer();
         waitForStart();
         while (opModeIsActive()) {
-            transfer.motor.setPower(0.7);
+            transfer.motor.setPower(p);
             boolean serv = gamepad1.square;
-            //if (serv && !lastServo) toggleServo();
+            if (serv && !lastServo) toggleServo();
             servo.setPosition(servopos);
             boolean macro = gamepad1.options;
             //if (macro && !lastUnload) unloadMag(time);
@@ -74,9 +75,9 @@ public class MagTest extends LinearOpMode {
         }
     }
     public void toggleServo() {
-        if (servo.getPosition() == 0.38) {
-            servo.setPosition(0.57);
-        } else servo.setPosition(0.38);
+        if (servo.getPosition() == 0.34) {
+            servo.setPosition(0.18);
+        } else servo.setPosition(0.34);
     }
     public void resetUnloadMacro() {
         time = null;
