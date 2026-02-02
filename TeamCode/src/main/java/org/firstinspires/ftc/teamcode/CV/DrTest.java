@@ -38,7 +38,7 @@ public class DrTest extends LinearOpMode {
     public static int x = 5;
     public static int y = 141;
     public Pose startPose = new Pose(56,8,Math.toRadians(90));
-    public static double ticks;
+    public static double ticks = 1000;
     @Override
     public void runOpMode() throws InterruptedException {
         leftFront = new Motor(hardwareMap, "leftFront", Motor.GoBILDA.RPM_435);

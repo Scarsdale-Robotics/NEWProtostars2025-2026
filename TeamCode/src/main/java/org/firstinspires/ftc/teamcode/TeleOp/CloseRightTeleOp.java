@@ -141,6 +141,7 @@ public class CloseRightTeleOp extends LinearOpMode {
         shooter2.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
         waitForStart();
         while (opModeIsActive()) {
+            follower.update();
             double strafee = gamepad1.left_stick_x;
             double forwardd = -gamepad1.left_stick_y;
             double turn = gamepad1.right_stick_x;

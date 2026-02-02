@@ -8,15 +8,18 @@ import com.pedropathing.follower.Follower;
 import com.pedropathing.follower.FollowerConstants;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.util.Timer;
+import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-
+@Configurable
 @TeleOp(name = "AutoAimBroken")
 public class BackupTeleOp extends LinearOpMode {
     public Motor rightFront;
@@ -26,16 +29,26 @@ public class BackupTeleOp extends LinearOpMode {
     public Motor shooter;
     public Motor shooter2;
     public Servo hoodServo;
+    public PIDController pidTur;
     public DriveSubsystem drive;
     public PIDFController pid;
-    public PIDController pidTur;
+    public GoBildaPinpointDriver pinpoint;
     public Motor turret;
     public Motor transfer;
     public boolean lastServo = false;
     public double hoodPosition = 0.34;
+    public static double ticks = 0;
     public Servo servo;
+    public boolean lastAlignFar = false;
+    public boolean lastAlignClose = false;
+    public boolean lastUnload = false;
+    public Timer timer;
+
     @Override
     public void runOpMode() throws InterruptedException {
+        this.timer = new Timer();
+        timer.resetTimer();
+        this.pidTur = new PIDController(0.008,0,0);
         leftFront = new Motor(hardwareMap, "leftFront", Motor.GoBILDA.RPM_435);
         rightFront = new Motor(hardwareMap, "rightFront", Motor.GoBILDA.RPM_435);
         leftBack = new Motor(hardwareMap, "leftBack", Motor.GoBILDA.RPM_435);
@@ -91,6 +104,11 @@ public class BackupTeleOp extends LinearOpMode {
                 leftBack,
                 rightBack
         );
+        this.pinpoint = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
+        pinpoint.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
+        pinpoint.setOffsets(6.2,-3.1, DistanceUnit.INCH);
+        pinpoint.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.FORWARD, GoBildaPinpointDriver.EncoderDirection.FORWARD);
+        pinpoint.resetPosAndIMU();
         transfer = new Motor(hardwareMap, "transfer", Motor.GoBILDA.RPM_435);
         transfer.setRunMode(Motor.RunMode.RawPower);
         this.servo = hardwareMap.get(Servo.class, "tsservo");
@@ -135,6 +153,7 @@ public class BackupTeleOp extends LinearOpMode {
         shooter2.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
         waitForStart();
         while (opModeIsActive()) {
+            pinpoint.update();
             double strafee = gamepad1.left_stick_x;
             double forwardd = -gamepad1.left_stick_y;
             double turn = gamepad1.right_stick_x;
@@ -142,9 +161,13 @@ public class BackupTeleOp extends LinearOpMode {
             if (gamepad1.triangle) transfer.motor.setPower(-1);
             else if (gamepad1.circle) transfer.motor.setPower(1);
             else transfer.motor.setPower(0);
-            if (gamepad1.dpad_up && !lastServo) toggleServo();
+            //if (gamepad1.dpad_up && !lastServo) toggleServo();
+            if (gamepad1.dpad_left) servo.setPosition(0.18);
+            else servo.setPosition(0.34);
             drive.controller.driveRobotCentric(strafee * speed, forwardd * speed, turn * speed);
-            turret.set(gamepad1.right_stick_x);
+            if (gamepad2.dpad_left) turret.set(0.3);
+            else if (gamepad2.circle) turret.set(-0.3);
+            else turret.set(0);
             if (gamepad2.left_bumper) {
                 //far zone
                 hoodPosition = 0.11;
@@ -155,8 +178,19 @@ public class BackupTeleOp extends LinearOpMode {
                 hoodPosition = 0.184;
                 shooterVelocityTwo(1300);
             }
+            else {
+                hoodPosition = 0.185;
+                shooter.set(0);
+                shooter2.set(0);
+            }
+            boolean shootmacro = gamepad1.options;
+            if (shootmacro && !lastUnload) unloadMag(timer);
             hoodServo.setPosition(hoodPosition);
+            telemetry.addData("X", pinpoint.getPosition().getX(DistanceUnit.INCH));
+            telemetry.addData("Y", pinpoint.getPosition().getY(DistanceUnit.INCH));
+            telemetry.addData("H", pinpoint.getPosition().getHeading(AngleUnit.DEGREES));
             telemetry.update();
+            lastUnload = shootmacro;
             lastServo = gamepad1.dpad_up;
         }
     }
@@ -182,5 +216,44 @@ public class BackupTeleOp extends LinearOpMode {
         if (servo.getPosition() == 0.34) {
             servo.setPosition(0.18);
         } else servo.setPosition(0.34);
+    }
+    public void setTurretPosition(double turretPos){
+        double error = turret.getCurrentPosition() - turretPos;
+        double power = pidTur.calculate(error,0);
+        double clamped = clamp2(power);
+        turret.set(clamped);
+        telemetry.addData("Error", error);
+        telemetry.addData("Power", power);
+        telemetry.addData("Clamped", clamped);
+        telemetry.addData("Tur Pos", turret.getCurrentPosition());
+        telemetry.update();
+    }
+    public void unloadMag(Timer opTimer) {
+        int pathState = 1;
+        opTimer.resetTimer();
+        while (opModeIsActive()) {
+            shooterVelocityTwo(1300);
+            transfer.set(-1);
+            if (opTimer.getElapsedTimeSeconds() >= 2.5 && pathState == 1) {
+                servo.setPosition(0.18);
+                pathState++;
+            }
+            if (opTimer.getElapsedTimeSeconds() >= 3 && pathState == 2) {
+                servo.setPosition(0.34);
+                pathState++;
+            }
+            if (opTimer.getElapsedTimeSeconds() >= 3.7 && pathState == 3) {
+                servo.setPosition(0.18);
+                pathState++;
+            }
+            if (opTimer.getElapsedTimeSeconds() >= 4.2 && pathState == 4) {
+                servo.setPosition(0.34);
+                pathState++;
+            }
+            if (opTimer.getElapsedTimeSeconds() >= 4.5 && pathState == 5) {
+                transfer.set(0);
+                break;
+            }
+        }
     }
 }
