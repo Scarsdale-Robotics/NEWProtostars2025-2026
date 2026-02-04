@@ -1,5 +1,10 @@
 package org.firstinspires.ftc.teamcode.CV;
 
+import com.bylazar.configurables.annotations.Configurable;
+import com.bylazar.panels.Panels;
+import com.bylazar.telemetry.PanelsTelemetry;
+import com.bylazar.telemetry.TelemetryManager;
+import com.pedropathing.control.LowPassFilter;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -10,7 +15,9 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 import android.util.Size;
 
+
 import java.util.List;
+@Configurable
 @TeleOp (name = "Aptest2/3")
 public class AprilTagTest extends LinearOpMode {
     public CameraName cam;
@@ -18,7 +25,10 @@ public class AprilTagTest extends LinearOpMode {
     public AprilTagProcessor ap;
     private final Size CAMERA_RESOLUTION = new Size(640, 480);
     public AprilTagDetection lastTagDetected;
-    public static double apTag = 0;
+    public double apTag = 0;
+    public static double alpha = 0.05;
+    public TelemetryManager panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
+    double lastValue = 0;
     @Override
     public void runOpMode() throws InterruptedException {
         this.cam = hardwareMap.get(CameraName.class, "Webcam 1");
@@ -43,35 +53,45 @@ public class AprilTagTest extends LinearOpMode {
         while (opModeIsActive()) {
             detectTags(ap);
             if (lastTagDetected != null) {
-                telemetry.addData("Proximity", xInchRadius(15, lastTagDetected));
+                panelsTelemetry.addData("Proximity", xInchRadius(15, lastTagDetected));
             }
             if (getTargetTag(21,22,23) != null) {
                 int motifId = getTargetTag(21,22,23).id;
-                if (motifId == 21) telemetry.addLine("GPP");
-                else if (motifId == 22) telemetry.addLine("PGP");
-                else telemetry.addLine("PPG");
+                if (motifId == 21) panelsTelemetry.addLine("GPP");
+                else if (motifId == 22) panelsTelemetry.addLine("PGP");
+                else panelsTelemetry.addLine("PPG");
             }
+            double raw = 0;
             if (lastTagDetected != null) {
+                raw = lastTagDetected.ftcPose.range;
                 apTag = lastTagDetected.ftcPose.range;
+
+                if (lastValue == 0) {
+                    lastValue = apTag; // initialize once
+                } else {
+                    lastValue = getState(apTag, lastValue);
+                }
             }
-            telemetry.addData("AP Value", apTag);
-            telemetry.update();
+            panelsTelemetry.addData("ap", apTag);
+            panelsTelemetry.addData("ap filtered", lastValue);
+            panelsTelemetry.addData("raw", raw);
+            panelsTelemetry.update(telemetry);
         }
     }
     public void detectTags(AprilTagProcessor ap) {
         List<AprilTagDetection> detections = ap.getDetections();
         if (detections != null && !detections.isEmpty()) {
             for (AprilTagDetection tag : detections) {
-                telemetry.addData("X", tag.ftcPose.x);
-                telemetry.addData("Y", tag.ftcPose.y);
-                telemetry.addData("Z", tag.ftcPose.z);
-                telemetry.addData("Range", tag.ftcPose.range);
-                telemetry.addData("Bearing", tag.ftcPose.bearing);
-                telemetry.addData("Yaw", tag.ftcPose.yaw);
-                telemetry.addData("ID", tag.id);
-                telemetry.addData("Field X", tag.robotPose.getPosition().x);
-                telemetry.addData("Field Y", tag.robotPose.getPosition().y);
-                telemetry.addData("Field Z", tag.robotPose.getPosition().z);
+                panelsTelemetry.addData("X", tag.ftcPose.x);
+                panelsTelemetry.addData("Y", tag.ftcPose.y);
+                panelsTelemetry.addData("Z", tag.ftcPose.z);
+                panelsTelemetry.addData("Range", tag.ftcPose.range);
+                panelsTelemetry.addData("Bearing", tag.ftcPose.bearing);
+                panelsTelemetry.addData("Yaw", tag.ftcPose.yaw);
+                panelsTelemetry.addData("ID", tag.id);
+                panelsTelemetry.addData("Field X", tag.robotPose.getPosition().x);
+                panelsTelemetry.addData("Field Y", tag.robotPose.getPosition().y);
+                panelsTelemetry.addData("Field Z", tag.robotPose.getPosition().z);
                 lastTagDetected = tag;
             }
         } else {
@@ -91,5 +111,8 @@ public class AprilTagTest extends LinearOpMode {
     }
     public boolean xInchRadius(int radius, AprilTagDetection target) {
         return target.ftcPose.range <= radius;
+    }
+    public double getState(double current, double last) {
+        return last + alpha * (current - last);
     }
 }
