@@ -250,7 +250,15 @@ public class BackupTeleOp extends LinearOpMode {
                 servo.setPosition(0.34);
                 pathState++;
             }
-            if (opTimer.getElapsedTimeSeconds() >= 4.5 && pathState == 5) {
+            if (opTimer.getElapsedTimeSeconds() >= 5 && pathState == 5) {
+                servo.setPosition(0.18);
+                pathState++;
+            }
+            if (opTimer.getElapsedTimeSeconds() >= 5.2 && pathState == 6) {
+                servo.setPosition(0.34);
+                pathState++;
+            }
+            if (opTimer.getElapsedTimeSeconds() >= 5.4 && pathState == 7) {
                 transfer.set(0);
                 break;
             }

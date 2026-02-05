@@ -26,7 +26,8 @@ public class AprilTagTest extends LinearOpMode {
     private final Size CAMERA_RESOLUTION = new Size(640, 480);
     public AprilTagDetection lastTagDetected;
     public double apTag = 0;
-    public static double alpha = 0.05;
+    //public static double alpha = 0.001;
+    public static double alpha = 0.0005;
     public TelemetryManager panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
     double lastValue = 0;
     @Override
@@ -65,14 +66,12 @@ public class AprilTagTest extends LinearOpMode {
             if (lastTagDetected != null) {
                 raw = lastTagDetected.ftcPose.range;
                 apTag = lastTagDetected.ftcPose.range;
-
                 if (lastValue == 0) {
                     lastValue = apTag; // initialize once
                 } else {
                     lastValue = getState(apTag, lastValue);
                 }
             }
-            panelsTelemetry.addData("ap", apTag);
             panelsTelemetry.addData("ap filtered", lastValue);
             panelsTelemetry.addData("raw", raw);
             panelsTelemetry.update(telemetry);
