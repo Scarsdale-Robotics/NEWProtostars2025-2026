@@ -81,17 +81,19 @@ public class AprilTagTest extends LinearOpMode {
         List<AprilTagDetection> detections = ap.getDetections();
         if (detections != null && !detections.isEmpty()) {
             for (AprilTagDetection tag : detections) {
-                panelsTelemetry.addData("X", tag.ftcPose.x);
-                panelsTelemetry.addData("Y", tag.ftcPose.y);
-                panelsTelemetry.addData("Z", tag.ftcPose.z);
-                panelsTelemetry.addData("Range", tag.ftcPose.range);
-                panelsTelemetry.addData("Bearing", tag.ftcPose.bearing);
-                panelsTelemetry.addData("Yaw", tag.ftcPose.yaw);
-                panelsTelemetry.addData("ID", tag.id);
-                panelsTelemetry.addData("Field X", tag.robotPose.getPosition().x);
-                panelsTelemetry.addData("Field Y", tag.robotPose.getPosition().y);
-                panelsTelemetry.addData("Field Z", tag.robotPose.getPosition().z);
-                lastTagDetected = tag;
+                if (tag.ftcPose != null) {
+                    panelsTelemetry.addData("X", tag.ftcPose.x);
+                    panelsTelemetry.addData("Y", tag.ftcPose.y);
+                    panelsTelemetry.addData("Z", tag.ftcPose.z);
+                    panelsTelemetry.addData("Range", tag.ftcPose.range);
+                    panelsTelemetry.addData("Bearing", tag.ftcPose.bearing);
+                    panelsTelemetry.addData("Yaw", tag.ftcPose.yaw);
+                    panelsTelemetry.addData("ID", tag.id);
+                    panelsTelemetry.addData("Field X", tag.robotPose.getPosition().x);
+                    panelsTelemetry.addData("Field Y", tag.robotPose.getPosition().y);
+                    panelsTelemetry.addData("Field Z", tag.robotPose.getPosition().z);
+                    lastTagDetected = tag;
+                }
             }
         } else {
             lastTagDetected = null;
