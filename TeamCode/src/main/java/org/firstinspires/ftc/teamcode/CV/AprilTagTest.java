@@ -16,6 +16,7 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 import android.util.Size;
 
 
+import java.util.ArrayList;
 import java.util.List;
 @Configurable
 @TeleOp (name = "Aptest2/3")
@@ -64,8 +65,8 @@ public class AprilTagTest extends LinearOpMode {
             }
             double raw = 0;
             if (lastTagDetected != null) {
-                raw = lastTagDetected.ftcPose.range;
-                apTag = lastTagDetected.ftcPose.range;
+                raw = lastTagDetected.ftcPose.bearing;
+                apTag = lastTagDetected.ftcPose.bearing;
                 if (lastValue == 0) {
                     lastValue = apTag; // initialize once
                 } else {
