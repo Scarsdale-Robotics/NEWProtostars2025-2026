@@ -1,9 +1,13 @@
 package org.firstinspires.ftc.teamcode.TeleOp;
 
+import android.util.Size;
+
 import com.arcrobotics.ftclib.controller.PIDController;
 import com.arcrobotics.ftclib.controller.PIDFController;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.bylazar.configurables.annotations.Configurable;
+import com.bylazar.telemetry.PanelsTelemetry;
+import com.bylazar.telemetry.TelemetryManager;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.follower.FollowerConstants;
 import com.pedropathing.geometry.Pose;
@@ -14,10 +18,16 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.robotcore.external.hardware.camera.CameraName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
+import org.firstinspires.ftc.vision.VisionPortal;
+import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
+import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
+
+import java.util.List;
 
 @Configurable
 @TeleOp(name = "AutoAimBroken")
@@ -43,9 +53,37 @@ public class BackupTeleOp extends LinearOpMode {
     public boolean lastAlignClose = false;
     public boolean lastUnload = false;
     public Timer timer;
+    public CameraName cam;
+    public VisionPortal vp;
+    public AprilTagProcessor ap;
+    private final Size CAMERA_RESOLUTION = new Size(640, 480);
+    public AprilTagDetection lastTagDetected;
+    public double apTag = 0;
+    //public static double alpha = 0.001;
+    public static double alpha = 0.0005;
+    public TelemetryManager panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
+    double lastValue = 0;
 
     @Override
     public void runOpMode() throws InterruptedException {
+        this.cam = hardwareMap.get(CameraName.class, "Webcam 1");
+        this.ap = new AprilTagProcessor.Builder()
+                .setDrawAxes(true)
+                .setDrawTagID(true)
+                .setDrawTagOutline(true)
+                .setDrawCubeProjection(true)
+                .build();
+        this.vp = new VisionPortal.Builder()
+                .setCamera(cam)
+                .enableLiveView(true)
+                .setCameraResolution(CAMERA_RESOLUTION)
+                .addProcessor(ap)
+                .setAutoStartStreamOnBuild(true)
+                .setStreamFormat(VisionPortal.StreamFormat.YUY2)
+                .setLiveViewContainerId(hardwareMap.appContext.getResources().getIdentifier(
+                        "cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName()))
+                .build();
+        vp.setProcessorEnabled(ap, true);
         this.timer = new Timer();
         timer.resetTimer();
         this.pidTur = new PIDController(0.008,0,0);
@@ -154,26 +192,49 @@ public class BackupTeleOp extends LinearOpMode {
         waitForStart();
         while (opModeIsActive()) {
             pinpoint.update();
+            detectTags(ap);
+            if (lastTagDetected != null) {
+                panelsTelemetry.addData("Proximity", xInchRadius(15, lastTagDetected));
+            }
+            if (getTargetTag(21,22,23) != null) {
+                int motifId = getTargetTag(21,22,23).id;
+                if (motifId == 21) panelsTelemetry.addLine("GPP");
+                else if (motifId == 22) panelsTelemetry.addLine("PGP");
+                else panelsTelemetry.addLine("PPG");
+            }
+            double raw = 0;
+            if (lastTagDetected != null) {
+                raw = lastTagDetected.ftcPose.bearing;
+                apTag = lastTagDetected.ftcPose.bearing;
+                if (lastValue == 0) {
+                    lastValue = apTag; // initialize once
+                } else {
+                    lastValue = getState(apTag, lastValue);
+                }
+            }
+            panelsTelemetry.addData("ap filtered", lastValue);
+            panelsTelemetry.addData("raw", raw);
+            panelsTelemetry.update(telemetry);
             double strafee = gamepad1.left_stick_x;
             double forwardd = -gamepad1.left_stick_y;
             double turn = gamepad1.right_stick_x;
             double speed = 0.5;
             if (gamepad1.triangle) transfer.motor.setPower(-1);
-            else if (gamepad1.circle) transfer.motor.setPower(1);
+            else if (gamepad1.cross) transfer.motor.setPower(1);
             else transfer.motor.setPower(0);
             //if (gamepad1.dpad_up && !lastServo) toggleServo();
-            if (gamepad1.dpad_left) servo.setPosition(0.18);
+            if (gamepad1.dpad_up) servo.setPosition(0.18);
             else servo.setPosition(0.34);
             drive.controller.driveRobotCentric(strafee * speed, forwardd * speed, turn * speed);
-            if (gamepad2.dpad_left) turret.set(0.3);
-            else if (gamepad2.circle) turret.set(-0.3);
+            if (gamepad1.dpad_left) turret.set(0.3);
+            else if (gamepad1.circle) turret.set(-0.3);
             else turret.set(0);
-            if (gamepad2.left_bumper) {
+            if (gamepad1.left_bumper) {
                 //far zone
                 hoodPosition = 0.11;
                 shooterVelocityTwo(1610);
             }
-            else if (gamepad2.right_bumper) {
+            else if (gamepad1.right_bumper) {
                 //close zone
                 hoodPosition = 0.184;
                 shooterVelocityTwo(1300);
@@ -232,6 +293,11 @@ public class BackupTeleOp extends LinearOpMode {
         int pathState = 1;
         opTimer.resetTimer();
         while (opModeIsActive()) {
+            double strafee = gamepad1.left_stick_x;
+            double forwardd = -gamepad1.left_stick_y;
+            double turn = gamepad1.right_stick_x;
+            double speed = 0.5;
+            drive.controller.driveRobotCentric(strafee * speed, forwardd * speed, turn * speed);
             shooterVelocityTwo(1300);
             transfer.set(-1);
             if (opTimer.getElapsedTimeSeconds() >= 2.5 && pathState == 1) {
@@ -263,5 +329,47 @@ public class BackupTeleOp extends LinearOpMode {
                 break;
             }
         }
+    }
+    public void detectTags(AprilTagProcessor ap) {
+        List<AprilTagDetection> detections = ap.getDetections();
+        if (detections != null && !detections.isEmpty()) {
+            for (AprilTagDetection tag : detections) {
+                if (tag.ftcPose != null) {
+                    panelsTelemetry.addData("X", tag.ftcPose.x);
+                    panelsTelemetry.addData("Y", tag.ftcPose.y);
+                    panelsTelemetry.addData("Z", tag.ftcPose.z);
+                    panelsTelemetry.addData("Range", tag.ftcPose.range);
+                    panelsTelemetry.addData("Bearing", tag.ftcPose.bearing);
+                    panelsTelemetry.addData("Yaw", tag.ftcPose.yaw);
+                    panelsTelemetry.addData("ID", tag.id);
+                    panelsTelemetry.addData("Field X", tag.robotPose.getPosition().x);
+                    panelsTelemetry.addData("Field Y", tag.robotPose.getPosition().y);
+                    panelsTelemetry.addData("Field Z", tag.robotPose.getPosition().z);
+                    lastTagDetected = tag;
+                }
+            }
+        } else {
+            lastTagDetected = null;
+        }
+    }
+    public AprilTagDetection getTargetTag(int targetId1, int targetId2, int targetId3) {
+        List<AprilTagDetection> detections = ap.getDetections();
+        AprilTagDetection sol = null;
+        for (AprilTagDetection tag : detections) {
+            if (tag.id == targetId1 || tag.id == targetId2 || tag.id == targetId3) {
+                sol = tag;
+                break;
+            }
+        }
+        return sol;
+    }
+    public boolean xInchRadius(int radius, AprilTagDetection target) {
+        return target.ftcPose.range <= radius;
+    }
+    public double getState(double current, double last) {
+        return last + alpha * (current - last);
+    }
+    public void autoAim(){
+
     }
 }
