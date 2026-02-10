@@ -247,6 +247,7 @@ public class BackupTeleOp extends LinearOpMode {
             boolean shootmacro = gamepad1.options;
             if (shootmacro && !lastUnload) unloadMag(timer);
             hoodServo.setPosition(hoodPosition);
+            autoAim();
             telemetry.addData("X", pinpoint.getPosition().getX(DistanceUnit.INCH));
             telemetry.addData("Y", pinpoint.getPosition().getY(DistanceUnit.INCH));
             telemetry.addData("H", pinpoint.getPosition().getHeading(AngleUnit.DEGREES));
@@ -272,22 +273,6 @@ public class BackupTeleOp extends LinearOpMode {
 
     public double clamp2(double val) {
         return Math.max(-0.8, Math.min(0.8, val));
-    }
-    public void toggleServo() {
-        if (servo.getPosition() == 0.34) {
-            servo.setPosition(0.18);
-        } else servo.setPosition(0.34);
-    }
-    public void setTurretPosition(double turretPos){
-        double error = turret.getCurrentPosition() - turretPos;
-        double power = pidTur.calculate(error,0);
-        double clamped = clamp2(power);
-        turret.set(clamped);
-        telemetry.addData("Error", error);
-        telemetry.addData("Power", power);
-        telemetry.addData("Clamped", clamped);
-        telemetry.addData("Tur Pos", turret.getCurrentPosition());
-        telemetry.update();
     }
     public void unloadMag(Timer opTimer) {
         int pathState = 1;
@@ -370,6 +355,16 @@ public class BackupTeleOp extends LinearOpMode {
         return last + alpha * (current - last);
     }
     public void autoAim(){
-
+        if (lastTagDetected != null) {
+            if (lastTagDetected.ftcPose != null) {
+                double error = lastTagDetected.ftcPose.bearing;
+                double p = pidTur.calculate(error,0);
+                double set = clamp2(p);
+                turret.set(-set);
+                panelsTelemetry.addData("clamped", set);
+                panelsTelemetry.addData("error", error);
+                panelsTelemetry.addData("p", p);
+            }
+        }
     }
 }
