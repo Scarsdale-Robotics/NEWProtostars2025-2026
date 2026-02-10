@@ -86,7 +86,7 @@ public class BackupTeleOp extends LinearOpMode {
         vp.setProcessorEnabled(ap, true);
         this.timer = new Timer();
         timer.resetTimer();
-        this.pidTur = new PIDController(0.008,0,0);
+        this.pidTur = new PIDController(0.008,0.001,0);
         leftFront = new Motor(hardwareMap, "leftFront", Motor.GoBILDA.RPM_435);
         rightFront = new Motor(hardwareMap, "rightFront", Motor.GoBILDA.RPM_435);
         leftBack = new Motor(hardwareMap, "leftBack", Motor.GoBILDA.RPM_435);
@@ -355,16 +355,12 @@ public class BackupTeleOp extends LinearOpMode {
         return last + alpha * (current - last);
     }
     public void autoAim(){
-        if (lastTagDetected != null) {
-            if (lastTagDetected.ftcPose != null) {
-                double error = lastTagDetected.ftcPose.bearing;
-                double p = pidTur.calculate(error,0);
-                double set = clamp2(p);
-                turret.set(-set);
-                panelsTelemetry.addData("clamped", set);
-                panelsTelemetry.addData("error", error);
-                panelsTelemetry.addData("p", p);
-            }
-        }
+        double error = lastValue;
+        double p = pidTur.calculate(error,0);
+        double set = clamp2(p);
+        turret.set(-set);
+        panelsTelemetry.addData("clamped", set);
+        panelsTelemetry.addData("error", error);
+        panelsTelemetry.addData("p", p);
     }
 }
