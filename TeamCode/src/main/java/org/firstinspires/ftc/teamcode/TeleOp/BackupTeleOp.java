@@ -60,7 +60,7 @@ public class BackupTeleOp extends LinearOpMode {
     public AprilTagDetection lastTagDetected;
     public double apTag = 0;
     //public static double alpha = 0.001;
-    public static double alpha = 0.0005;
+    public static double alpha = 0.5;
     public TelemetryManager panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
     double lastValue = 0;
 
@@ -86,7 +86,7 @@ public class BackupTeleOp extends LinearOpMode {
         vp.setProcessorEnabled(ap, true);
         this.timer = new Timer();
         timer.resetTimer();
-        this.pidTur = new PIDController(0.008,0.001,0);
+        this.pidTur = new PIDController(0.1,0,0);
         leftFront = new Motor(hardwareMap, "leftFront", Motor.GoBILDA.RPM_435);
         rightFront = new Motor(hardwareMap, "rightFront", Motor.GoBILDA.RPM_435);
         leftBack = new Motor(hardwareMap, "leftBack", Motor.GoBILDA.RPM_435);
@@ -206,12 +206,9 @@ public class BackupTeleOp extends LinearOpMode {
             if (lastTagDetected != null) {
                 raw = lastTagDetected.ftcPose.bearing;
                 apTag = lastTagDetected.ftcPose.bearing;
-                if (lastValue == 0) {
-                    lastValue = apTag; // initialize once
-                } else {
-                    lastValue = getState(apTag, lastValue);
-                }
-            }
+                if (lastValue == 0) lastValue = apTag;
+                else lastValue = getState(apTag, lastValue);
+            } else lastValue = 0;
             panelsTelemetry.addData("ap filtered", lastValue);
             panelsTelemetry.addData("raw", raw);
             panelsTelemetry.update(telemetry);
@@ -248,10 +245,6 @@ public class BackupTeleOp extends LinearOpMode {
             if (shootmacro && !lastUnload) unloadMag(timer);
             hoodServo.setPosition(hoodPosition);
             autoAim();
-            telemetry.addData("X", pinpoint.getPosition().getX(DistanceUnit.INCH));
-            telemetry.addData("Y", pinpoint.getPosition().getY(DistanceUnit.INCH));
-            telemetry.addData("H", pinpoint.getPosition().getHeading(AngleUnit.DEGREES));
-            telemetry.update();
             lastUnload = shootmacro;
             lastServo = gamepad1.dpad_up;
         }
@@ -355,8 +348,8 @@ public class BackupTeleOp extends LinearOpMode {
         return last + alpha * (current - last);
     }
     public void autoAim(){
-        double error = lastValue;
-        double p = pidTur.calculate(error,0);
+        double error = apTag;
+        double p = pidTur.calculate(2*error,0);
         double set = clamp2(p);
         turret.set(-set);
         panelsTelemetry.addData("clamped", set);
