@@ -28,10 +28,10 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
 import java.util.List;
-
+//TODO: ADD AUTO AIM W X = MOTOR ENCODER AND Y = OTHER ODOM POD, USE PINPOINT AS WELL
 @Configurable
-@TeleOp(name = "AutoAimBroken")
-public class BackupTeleOp extends LinearOpMode {
+@TeleOp(name = "Solar Scrim 2/28")
+public class ScuffedSolarScrimTeleop extends LinearOpMode {
     public Motor rightFront;
     public Motor rightBack;
     public Motor leftFront;
@@ -40,20 +40,14 @@ public class BackupTeleOp extends LinearOpMode {
     public Motor shooter2;
     public Servo hoodServo;
     public PIDController pidTur;
+    public Motor transfer2;
     public DriveSubsystem drive;
     public PIDFController pid;
     public GoBildaPinpointDriver pinpoint;
-    public Motor turret;
     public Motor transfer;
     public boolean lastServo = false;
     public double hoodPosition = 0.34;
-    public static double ticks = 0;
     public Servo servo;
-    public static double kp = 0.1;
-    public static double kd = 0.001;
-    public static double ki = 0.01;
-    public boolean lastAlignFar = false;
-    public boolean lastAlignClose = false;
     public boolean lastUnload = false;
     public Timer timer;
     public CameraName cam;
@@ -62,9 +56,9 @@ public class BackupTeleOp extends LinearOpMode {
     private final Size CAMERA_RESOLUTION = new Size(640, 480);
     public AprilTagDetection lastTagDetected;
     public double apTag = 0;
-    public static double alpha = 0.2;
+    public static double alpha = 0.6;
     public TelemetryManager panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
-    public double lastValue = 0;
+    double lastValue = 0;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -88,34 +82,29 @@ public class BackupTeleOp extends LinearOpMode {
         vp.setProcessorEnabled(ap, true);
         this.timer = new Timer();
         timer.resetTimer();
-        this.pidTur = new PIDController(kp,ki,kd);
+        this.pidTur = new PIDController(0.1,0,0.01);
         leftFront = new Motor(hardwareMap, "leftFront", Motor.GoBILDA.RPM_435);
         rightFront = new Motor(hardwareMap, "rightFront", Motor.GoBILDA.RPM_435);
         leftBack = new Motor(hardwareMap, "leftBack", Motor.GoBILDA.RPM_435);
         rightBack = new Motor(hardwareMap, "rightBack", Motor.GoBILDA.RPM_435);
-        turret = new Motor(hardwareMap, "turret", Motor.GoBILDA.RPM_312);
 
 
         leftFront.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rightFront.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         leftBack.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rightBack.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        turret.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
 
 
         leftFront.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         rightFront.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         leftBack.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         rightBack.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        turret.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
 
         leftFront.setRunMode(Motor.RunMode.RawPower);
         rightFront.setRunMode(Motor.RunMode.RawPower);
         leftBack.setRunMode(Motor.RunMode.RawPower);
         rightBack.setRunMode(Motor.RunMode.RawPower);
-        turret.setRunMode(Motor.RunMode.RawPower);
 
         leftFront.setInverted(true);
         rightFront.setInverted(true);
@@ -127,15 +116,12 @@ public class BackupTeleOp extends LinearOpMode {
         rightFront.motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         leftBack.motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightBack.motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        turret.motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-
 
 
         leftFront.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
         rightFront.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
         leftBack.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
         rightBack.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
-        turret.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
 
 
         this.drive = new DriveSubsystem(
@@ -151,24 +137,15 @@ public class BackupTeleOp extends LinearOpMode {
         pinpoint.resetPosAndIMU();
         transfer = new Motor(hardwareMap, "transfer", Motor.GoBILDA.RPM_435);
         transfer.setRunMode(Motor.RunMode.RawPower);
+        transfer2 = new Motor(hardwareMap, "transfer2", Motor.GoBILDA.RPM_1620);
+        transfer2.setRunMode(Motor.RunMode.RawPower);
+        transfer2.setInverted(true);
         this.servo = hardwareMap.get(Servo.class, "tsservo");
         this.hoodServo = hardwareMap.get(Servo.class, "hoodServo");
         this.pid = new PIDFController(0.0027,0,0,0);
         this.shooter = new Motor(hardwareMap, "shooter", Motor.GoBILDA.RPM_1620);
         this.shooter2 = new Motor(hardwareMap, "shooter2", Motor.GoBILDA.RPM_1620);
-        this.pidTur = new PIDController(0.15,0.01,0.005);
-        turret = new Motor(hardwareMap, "turret", Motor.GoBILDA.RPM_1150);
-        //transfer = new Motor(hardwareMap, "transfer", Motor.GoBILDA.RPM_1620);
-        turret.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        //transfer.motor.setMode(DcMoto
-        turret.motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        //transfer.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        turret.setRunMode(Motor.RunMode.RawPower);
-        //transfer.setRunMode(Motor.RunMode.RawPower);
-        turret.motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        //transfer.motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAK
-        turret.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
-        //transfer.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
+        this.pidTur = new PIDController(0.008,0,0);
         shooter.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         shooter2.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         //transfer.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -218,16 +195,22 @@ public class BackupTeleOp extends LinearOpMode {
             double forwardd = -gamepad1.left_stick_y;
             double turn = gamepad1.right_stick_x;
             double speed = 0.5;
-            if (gamepad1.triangle) transfer.motor.setPower(-1);
-            else if (gamepad1.cross) transfer.motor.setPower(1);
-            else transfer.motor.setPower(0);
+            if (gamepad1.triangle) {
+                transfer.motor.setPower(-1);
+                //transfer2.motor.setPower(-0.65);
+            }
+
+            else if (gamepad1.cross) {
+                transfer2.motor.setPower(-1);
+            }
+            else {
+                transfer.motor.setPower(0);
+                transfer2.motor.setPower(0);
+            }
             //if (gamepad1.dpad_up && !lastServo) toggleServo();
             if (gamepad1.dpad_up) servo.setPosition(0.18);
             else servo.setPosition(0.34);
             drive.controller.driveRobotCentric(strafee * speed, forwardd * speed, turn * speed);
-            if (gamepad1.dpad_left) turret.set(0.3);
-            else if (gamepad1.circle) turret.set(-0.3);
-            else turret.set(0);
             if (gamepad1.left_bumper) {
                 //far zone
                 hoodPosition = 0.11;
@@ -246,9 +229,7 @@ public class BackupTeleOp extends LinearOpMode {
             boolean shootmacro = gamepad1.options;
             if (shootmacro && !lastUnload) unloadMag(timer);
             hoodServo.setPosition(hoodPosition);
-            if (lastTagDetected != null) {
-                if (lastTagDetected.ftcPose != null) autoAim();
-            }
+            //autoAim();
             lastUnload = shootmacro;
             lastServo = gamepad1.dpad_up;
         }
@@ -259,10 +240,10 @@ public class BackupTeleOp extends LinearOpMode {
         double clamped = clamp(power);
         shooter.set(clamped);
         shooter2.set(clamped);
-        panelsTelemetry.addData("Error", error);
-        panelsTelemetry.addData("Power", power);
-        panelsTelemetry.addData("Clamped", clamped);
-        panelsTelemetry.addData("Shooter Vel", shooter.getCorrectedVelocity());
+        telemetry.addData("Error", error);
+        telemetry.addData("Power", power);
+        telemetry.addData("Clamped", clamped);
+        telemetry.addData("Shooter Vel", shooter.getCorrectedVelocity());
     }
     public double clamp(double value) {
         return Math.max(-1, Math.min(1, value));
@@ -351,13 +332,13 @@ public class BackupTeleOp extends LinearOpMode {
     public double getState(double current, double last) {
         return last + alpha * (current - last);
     }
-    public void autoAim(){
-        double error = lastValue;
-        double p = pidTur.calculate(error,0);
-        double set = clamp2(p);
-        turret.set(-set);
-        panelsTelemetry.addData("clamped", set);
-        panelsTelemetry.addData("error", error);
-        panelsTelemetry.addData("p", p);
-    }
+    //public void autoAim(){
+      //  double error = apTag;
+        //double p = pidTur.calculate(2*error,0);
+        //double set = clamp2(p);
+        //turret.set(-set);
+        //panelsTelemetry.addData("clamped", set);
+        //panelsTelemetry.addData("error", error);
+        //panelsTelemetry.addData("p", p);
+    //}
 }
