@@ -86,7 +86,7 @@ public class BackupTeleOp extends LinearOpMode {
         vp.setProcessorEnabled(ap, true);
         this.timer = new Timer();
         timer.resetTimer();
-        this.pidTur = new PIDController(0.1,0,0);
+        this.pidTur = new PIDController(0.1,0,0.01);
         leftFront = new Motor(hardwareMap, "leftFront", Motor.GoBILDA.RPM_435);
         rightFront = new Motor(hardwareMap, "rightFront", Motor.GoBILDA.RPM_435);
         leftBack = new Motor(hardwareMap, "leftBack", Motor.GoBILDA.RPM_435);
