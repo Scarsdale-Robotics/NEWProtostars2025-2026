@@ -102,8 +102,6 @@ public class BackupTeleOp extends LinearOpMode {
         rightBack.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         turret.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-
-
         leftFront.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         rightFront.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         leftBack.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -151,6 +149,7 @@ public class BackupTeleOp extends LinearOpMode {
         pinpoint.resetPosAndIMU();
         transfer = new Motor(hardwareMap, "transfer", Motor.GoBILDA.RPM_435);
         transfer.setRunMode(Motor.RunMode.RawPower);
+        this.pinpoint = hardwareMap.get(GoBildaPinpointDriver.class, "pp");
         this.servo = hardwareMap.get(Servo.class, "tsservo");
         this.hoodServo = hardwareMap.get(Servo.class, "hoodServo");
         this.pid = new PIDFController(0.0027,0,0,0);
@@ -191,6 +190,9 @@ public class BackupTeleOp extends LinearOpMode {
 
         shooter.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
         shooter2.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
+        pinpoint.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.FORWARD, GoBildaPinpointDriver.EncoderDirection.FORWARD);
+        pinpoint.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
+        pinpoint.resetPosAndIMU();
         waitForStart();
         while (opModeIsActive()) {
             pinpoint.update();
@@ -249,6 +251,9 @@ public class BackupTeleOp extends LinearOpMode {
             if (lastTagDetected != null) {
                 if (lastTagDetected.ftcPose != null) autoAim();
             }
+            telemetry.addData("X", pinpoint.getPosition().getX(DistanceUnit.INCH));
+            telemetry.addData("Y", pinpoint.getPosition().getY(DistanceUnit.INCH));
+            telemetry.addData("H", pinpoint.getHeading(AngleUnit.DEGREES));
             lastUnload = shootmacro;
             lastServo = gamepad1.dpad_up;
         }

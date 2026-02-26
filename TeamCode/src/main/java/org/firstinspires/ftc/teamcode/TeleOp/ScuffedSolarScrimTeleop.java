@@ -130,11 +130,6 @@ public class ScuffedSolarScrimTeleop extends LinearOpMode {
                 leftBack,
                 rightBack
         );
-        this.pinpoint = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
-        pinpoint.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
-        pinpoint.setOffsets(6.2,-3.1, DistanceUnit.INCH);
-        pinpoint.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.FORWARD, GoBildaPinpointDriver.EncoderDirection.FORWARD);
-        pinpoint.resetPosAndIMU();
         transfer = new Motor(hardwareMap, "transfer", Motor.GoBILDA.RPM_435);
         transfer.setRunMode(Motor.RunMode.RawPower);
         transfer2 = new Motor(hardwareMap, "transfer2", Motor.GoBILDA.RPM_1620);
@@ -168,6 +163,10 @@ public class ScuffedSolarScrimTeleop extends LinearOpMode {
 
         shooter.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
         shooter2.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
+
+        this.pinpoint = hardwareMap.get(GoBildaPinpointDriver.class, "pp");
+        pinpoint.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.FORWARD, GoBildaPinpointDriver.EncoderDirection.FORWARD);
+        pinpoint.resetPosAndIMU();
         waitForStart();
         while (opModeIsActive()) {
             pinpoint.update();
@@ -230,6 +229,10 @@ public class ScuffedSolarScrimTeleop extends LinearOpMode {
             if (shootmacro && !lastUnload) unloadMag(timer);
             hoodServo.setPosition(hoodPosition);
             //autoAim();
+            telemetry.addData("X", pinpoint.getPosition().getX(DistanceUnit.INCH));
+            telemetry.addData("Y", pinpoint.getPosition().getY(DistanceUnit.INCH));
+            telemetry.addData("H", pinpoint.getHeading(AngleUnit.DEGREES));
+            telemetry.update();
             lastUnload = shootmacro;
             lastServo = gamepad1.dpad_up;
         }
