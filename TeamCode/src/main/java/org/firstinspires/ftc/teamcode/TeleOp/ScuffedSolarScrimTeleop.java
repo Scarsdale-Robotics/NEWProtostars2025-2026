@@ -59,10 +59,15 @@ public class ScuffedSolarScrimTeleop extends LinearOpMode {
     public static double alpha = 0.6;
     public TelemetryManager panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
     double lastValue = 0;
+    public static double p = 0.01;
+    public static double d = 0.001;
+    public static double i = 0.01;
+    public PIDController pidturn;
 
     @Override
     public void runOpMode() throws InterruptedException {
         this.cam = hardwareMap.get(CameraName.class, "Webcam 1");
+        this.pidturn = new PIDController(p, i, d);
         this.ap = new AprilTagProcessor.Builder()
                 .setDrawAxes(true)
                 .setDrawTagID(true)
@@ -82,7 +87,6 @@ public class ScuffedSolarScrimTeleop extends LinearOpMode {
         vp.setProcessorEnabled(ap, true);
         this.timer = new Timer();
         timer.resetTimer();
-        this.pidTur = new PIDController(0.1,0,0.01);
         leftFront = new Motor(hardwareMap, "leftFront", Motor.GoBILDA.RPM_435);
         rightFront = new Motor(hardwareMap, "rightFront", Motor.GoBILDA.RPM_435);
         leftBack = new Motor(hardwareMap, "leftBack", Motor.GoBILDA.RPM_435);
@@ -137,7 +141,7 @@ public class ScuffedSolarScrimTeleop extends LinearOpMode {
         transfer2.setInverted(true);
         this.servo = hardwareMap.get(Servo.class, "tsservo");
         this.hoodServo = hardwareMap.get(Servo.class, "hoodServo");
-        this.pid = new PIDFController(0.0027,0,0,0);
+        this.pid = new PIDFController(0.004,0,0,0);
         this.shooter = new Motor(hardwareMap, "shooter", Motor.GoBILDA.RPM_1620);
         this.shooter2 = new Motor(hardwareMap, "shooter2", Motor.GoBILDA.RPM_1620);
         this.pidTur = new PIDController(0.008,0,0);
@@ -189,21 +193,17 @@ public class ScuffedSolarScrimTeleop extends LinearOpMode {
             } else lastValue = 0;
             panelsTelemetry.addData("ap filtered", lastValue);
             panelsTelemetry.addData("raw", raw);
-            panelsTelemetry.update(telemetry);
             double strafee = gamepad1.left_stick_x;
             double forwardd = -gamepad1.left_stick_y;
             double turn = gamepad1.right_stick_x;
-            double speed = 0.5;
+            double speed = 0.8;
             if (gamepad1.triangle) {
                 transfer.motor.setPower(-1);
-                //transfer2.motor.setPower(-0.65);
-            }
-
-            else if (gamepad1.cross) {
+            } else transfer.motor.setPower(0);
+            if (gamepad1.cross) {
                 transfer2.motor.setPower(-1);
             }
             else {
-                transfer.motor.setPower(0);
                 transfer2.motor.setPower(0);
             }
             //if (gamepad1.dpad_up && !lastServo) toggleServo();
@@ -213,7 +213,7 @@ public class ScuffedSolarScrimTeleop extends LinearOpMode {
             if (gamepad1.left_bumper) {
                 //far zone
                 hoodPosition = 0.11;
-                shooterVelocityTwo(1610);
+                shooterVelocityTwo(1650);
             }
             else if (gamepad1.right_bumper) {
                 //close zone
@@ -225,13 +225,15 @@ public class ScuffedSolarScrimTeleop extends LinearOpMode {
                 shooter.set(0);
                 shooter2.set(0);
             }
+
             boolean shootmacro = gamepad1.options;
             if (shootmacro && !lastUnload) unloadMag(timer);
             hoodServo.setPosition(hoodPosition);
-            //autoAim();
+            if (gamepad1.square) autoAim();
             telemetry.addData("X", pinpoint.getPosition().getX(DistanceUnit.INCH));
             telemetry.addData("Y", pinpoint.getPosition().getY(DistanceUnit.INCH));
             telemetry.addData("H", pinpoint.getHeading(AngleUnit.DEGREES));
+            panelsTelemetry.update(telemetry);
             telemetry.update();
             lastUnload = shootmacro;
             lastServo = gamepad1.dpad_up;
@@ -335,13 +337,17 @@ public class ScuffedSolarScrimTeleop extends LinearOpMode {
     public double getState(double current, double last) {
         return last + alpha * (current - last);
     }
-    //public void autoAim(){
-      //  double error = apTag;
-        //double p = pidTur.calculate(2*error,0);
-        //double set = clamp2(p);
-        //turret.set(-set);
-        //panelsTelemetry.addData("clamped", set);
-        //panelsTelemetry.addData("error", error);
-        //panelsTelemetry.addData("p", p);
-    //}
+    public void autoAim(){
+        if (lastTagDetected != null) {
+            if (lastTagDetected.ftcPose != null) {
+                double error = lastTagDetected.ftcPose.bearing;
+                double p = pidturn.calculate(error,0);
+                double set = clamp(p);
+                drive.controller.driveRobotCentric(0,0,-set);
+                telemetry.addData("clamped", set);
+                telemetry.addData("error", error);
+                telemetry.addData("p", p);
+            }
+        }
+    }
 }
