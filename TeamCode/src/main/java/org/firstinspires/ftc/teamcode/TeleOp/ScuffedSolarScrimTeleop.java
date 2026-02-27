@@ -141,7 +141,7 @@ public class ScuffedSolarScrimTeleop extends LinearOpMode {
         transfer2.setInverted(true);
         this.servo = hardwareMap.get(Servo.class, "tsservo");
         this.hoodServo = hardwareMap.get(Servo.class, "hoodServo");
-        this.pid = new PIDFController(0.006,0,0.00,0);
+        this.pid = new PIDFController(0.004,0,0,0);
         this.shooter = new Motor(hardwareMap, "shooter", Motor.GoBILDA.RPM_1620);
         this.shooter2 = new Motor(hardwareMap, "shooter2", Motor.GoBILDA.RPM_1620);
         this.pidTur = new PIDController(0.008,0,0);
@@ -213,12 +213,12 @@ public class ScuffedSolarScrimTeleop extends LinearOpMode {
             if (gamepad1.left_bumper) {
                 //far zone
                 hoodPosition = 0.11;
-                shooterVelocityTwo(1400);
+                shooterVelocityTwo(1600);
             }
             else if (gamepad1.right_bumper) {
                 //close zone
                 hoodPosition = 0.184;
-                shooterVelocityTwo(1100);
+                shooterVelocityTwo(1300);
             }
             else {
                 hoodPosition = 0.185;
