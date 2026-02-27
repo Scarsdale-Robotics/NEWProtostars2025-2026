@@ -59,8 +59,8 @@ public class ScuffedSolarScrimTeleop extends LinearOpMode {
     public static double alpha = 0.6;
     public TelemetryManager panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
     double lastValue = 0;
-    public static double p = 0.01;
-    public static double d = 0.001;
+    public static double p = 0.035;
+    public static double d = 0.003;
     public static double i = 0.01;
     public PIDController pidturn;
 
@@ -141,7 +141,7 @@ public class ScuffedSolarScrimTeleop extends LinearOpMode {
         transfer2.setInverted(true);
         this.servo = hardwareMap.get(Servo.class, "tsservo");
         this.hoodServo = hardwareMap.get(Servo.class, "hoodServo");
-        this.pid = new PIDFController(0.004,0,0,0);
+        this.pid = new PIDFController(0.006,0,0.00,0);
         this.shooter = new Motor(hardwareMap, "shooter", Motor.GoBILDA.RPM_1620);
         this.shooter2 = new Motor(hardwareMap, "shooter2", Motor.GoBILDA.RPM_1620);
         this.pidTur = new PIDController(0.008,0,0);
@@ -213,12 +213,12 @@ public class ScuffedSolarScrimTeleop extends LinearOpMode {
             if (gamepad1.left_bumper) {
                 //far zone
                 hoodPosition = 0.11;
-                shooterVelocityTwo(1650);
+                shooterVelocityTwo(1400);
             }
             else if (gamepad1.right_bumper) {
                 //close zone
                 hoodPosition = 0.184;
-                shooterVelocityTwo(1300);
+                shooterVelocityTwo(1100);
             }
             else {
                 hoodPosition = 0.185;
@@ -343,7 +343,7 @@ public class ScuffedSolarScrimTeleop extends LinearOpMode {
                 double error = lastTagDetected.ftcPose.bearing;
                 double p = pidturn.calculate(error,0);
                 double set = clamp(p);
-                drive.controller.driveRobotCentric(0,0,-set);
+                drive.controller.driveRobotCentric(0,0,set);
                 telemetry.addData("clamped", set);
                 telemetry.addData("error", error);
                 telemetry.addData("p", p);
