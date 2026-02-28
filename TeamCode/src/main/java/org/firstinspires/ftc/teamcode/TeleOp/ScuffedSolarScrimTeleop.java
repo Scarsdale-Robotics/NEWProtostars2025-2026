@@ -1,5 +1,4 @@
 package org.firstinspires.ftc.teamcode.TeleOp;
-
 import android.util.Size;
 
 import com.arcrobotics.ftclib.controller.PIDController;
@@ -28,7 +27,6 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
 import java.util.List;
-//TODO: ADD AUTO AIM W X = MOTOR ENCODER AND Y = OTHER ODOM POD, USE PINPOINT AS WELL
 @Configurable
 @TeleOp(name = "Solar Scrim 2/28")
 public class ScuffedSolarScrimTeleop extends LinearOpMode {
@@ -63,7 +61,8 @@ public class ScuffedSolarScrimTeleop extends LinearOpMode {
     public static double d = 0.003;
     public static double i = 0.01;
     public PIDController pidturn;
-
+    public static double farDegrees = 0;
+    public static double closeDegrees = 0;
     @Override
     public void runOpMode() throws InterruptedException {
         this.cam = hardwareMap.get(CameraName.class, "Webcam 1");
@@ -169,7 +168,6 @@ public class ScuffedSolarScrimTeleop extends LinearOpMode {
         shooter2.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
 
         this.pinpoint = hardwareMap.get(GoBildaPinpointDriver.class, "pp");
-        pinpoint.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.FORWARD, GoBildaPinpointDriver.EncoderDirection.FORWARD);
         pinpoint.resetPosAndIMU();
         waitForStart();
         while (opModeIsActive()) {
@@ -197,16 +195,12 @@ public class ScuffedSolarScrimTeleop extends LinearOpMode {
             double forwardd = -gamepad1.left_stick_y;
             double turn = gamepad1.right_stick_x;
             double speed = 0.8;
-            if (gamepad1.triangle) {
-                transfer.motor.setPower(-1);
-            } else transfer.motor.setPower(0);
-            if (gamepad1.cross) {
-                transfer2.motor.setPower(-1);
-            }
-            else {
-                transfer2.motor.setPower(0);
-            }
-            //if (gamepad1.dpad_up && !lastServo) toggleServo();
+            if (gamepad1.triangle) transfer.motor.setPower(-1);
+            else if (gamepad1.circle) transfer.motor.setPower(1);
+            else transfer.motor.setPower(0);
+            if (gamepad1.square) transfer2.motor.setPower(-1);
+            else if (gamepad1.cross) transfer2.motor.setPower(1);
+            else transfer2.motor.setPower(0);
             if (gamepad1.dpad_up) servo.setPosition(0.18);
             else servo.setPosition(0.34);
             drive.controller.driveRobotCentric(strafee * speed, forwardd * speed, turn * speed);
@@ -226,17 +220,15 @@ public class ScuffedSolarScrimTeleop extends LinearOpMode {
                 shooter2.set(0);
             }
 
-            boolean shootmacro = gamepad1.options;
-            if (shootmacro && !lastUnload) unloadMag(timer);
+            //boolean shootmacro = gamepad1.options;
+            //if (shootmacro && !lastUnload) unloadMag(timer);
             hoodServo.setPosition(hoodPosition);
-            if (gamepad1.square) autoAim();
-            telemetry.addData("X", pinpoint.getPosition().getX(DistanceUnit.INCH));
-            telemetry.addData("Y", pinpoint.getPosition().getY(DistanceUnit.INCH));
-            telemetry.addData("H", pinpoint.getHeading(AngleUnit.DEGREES));
+            if (gamepad2.square) autoAim();
+            if (gamepad2.cross) pinpointAim(farDegrees);
+            if (gamepad2.triangle) pinpointAim(closeDegrees);
             panelsTelemetry.update(telemetry);
             telemetry.update();
-            lastUnload = shootmacro;
-            lastServo = gamepad1.dpad_up;
+            //lastUnload = shootmacro;
         }
     }
     public void shooterVelocityTwo(double tps) {
@@ -349,5 +341,20 @@ public class ScuffedSolarScrimTeleop extends LinearOpMode {
                 telemetry.addData("p", p);
             }
         }
+    }
+    public void pinpointAim(double degrees) {
+        double h = pinpoint.getHeading(AngleUnit.DEGREES);
+        //maybe remove normalize to see if it turns the other way
+        if (h < 0) {
+            h = 360 - h;
+        }
+        double error = h - degrees;
+        double p = pidturn.calculate(error,0);
+        double clamped = clamp2(p);
+        drive.controller.driveRobotCentric(0,0,clamped);
+        telemetry.addData("Error (pinpoint)", error);
+        telemetry.addData("Heading (pinpoint)", h);
+        telemetry.addData("Raw Power (pinpoint)", p);
+        telemetry.addData("Clamped (pinpoint)", clamped);
     }
 }
