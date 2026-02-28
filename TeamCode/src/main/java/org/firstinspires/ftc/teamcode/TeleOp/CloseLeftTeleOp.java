@@ -17,7 +17,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 @Configurable
-@TeleOp(name = "CLTELE 1/31")
+@TeleOp(name = "CLTELE 2/28")
 public class CloseLeftTeleOp extends LinearOpMode {
     public Motor rightFront;
     public Motor rightBack;
@@ -46,13 +46,11 @@ public class CloseLeftTeleOp extends LinearOpMode {
         rightBack = new Motor(hardwareMap, "rightBack", Motor.GoBILDA.RPM_435);
         turret = new Motor(hardwareMap, "turret", Motor.GoBILDA.RPM_312);
 
-
         leftFront.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rightFront.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         leftBack.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rightBack.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         turret.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
 
 
         leftFront.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);

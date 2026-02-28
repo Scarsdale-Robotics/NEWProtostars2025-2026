@@ -28,8 +28,8 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
 import java.util.List;
 @Configurable
-@TeleOp(name = "CL2/28")
-public class ScuffedSolarScrimTeleop extends LinearOpMode {
+@TeleOp(name = "CR2/28")
+public class CR extends LinearOpMode {
     public Motor rightFront;
     public Motor rightBack;
     public Motor leftFront;
@@ -63,9 +63,11 @@ public class ScuffedSolarScrimTeleop extends LinearOpMode {
     public PIDController pidturn;
     public static double farDegrees = 0;
     public static double closeDegrees = 0;
-    public Pose sp = new Pose(0,0, Math.toRadians(0));
+    public Pose sp = new Pose(56,8, Math.toRadians(90));
     @Override
     public void runOpMode() throws InterruptedException {
+        this.follower = Constants.createFollower(hardwareMap);
+        follower.setStartingPose(sp);
         this.cam = hardwareMap.get(CameraName.class, "Webcam 1");
         this.pidturn = new PIDController(p, i, d);
         this.ap = new AprilTagProcessor.Builder()
@@ -141,7 +143,7 @@ public class ScuffedSolarScrimTeleop extends LinearOpMode {
         transfer2.setInverted(true);
         this.servo = hardwareMap.get(Servo.class, "tsservo");
         this.hoodServo = hardwareMap.get(Servo.class, "hoodServo");
-        this.pid = new PIDFController(0.005,0,0.0001,0);
+        this.pid = new PIDFController(0.004,0,0,0);
         this.shooter = new Motor(hardwareMap, "shooter", Motor.GoBILDA.RPM_1620);
         this.shooter2 = new Motor(hardwareMap, "shooter2", Motor.GoBILDA.RPM_1620);
         this.pidTur = new PIDController(0.008,0,0);
@@ -169,6 +171,7 @@ public class ScuffedSolarScrimTeleop extends LinearOpMode {
         shooter2.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
         waitForStart();
         while (opModeIsActive()) {
+            follower.update();
             detectTags(ap);
             if (lastTagDetected != null) {
                 panelsTelemetry.addData("Proximity", xInchRadius(15, lastTagDetected));
@@ -192,11 +195,11 @@ public class ScuffedSolarScrimTeleop extends LinearOpMode {
             double forwardd = -gamepad1.left_stick_y;
             double turn = gamepad1.right_stick_x;
             double speed = 0.8;
-            if (gamepad1.cross) transfer.motor.setPower(-1);
-            else if (gamepad1.square) transfer.motor.setPower(1);
+            if (gamepad1.triangle) transfer.motor.setPower(-1);
+            else if (gamepad1.circle) transfer.motor.setPower(1);
             else transfer.motor.setPower(0);
-            if (gamepad1.triangle) transfer2.motor.setPower(-1);
-            else if (gamepad1.circle) transfer2.motor.setPower(1);
+            if (gamepad1.square) transfer2.motor.setPower(-1);
+            else if (gamepad1.cross) transfer2.motor.setPower(1);
             else transfer2.motor.setPower(0);
             if (gamepad1.dpad_up) servo.setPosition(0.18);
             else servo.setPosition(0.34);
@@ -220,8 +223,8 @@ public class ScuffedSolarScrimTeleop extends LinearOpMode {
             //if (shootmacro && !lastUnload) unloadMag(timer);
             hoodServo.setPosition(hoodPosition);
             if (gamepad2.square) autoAim();
-            //if (gamepad2.cross) pinpointAim(farDegrees);
-            //if (gamepad2.triangle) pinpointAim(closeDegrees);
+            if (gamepad2.cross) pinpointAim(farDegrees);
+            if (gamepad2.triangle) pinpointAim(closeDegrees);
             panelsTelemetry.update(telemetry);
             telemetry.update();
             //lastUnload = shootmacro;
@@ -297,7 +300,7 @@ public class ScuffedSolarScrimTeleop extends LinearOpMode {
         }
     }
     public void pinpointAim(double degrees) {
-        double h = 0;
+        double h = Math.toDegrees(follower.getHeading());
         //maybe remove normalize to see if it turns the other way
         if (h < 0) {
             h = 360 - h;
