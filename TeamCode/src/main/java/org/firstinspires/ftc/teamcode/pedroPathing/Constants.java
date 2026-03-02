@@ -99,8 +99,8 @@ public class Constants {
             //check these
             .leftFrontMotorDirection(DcMotorEx.Direction.REVERSE)
             .leftRearMotorDirection(DcMotorEx.Direction.REVERSE)
-            .rightFrontMotorDirection(DcMotorEx.Direction.REVERSE)
-            .rightRearMotorDirection(DcMotorEx.Direction.REVERSE)
+            .rightFrontMotorDirection(DcMotorEx.Direction.FORWARD)
+            .rightRearMotorDirection(DcMotorEx.Direction.FORWARD)
             .xVelocity(45.18)
             .yVelocity(33);
     //TODO: Tune
