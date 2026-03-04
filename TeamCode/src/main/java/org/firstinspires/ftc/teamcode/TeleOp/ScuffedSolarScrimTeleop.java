@@ -63,7 +63,9 @@ public class ScuffedSolarScrimTeleop extends LinearOpMode {
     public PIDController pidturn;
     public static double farDegrees = 0;
     public static double closeDegrees = 0;
-    public Pose sp = new Pose(0,0, Math.toRadians(0));
+    public Pose sp = new Pose(56,8, Math.toRadians(90));
+    public static double x = 56;
+    public static double y = 8;
     @Override
     public void runOpMode() throws InterruptedException {
         this.cam = hardwareMap.get(CameraName.class, "Webcam 1");
@@ -99,10 +101,10 @@ public class ScuffedSolarScrimTeleop extends LinearOpMode {
         rightBack.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
 
-        leftFront.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        rightFront.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        leftBack.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        rightBack.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        leftFront.motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightFront.motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        leftBack.motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightBack.motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
 
         leftFront.setRunMode(Motor.RunMode.RawPower);
@@ -167,8 +169,11 @@ public class ScuffedSolarScrimTeleop extends LinearOpMode {
 
         shooter.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
         shooter2.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
+        this.follower = Constants.createFollower(hardwareMap);
+        follower.setStartingPose(sp);
         waitForStart();
         while (opModeIsActive()) {
+            follower.update();
             detectTags(ap);
             if (lastTagDetected != null) {
                 panelsTelemetry.addData("Proximity", xInchRadius(15, lastTagDetected));
@@ -223,6 +228,9 @@ public class ScuffedSolarScrimTeleop extends LinearOpMode {
             //if (gamepad2.cross) pinpointAim(farDegrees);
             //if (gamepad2.triangle) pinpointAim(closeDegrees);
             panelsTelemetry.update(telemetry);
+            telemetry.addData("X", follower.getPose().getX());
+            telemetry.addData("Y", follower.getPose().getY());
+            telemetry.addData("X", Math.toDegrees(follower.getPose().getHeading()));
             telemetry.update();
             //lastUnload = shootmacro;
         }
@@ -283,32 +291,36 @@ public class ScuffedSolarScrimTeleop extends LinearOpMode {
     public double getState(double current, double last) {
         return last + alpha * (current - last);
     }
-    public void autoAim(){
+    public void autoAim() {
         if (lastTagDetected != null) {
             if (lastTagDetected.ftcPose != null) {
                 double error = lastTagDetected.ftcPose.bearing;
-                double p = pidturn.calculate(error,0);
+                double p = pidturn.calculate(error, 0);
                 double set = clamp(p);
-                drive.controller.driveRobotCentric(0,0,set);
+                drive.controller.driveRobotCentric(0, 0, set);
                 telemetry.addData("clamped", set);
                 telemetry.addData("error", error);
                 telemetry.addData("p", p);
             }
         }
     }
-    public void pinpointAim(double degrees) {
-        double h = 0;
-        //maybe remove normalize to see if it turns the other way
-        if (h < 0) {
-            h = 360 - h;
-        }
-        double error = h - degrees;
-        double p = pidturn.calculate(error,0);
-        double clamped = clamp2(p);
+    public double shooterVelocity(double x, double y, Follower follower) {
+        double dist = Math.sqrt(Math.pow(x - follower.getPose().getX(),2) + Math.pow(y - follower.getPose().getY(),2));
+        return (-0.0265 * Math.pow(dist,2)) + (11.5 * dist) + 580;
+    }
+    public void autoAim(Follower follower) {
+        double rF = Math.toDegrees(follower.getHeading());
+        double gF = Math.toDegrees(Math.atan2(y - follower.getPose().getY(), x - follower.getPose().getX()));
+        double tt = rF - gF;
+        double power = pidturn.calculate(tt, 0);
+        double clamped = clamp2(power);
         drive.controller.driveRobotCentric(0,0,clamped);
-        telemetry.addData("Error (pinpoint)", error);
-        telemetry.addData("Heading (pinpoint)", h);
-        telemetry.addData("Raw Power (pinpoint)", p);
-        telemetry.addData("Clamped (pinpoint)", clamped);
+        telemetry.addData("angle", Math.toDegrees(follower.getPose().getHeading()));
+        telemetry.addData("clamped", clamped);
+        telemetry.addData("power", power);
+        telemetry.addData("error", tt);
+        telemetry.addData("rF", rF);
+        telemetry.addData("gF", gF);
+        telemetry.addData("tt", tt);
     }
 }
