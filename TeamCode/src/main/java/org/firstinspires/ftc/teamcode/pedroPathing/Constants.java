@@ -77,10 +77,13 @@ public class Constants {
             .leftFrontMotorName("leftFront")
             .rightRearMotorName("rightBack")
             .leftRearMotorName("leftBack")
-            .leftFrontEncoderDirection(Encoder.REVERSE)
+            .leftFrontEncoderDirection(Encoder.FORWARD)
             .rightFrontEncoderDirection(Encoder.REVERSE)
             .rightRearEncoderDirection(Encoder.REVERSE)
-            .leftRearEncoderDirection(Encoder.REVERSE)
+            .leftRearEncoderDirection(Encoder.FORWARD)
+            //.forwardTicksToInches(0.03537214443)
+            //.strafeTicksToInches(0.03836930455)
+            .forwardTicksToInches(-0.030450470865148075)
             .robotLength(10.5)
             .robotWidth(13);
     public static Follower createFollower(HardwareMap hardwareMap) {
