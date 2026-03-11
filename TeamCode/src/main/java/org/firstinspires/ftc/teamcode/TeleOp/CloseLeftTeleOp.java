@@ -14,11 +14,13 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem;
+import org.firstinspires.ftc.teamcode.Subsystems.KalmanFilter;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 @Configurable
 @TeleOp(name = "CLTELE 2/28")
 public class CloseLeftTeleOp extends LinearOpMode {
+    public KalmanFilter kalman;
     public Motor rightFront;
     public Motor rightBack;
     public Motor leftFront;
@@ -40,6 +42,7 @@ public class CloseLeftTeleOp extends LinearOpMode {
     public Pose startPose = new Pose(56,8,Math.toRadians(90));
     @Override
     public void runOpMode() throws InterruptedException {
+        this.kalman = new KalmanFilter(0.4, 0.1);
         leftFront = new Motor(hardwareMap, "leftFront", Motor.GoBILDA.RPM_435);
         rightFront = new Motor(hardwareMap, "rightFront", Motor.GoBILDA.RPM_435);
         leftBack = new Motor(hardwareMap, "leftBack", Motor.GoBILDA.RPM_435);
@@ -139,6 +142,7 @@ public class CloseLeftTeleOp extends LinearOpMode {
         shooter2.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
         waitForStart();
         while (opModeIsActive()) {
+            kalman.update(follower.getVelocity().getMagnitude(), follower.getPose().getX());
             double strafee = gamepad1.left_stick_x;
             double forwardd = -gamepad1.left_stick_y;
             double turn = gamepad1.right_stick_x;
@@ -213,5 +217,9 @@ public class CloseLeftTeleOp extends LinearOpMode {
         if (servo.getPosition() == 0.34) {
             servo.setPosition(0.18);
         } else servo.setPosition(0.34);
+    }
+    public void kalmanUpdate(){
+        Pose pose = follower.getPose();
+        follower.setPose(new Pose(kalman.getState(), kalman.getState(), kalman.getState()));
     }
 }

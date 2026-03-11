@@ -1,25 +1,22 @@
 package org.firstinspires.ftc.teamcode.Subsystems;
 
-public class kalmanfilter {
+public class KalmanFilter {
     public double r;
     public double q;
-    public kalmanfilter(double r, double q){
+    public KalmanFilter(double r, double q){
         this.r = r;
         this.q = q;
     }
-    public double ut;
-    public double kt;
     public double lastx = 0;
     public double lastp = 0;
-    public void update(double ut) {
+    public void update(double ut, double zt) {
         double measurement = lastx + ut;
         double uncertainty = lastp + q;
         double kt = uncertainty / (uncertainty + r);
-        measurement =
+        measurement = lastx + kt * (zt - measurement);
+        uncertainty = (1 - kt) * uncertainty;
         lastp = uncertainty;
         lastx = measurement;
     }
-    public double getState(){
-
-    }
+    public double getState() {return lastx;}
 }
