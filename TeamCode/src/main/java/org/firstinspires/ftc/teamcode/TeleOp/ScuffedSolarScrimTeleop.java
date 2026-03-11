@@ -230,7 +230,7 @@ public class ScuffedSolarScrimTeleop extends LinearOpMode {
             panelsTelemetry.update(telemetry);
             telemetry.addData("X", follower.getPose().getX());
             telemetry.addData("Y", follower.getPose().getY());
-            telemetry.addData("X", Math.toDegrees(follower.getPose().getHeading()));
+            telemetry.addData("H", Math.toDegrees(follower.getPose().getHeading()));
             telemetry.update();
             //lastUnload = shootmacro;
         }
