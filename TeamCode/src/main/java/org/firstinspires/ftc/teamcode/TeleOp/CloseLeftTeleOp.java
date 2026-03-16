@@ -218,7 +218,7 @@ public class CloseLeftTeleOp extends LinearOpMode {
             servo.setPosition(0.18);
         } else servo.setPosition(0.34);
     }
-    public void kalmanUpdate(){
+    public void kalmanUpdate() {
         Pose pose = follower.getPose();
         follower.setPose(new Pose(kalman.getState(), kalman.getState(), kalman.getState()));
     }
