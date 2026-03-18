@@ -4,6 +4,8 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Servo;
 @TeleOp(name = "ServoTurretTest3/18")
 public class TestServoTurret extends LinearOpMode {
+    //servo 1 = 0
+    //servo 2 = 0.99
     public Servo servo1;
     public Servo servo2;
     @Override
@@ -25,7 +27,7 @@ public class TestServoTurret extends LinearOpMode {
         double rad = Math.toRadians(phideg);
         double frac = rad / (2 * Math.PI);
         servo1.setPosition(frac);
-        servo2.setPosition(frac);
+        servo2.setPosition(0.99 - frac);
     }
     public double servoOnePhi(){
         return 360 * (servo1.getPosition());
