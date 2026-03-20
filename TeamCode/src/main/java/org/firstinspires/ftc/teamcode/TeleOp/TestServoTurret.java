@@ -11,6 +11,7 @@ public class TestServoTurret extends LinearOpMode {
     public Servo servo1;
     public Servo servo2;
     public static double pos1 = 0.99;
+    public static double phi = 0;
     @Override
     public void runOpMode() throws InterruptedException {
         this.servo1 = hardwareMap.get(Servo.class, "servo_one");
@@ -19,6 +20,7 @@ public class TestServoTurret extends LinearOpMode {
         while (opModeIsActive()) {
             servo1.setPosition(0.99 - pos1);
             servo2.setPosition(pos1);
+            //setTargetPhi(phi);
             telemetry.addData("Servo 1 Phi", servoOnePhi());
             telemetry.addData("Servo 2 Phi", servoTwoPhi());
             telemetry.addData("Servo 1 Pos", servo1.getPosition());

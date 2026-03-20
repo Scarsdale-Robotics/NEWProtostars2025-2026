@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.CV;
 import android.util.Size;
 
+import com.acmerobotics.roadrunner.util.Angle;
 import com.arcrobotics.ftclib.controller.PIDController;
 import com.arcrobotics.ftclib.controller.PIDFController;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
@@ -190,6 +191,7 @@ public class ExampleKalmanFilter extends LinearOpMode {
         shooter2.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
         waitForStart();
         while (opModeIsActive()) {
+            detectTags(ap);
             kalmanX.update(follower.getPose().getX() - lastX, apX);
             kalmanH.update(follower.getPose().getX() - lastH, apH);
             kalmanY.update(follower.getPose().getX() - lastY, apY);
@@ -315,8 +317,7 @@ public class ExampleKalmanFilter extends LinearOpMode {
             if (lastTagDetected.robotPose != null) {
                 apX = lastTagDetected.robotPose.getPosition().x;
                 apY = lastTagDetected.robotPose.getPosition().y;
-                //TODO: implement
-                apH = lastTagDetected.robotPose.getOrientation().getYaw(AngleUnit.DEGREES) - 90;
+                apH = normalizeYaw(lastTagDetected.robotPose.getOrientation().getYaw(AngleUnit.DEGREES));
             } else {
                 apX = kalmanX.lastx;
                 apY = kalmanY.lastx;
@@ -328,4 +329,5 @@ public class ExampleKalmanFilter extends LinearOpMode {
             apH = kalmanH.lastx;
         }
     }
+    public double normalizeYaw(double yaw) {return (-yaw) - 90;}
 }
