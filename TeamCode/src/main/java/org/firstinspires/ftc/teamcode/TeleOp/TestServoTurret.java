@@ -18,8 +18,8 @@ public class TestServoTurret extends LinearOpMode {
         this.servo2 = hardwareMap.get(Servo.class, "servo_two");
         waitForStart();
         while (opModeIsActive()) {
-            servo1.setPosition(0.99 - pos1);
-            servo2.setPosition(pos1);
+            //servo1.setPosition(0.99 - pos1);
+            //servo2.setPosition(pos1);
             //setTargetPhi(phi);
             telemetry.addData("Servo 1 Phi", servoOnePhi());
             telemetry.addData("Servo 2 Phi", servoTwoPhi());
@@ -31,8 +31,9 @@ public class TestServoTurret extends LinearOpMode {
     public void setTargetPhi(double phideg){
         double rad = Math.toRadians(phideg);
         double frac = rad / (2 * Math.PI);
-        servo1.setPosition(frac);
-        servo2.setPosition(0.99 - frac);
+        double cfrac = clamp(frac);
+        servo1.setPosition(cfrac);
+        servo2.setPosition(0.99 - cfrac);
     }
     public double servoOnePhi(){
         return 360 * (servo1.getPosition());
@@ -40,4 +41,5 @@ public class TestServoTurret extends LinearOpMode {
     public double servoTwoPhi(){
         return 360 * (servo1.getPosition());
     }
+    public double clamp(double d) {return Math.max(0, Math.min(d, 0.99));}
 }
