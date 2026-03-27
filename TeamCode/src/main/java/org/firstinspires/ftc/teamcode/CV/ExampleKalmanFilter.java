@@ -21,15 +21,17 @@ import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem;
 import org.firstinspires.ftc.teamcode.Subsystems.KalmanFilter;
+import org.firstinspires.ftc.teamcode.Subsystems.RollingAverage;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Configurable
-@TeleOp(name = "CLTELE 2/28")
+@TeleOp(name = "Example Filter")
 public class ExampleKalmanFilter extends LinearOpMode {
     public CameraName cam;
     public VisionPortal vp;
@@ -57,6 +59,7 @@ public class ExampleKalmanFilter extends LinearOpMode {
     public Follower follower;
     public FollowerConstants constants;
     public Motor transfer;
+    public RollingAverage tagFilter;
     public boolean lastServo = false;
     public Servo servo;
     public static int x = 5;
@@ -65,8 +68,10 @@ public class ExampleKalmanFilter extends LinearOpMode {
     public static double apX = 0;
     public static double apY = 0;
     public static double apH = 0;
+    public List<Double> aprilTagValues = new ArrayList<>();
     @Override
     public void runOpMode() throws InterruptedException {
+        this.tagFilter = new RollingAverage(aprilTagValues, 3,new double[]{0.2,0.2,0.6});
         this.cam = hardwareMap.get(CameraName.class, "Webcam 1");
         this.kalmanX = new KalmanFilter(0.4, 0.1);
         this.kalmanY = new KalmanFilter(0.4, 0.5);
@@ -184,8 +189,6 @@ public class ExampleKalmanFilter extends LinearOpMode {
         shooter.motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         shooter2.motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         //transfer.motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-
-
 
         shooter.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
         shooter2.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
@@ -319,14 +322,14 @@ public class ExampleKalmanFilter extends LinearOpMode {
                 apY = lastTagDetected.robotPose.getPosition().y;
                 apH = normalizeYaw(lastTagDetected.robotPose.getOrientation().getYaw(AngleUnit.DEGREES));
             } else {
-                apX = kalmanX.lastx;
-                apY = kalmanY.lastx;
-                apH = kalmanH.lastx;
+                apX = kalmanX.lastX;
+                apY = kalmanY.lastX;
+                apH = kalmanH.lastX;
             }
         } else {
-            apX = kalmanX.lastx;
-            apY = kalmanY.lastx;
-            apH = kalmanH.lastx;
+            apX = kalmanX.lastX;
+            apY = kalmanY.lastX;
+            apH = kalmanH.lastX;
         }
     }
     public double normalizeYaw(double yaw) {return (-yaw) - 90;}

@@ -24,7 +24,7 @@ public class Constants {
 
             .forwardZeroPowerAcceleration(-37)
             .lateralZeroPowerAcceleration(-62.23)
-            .mass(10.56)
+            .mass(7)
             .translationalPIDFCoefficients(new PIDFCoefficients(
                     0.055,
                     0,
@@ -72,25 +72,13 @@ public class Constants {
 
     public static PathConstraints pathConstraints = new PathConstraints(0.99, 100, 1.1, 1);
 
-    public static DriveEncoderConstants localizerConstants = new DriveEncoderConstants()
-            .rightFrontMotorName("rightFront")
-            .leftFrontMotorName("leftFront")
-            .rightRearMotorName("rightBack")
-            .leftRearMotorName("leftBack")
-            .leftFrontEncoderDirection(Encoder.FORWARD)
-            .rightFrontEncoderDirection(Encoder.REVERSE)
-            .rightRearEncoderDirection(Encoder.REVERSE)
-            .leftRearEncoderDirection(Encoder.FORWARD)
-            //.forwardTicksToInches(0.03537214443)
-            //.strafeTicksToInches(0.03836930455)
-            .forwardTicksToInches(-0.030450470865148075)
-            .robotLength(10.5)
-            .robotWidth(13);
+    public static PinpointConstants localizerConstants = new PinpointConstants();
+
     public static Follower createFollower(HardwareMap hardwareMap) {
         return new FollowerBuilder(followerConstants, hardwareMap)
                 .pathConstraints(pathConstraints)
                 .mecanumDrivetrain(driveConstants)
-                .driveEncoderLocalizer(localizerConstants)
+                .pinpointLocalizer(localizerConstants)
                 .build();
     }
     public static MecanumConstants driveConstants = new MecanumConstants()
